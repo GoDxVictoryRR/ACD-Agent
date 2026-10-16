@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ownership Lens | Offshore Network Investigator</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Pinned Cytoscape.js from cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>🌐 Ownership Lens</h1>
+      <p>Autonomous Graph Agent for Offshore Control & Ownership Networks</p>
+    </div>
+    <div id="healthBadge" class="health-badge">
+      <span id="healthDot" class="health-dot"></span>
+      <span id="healthText">Connecting...</span>
+    </div>
+  </header>
+
+  <div class="layout-grid">
+    <!-- Left Column: Search & Settings -->
+    <aside>
+      <div class="card">
+        <h2>Target Entity</h2>
+        <div class="form-group">
+          <label for="entityInput">Entity Name</label>
+          <input type="text" id="entityInput" placeholder="e.g. Blue Star Maritime Holdings Ltd" autocomplete="off">
+          <div id="suggestions" style="margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.2rem;"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="watchlistInput">Watchlist Entities (comma-separated)</label>
+          <textarea id="watchlistInput" rows="2" placeholder="e.g. Ironclad Sanctions Entity Inc, Apex Nominees Ltd"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="depthSelect">Traversal Depth</label>
+          <select id="depthSelect">
+            <option value="1">Depth 1 (Immediate connections only)</option>
+            <option value="2" selected>Depth 2 (Two hops - Default)</option>
+            <option value="3">Depth 3 (Three hops - Full exposure)</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button id="btnRun" class="btn-primary">Investigate</button>
+          <button id="btnCompare" class="btn-secondary" title="Runs both depth 1 and depth 3 to prove graph value">Compare D1 vs D3</button>
+        </div>
+
+        <div class="quick-picks">
+          <label>Pre-configured Demo Entities</label>
+          <div id="demoPicks"></div>
+        </div>
+      </div>
+
+      <!-- Recalled Prior Cases -->
+      <div class="card" id="recalledCard" style="display: none;">
+        <h2>Prior Cases Recalled</h2>
+        <div id="recalledList" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+      </div>
+    </aside>
+
+    <!-- Right Column: Results & Graph -->
+    <main>
+      <!-- Depth Contrast Side-by-Side Panel (Initially Hidden) -->
+      <div class="card" id="contrastCard" style="display: none;">
+        <h2>Depth Contrast Comparison: Proving the Graph Matters</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Shows how shallow depth 1 investigation misses concealed multi-hop nominee ownership paths uncovered at depth 3.
+        </p>
+        <div class="contrast-container">
+          <div class="contrast-panel" id="contrastD1">
+            <h3>Depth 1 Evaluation</h3>
+            <div id="contrastD1Badge"></div>
+            <p id="contrastD1Memo" style="margin-top: 0.5rem; font-size: 0.8rem;"></p>
+          </div>
+          <div class="contrast-panel" id="contrastD3">
+            <h3>Depth 3 Evaluation</h3>
+            <div id="contrastD3Badge"></div>
+            <p id="contrastD3Memo" style="margin-top: 0.5rem; font-size: 0.8rem;"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verdict & Memo Card -->
+      <div class="card" id="verdictCard">
+        <div class="verdict-header">
+          <h2>Investigation Verdict</h2>
+          <div id="verdictBadge" class="badge badge-insufficient_evidence">READY TO RUN</div>
+        </div>
+        <div class="memo-box" id="memoText">Enter an offshore entity name on the left or pick a demo entity to begin investigation.</div>
+        <div class="memo-meta">
+          <span id="memoSource">Source: -</span>
+          <span id="investigationTime">Elapsed: -</span>
+        </div>
+      </div>
+
+      <!-- Evidence Ledger Table -->
+      <div class="card" id="ledgerCard">
+        <h2>Evidence Ledger (Deterministic Findings)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Rule ID</th>
+              <th>Severity</th>
+              <th>Indicator Description</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody">
+            <tr>
+              <td colspan="3" style="text-align: center; color: var(--text-muted);">No findings yet. Run an investigation to populate the ledger.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Subgraph Cytoscape View -->
+      <div class="card">
+        <h2>Subnetwork Graph View</h2>
+        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 1rem; align-items: center;">
+          <span>🔵 Entity</span>
+          <span>🟡 Officer</span>
+          <span>🟣 Address</span>
+          <span>🟠 Intermediary</span>
+          <span style="color: #ef4444; font-weight: bold;">🔴 Watchlist / High-Risk Path</span>
+        </div>
+        <div id="cy"></div>
+      </div>
+
+      <!-- Streaming Tool Execution Trace -->
+      <div class="card">
+        <h2>Agent Execution Trace</h2>
+        <div class="trace-list" id="traceList">
+          <div style="color: var(--text-muted);">Awaiting investigation start...</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <p>
+      Data source: <strong>ICIJ Offshore Leaks Database</strong> (licensed under Open Database License / CC BY-SA).
+      <br>
+      <strong>Disclaimer:</strong> Presence in offshore leaks data does not imply illegality or wrongdoing. All findings are exposure indicators requiring human review.
+    </p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

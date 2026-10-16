@@ -1,0 +1,36 @@
+{
+  "demo_entities": [
+    {
+      "id": "ENT_BLUESTAR_01",
+      "name": "Blue Star Maritime Holdings Ltd",
+      "expected_depth_1": "clear",
+      "expected_depth_3": "escalate",
+      "description": "At depth 1, appears clean (no alarming rules fire). At depth 3, links through nominee director to Ironclad Sanctions Entity Inc — verdict flips from clear to escalate."
+    },
+    {
+      "id": "ENT_SILVERLINE_01",
+      "name": "Silverline Capital Management Ltd",
+      "expected_depth_1": "review",
+      "expected_depth_3": "review",
+      "description": "Exposed to high-degree nominee officer John Alexander Vance (officer in 50+ offshore shells)."
+    },
+    {
+      "id": "ENT_ORION_01",
+      "name": "Orion Global Logistics Corp",
+      "expected_depth_1": "review",
+      "expected_depth_3": "review",
+      "description": "Registered at mass incorporation address hub (Suite 301, St. James Court) shared by 60+ entities."
+    },
+    {
+      "id": "ENT_SOLITARY_01",
+      "name": "Solitary Enterprises Ltd",
+      "expected_depth_1": "clear",
+      "expected_depth_3": "clear",
+      "description": "Clean entity with a single solitary address, zero hub overlap, zero sanctions connection."
+    }
+  ],
+  "watchlist": [
+    "Ironclad Sanctions Entity Inc",
+    "Apex Nominees Ltd"
+  ]
+}

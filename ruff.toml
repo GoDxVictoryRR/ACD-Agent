@@ -1,0 +1,14 @@
+# ruff.toml — Ruff configuration for ACD-Agent
+target-version = "py312"
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "W", "UP"]
+ignore = [
+    "E501",  # Line too long
+    "E402",  # Module level import not at top (needed for sys.path.insert in standalone scripts)
+    "UP007", # Use X | Y for type annotations
+]
+
+[lint.isort]
+known-first-party = ["core", "agent", "api", "mcp_server", "data", "scripts"]

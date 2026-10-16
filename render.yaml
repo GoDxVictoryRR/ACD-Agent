@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: ownership-lens-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_MODEL
+        value: nvidia/llama-3.3-nemotron-super-49b-v1.5
+      - key: FALKORDB_HOST
+        sync: false
+      - key: FALKORDB_PORT
+        sync: false
+      - key: FALKORDB_USERNAME
+        sync: false
+      - key: FALKORDB_PASSWORD
+        sync: false
+      - key: FALKORDB_SSL
+        value: "false"
+      - key: GRAPH_NAME
+        value: ownership
+      - key: DAILY_LLM_CAP
+        value: "300"
+      - key: ALLOWED_ORIGINS
+        value: "*"

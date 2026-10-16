@@ -1,0 +1,33 @@
+{
+  "Blue Star Maritime Holdings Ltd": {
+    "depth_1": "clear",
+    "depth_3": "escalate"
+  },
+  "Silverline Capital Management Ltd": {
+    "depth_2": "review"
+  },
+  "Orion Global Logistics Corp": {
+    "depth_2": "review"
+  },
+  "Solitary Enterprises Ltd": {
+    "depth_2": "clear"
+  },
+  "Vance Shell Entity 001 Ltd": {
+    "depth_2": "review"
+  },
+  "St James Resident 001 Corp": {
+    "depth_2": "review"
+  },
+  "Apex Nominees Ltd": {
+    "depth_2": "escalate"
+  },
+  "Ironclad Sanctions Entity Inc": {
+    "depth_2": "escalate"
+  },
+  "Unknown Entity Alpha": {
+    "depth_2": "insufficient_evidence"
+  },
+  "Unknown Entity Beta": {
+    "depth_2": "insufficient_evidence"
+  }
+}

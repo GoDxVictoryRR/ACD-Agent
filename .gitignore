@@ -1,1 +1,12 @@
-./agents
+.env
+data/raw/
+.venv/
+__pycache__/
+*.pyc
+.falkordb-data/
+cache/
+*.egg-info/
+dist/
+.pytest_cache/
+scratch_prompt.txt
+test_clean_clone/
