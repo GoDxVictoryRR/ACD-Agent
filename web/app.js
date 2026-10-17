@@ -166,7 +166,7 @@ async function checkHealth() {
     text.title = data.data_disclaimer || "";
   } catch (err) {
     dot.className = "health-dot down";
-    text.textContent = "Backend offline (starting up...)";
+    text.textContent = "Backend offline (starting up…)";
   }
 }
 
@@ -322,15 +322,15 @@ async function runSingleInvestigation(depthOverride = null) {
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M12 2a10 10 0 0 1 10 10"></path>
     </svg>
-    <span>Investigating...</span>
+    <span>Investigating…</span>
   `;
 
   const traceList = document.getElementById("traceList");
   traceList.innerHTML = "";
 
   document.getElementById("verdictBadge").className = "badge badge-insufficient_evidence";
-  document.getElementById("verdictBadge").textContent = "ANALYZING GRAPH...";
-  document.getElementById("memoText").textContent = "Traversing beneficial ownership and control paths in FalkorDB...";
+  document.getElementById("verdictBadge").textContent = "ANALYZING GRAPH…";
+  document.getElementById("memoText").textContent = "Traversing beneficial ownership and control paths in FalkorDB…";
 
   const t0 = performance.now();
 
@@ -606,10 +606,10 @@ async function runDepthComparison() {
   const d3Badge = document.getElementById("contrastD3Badge");
   const d3Memo = document.getElementById("contrastD3Memo");
 
-  d1Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 1...</span>`;
-  d1Memo.textContent = "Executing single-hop neighborhood exploration...";
-  d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">AWAITING...</span>`;
-  d3Memo.textContent = "Awaiting depth 1 completion before starting multi-hop traversal...";
+  d1Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 1…</span>`;
+  d1Memo.textContent = "Executing single-hop neighborhood exploration…";
+  d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">AWAITING…</span>`;
+  d3Memo.textContent = "Awaiting depth 1 completion before starting multi-hop traversal…";
 
   const watchlistRaw = document.getElementById("watchlistInput").value;
   const watchlist = watchlistRaw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -629,8 +629,8 @@ async function runDepthComparison() {
     d1Memo.textContent = r1Data.memo || "Depth 1 found no immediate watchlist connections.";
 
     // Run Depth 3
-    d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 3...</span>`;
-    d3Memo.textContent = "Traversing 3 hops across nominee hubs and intermediary layers in FalkorDB...";
+    d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 3…</span>`;
+    d3Memo.textContent = "Traversing 3 hops across nominee hubs and intermediary layers in FalkorDB…";
 
     const res3 = await fetch(`${apiBase}/investigate`, {
       method: "POST",

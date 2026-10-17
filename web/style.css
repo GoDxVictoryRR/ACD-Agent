@@ -105,10 +105,39 @@ body {
   }
 }
 
+/* Accessible Skip to Content Link */
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 1.5rem;
+  background: var(--accent-primary);
+  color: #ffffff;
+  padding: 0.6rem 1.15rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  z-index: 9999;
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 1.25rem;
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
 /* Accessible Focus States */
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* Tabular Numerals for Numerical Data & Metrics */
+.tabular-nums, .badge, .inspector-tag, .health-badge, .trace-item, table {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Top Masthead */
@@ -735,6 +764,8 @@ button:disabled {
 /* Evidence Ledger Table */
 .table-container {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 460px;
   border-radius: 7px;
   border: 1px solid var(--border-subtle);
   background: var(--bg-input);
@@ -759,6 +790,10 @@ th {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 var(--border-subtle);
 }
 
 tbody tr:last-child td {

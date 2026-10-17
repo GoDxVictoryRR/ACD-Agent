@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ownership Lens | Offshore Network Investigator</title>
   <meta name="description" content="Autonomous Graph Agent for Offshore Control and Beneficial Ownership Networks powered by FalkorDB and Model Context Protocol.">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
   <!-- Pinned Cytoscape.js from cdnjs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
 </head>
 <body>
+  <!-- Accessible Skip Link for Keyboard & Screen Reader Users -->
+  <a href="#verdictCard" class="skip-link">Skip to investigation findings</a>
+
   <!-- Top Navigation & System Health Bar -->
-  <header>
+  <header role="banner">
     <div class="brand-wrapper">
       <div class="brand-icon" aria-hidden="true" style="width: 42px; height: 42px; min-width: 42px; max-width: 42px; max-height: 42px; overflow: hidden;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
@@ -25,21 +28,21 @@
           <h1>Ownership Lens</h1>
           <span class="track-badge">FalkorDB Graph Agent</span>
         </div>
-        <p class="brand-subtitle">Autonomous Investigator for Beneficial Ownership & Offshore Control Networks</p>
+        <p class="brand-subtitle">Autonomous Investigator for Beneficial Ownership &amp; Offshore Control Networks</p>
       </div>
     </div>
 
-    <div class="health-status-bar">
+    <div class="health-status-bar" role="status" aria-label="Database connectivity status">
       <div id="healthBadge" class="health-badge">
         <span id="healthDot" class="health-dot" title="Database connectivity indicator"></span>
-        <span id="healthText">Connecting to FalkorDB...</span>
+        <span id="healthText" aria-live="polite">Connecting to FalkorDB…</span>
       </div>
     </div>
   </header>
 
   <div class="layout-grid">
     <!-- Left Column: Scope, Inputs, and Dossier Scenarios -->
-    <aside>
+    <aside aria-label="Investigation parameters">
       <!-- Target Configuration Card -->
       <div class="card">
         <div class="card-header">
@@ -55,8 +58,8 @@
             <span class="label-hint">Exact or autocomplete</span>
           </label>
           <div class="input-container">
-            <input type="text" id="entityInput" placeholder="e.g. MOSSACK FONSECA & CO. (SAMOA) LIMITED." autocomplete="off" spellcheck="false">
-            <div id="suggestions"></div>
+            <input type="text" id="entityInput" placeholder="e.g. MOSSACK FONSECA & CO. (SAMOA) LIMITED." autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="suggestions">
+            <div id="suggestions" role="listbox" aria-label="Entity suggestions"></div>
           </div>
         </div>
 
@@ -81,14 +84,14 @@
         </div>
 
         <div class="btn-group">
-          <button id="btnRun" class="btn-primary" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <button id="btnRun" class="btn-primary" type="button" aria-label="Execute graph investigation">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
             <span>Investigate</span>
           </button>
-          <button id="btnCompare" class="btn-secondary" type="button" title="Runs Depth 1 vs Depth 3 to demonstrate concealed multi-hop exposure">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button id="btnCompare" class="btn-secondary" type="button" aria-label="Compare Depth 1 versus Depth 3 findings side-by-side" title="Runs Depth 1 vs Depth 3 to demonstrate concealed multi-hop exposure">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="12" y1="3" x2="12" y2="21"></line>
             </svg>
@@ -116,7 +119,7 @@
     </aside>
 
     <!-- Right Column: Results, Topology, and Ledger -->
-    <main>
+    <main id="mainContent">
       <!-- Depth Contrast Side-by-Side Panel (Proves Graph Value) -->
       <div class="card" id="contrastCard" style="display: none;">
         <div class="card-header">
@@ -128,7 +131,7 @@
         <div class="contrast-container">
           <div class="contrast-panel" id="contrastD1">
             <h3>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -140,7 +143,7 @@
           </div>
           <div class="contrast-panel" id="contrastD3">
             <h3>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
               <span>Depth 3 Evaluation (Multi-Hop)</span>
@@ -155,12 +158,12 @@
       <div class="card" id="verdictCard">
         <div class="verdict-header">
           <div>
-            <h2>Compliance Findings & Memorandum</h2>
+            <h2>Compliance Findings &amp; Memorandum</h2>
             <p class="card-desc" style="margin-bottom: 0;">Deterministic rule evaluation backed by anti-hallucination verification.</p>
           </div>
-          <div id="verdictBadge" class="badge badge-insufficient_evidence">READY TO RUN</div>
+          <div id="verdictBadge" class="badge badge-insufficient_evidence" aria-live="polite">READY TO RUN</div>
         </div>
-        <div class="memo-box" id="memoText">Select a curated dossier on the left or enter an entity name to initiate graph analysis.</div>
+        <div class="memo-box" id="memoText" aria-live="polite">Select a curated dossier on the left or enter an entity name to initiate graph analysis.</div>
         <div class="memo-meta">
           <span id="memoSource">Source: DETERMINISTIC RULES ENGINE</span>
           <span id="investigationTime">Elapsed: —</span>
@@ -174,26 +177,26 @@
             <h2>Network Topology View</h2>
             <p class="card-desc" style="margin-bottom: 0;">Interactive k-hop subnetwork rendered from FalkorDB traversal paths.</p>
           </div>
-          <div class="graph-toolbar">
-            <button type="button" class="graph-tool-btn" id="btnZoomIn" title="Zoom in">+</button>
-            <button type="button" class="graph-tool-btn" id="btnZoomOut" title="Zoom out">−</button>
-            <button type="button" class="graph-tool-btn" id="btnFitGraph" title="Fit to screen">Fit</button>
-            <button type="button" class="graph-tool-btn" id="btnResetGraph" title="Reset layout">Reset</button>
+          <div class="graph-toolbar" role="toolbar" aria-label="Graph navigation controls">
+            <button type="button" class="graph-tool-btn" id="btnZoomIn" aria-label="Zoom in" title="Zoom in">+</button>
+            <button type="button" class="graph-tool-btn" id="btnZoomOut" aria-label="Zoom out" title="Zoom out">−</button>
+            <button type="button" class="graph-tool-btn" id="btnFitGraph" aria-label="Fit graph to view" title="Fit to view">Fit</button>
+            <button type="button" class="graph-tool-btn" id="btnResetGraph" aria-label="Reset graph layout" title="Reset layout">Reset</button>
           </div>
         </div>
 
-        <div class="graph-legend">
-          <div class="legend-item"><span class="legend-marker entity"></span><span>Entity</span></div>
-          <div class="legend-item"><span class="legend-marker officer"></span><span>Officer / Director</span></div>
-          <div class="legend-item"><span class="legend-marker intermediary"></span><span>Intermediary</span></div>
-          <div class="legend-item"><span class="legend-marker address"></span><span>Registered Address</span></div>
-          <div class="legend-item"><span class="legend-marker watchlist"></span><span style="color: #fca5a5; font-weight: 600;">Watchlist Exposure Path</span></div>
+        <div class="graph-legend" aria-label="Graph legend">
+          <div class="legend-item"><span class="legend-marker entity" aria-hidden="true"></span><span>Entity</span></div>
+          <div class="legend-item"><span class="legend-marker officer" aria-hidden="true"></span><span>Officer / Director</span></div>
+          <div class="legend-item"><span class="legend-marker intermediary" aria-hidden="true"></span><span>Intermediary</span></div>
+          <div class="legend-item"><span class="legend-marker address" aria-hidden="true"></span><span>Registered Address</span></div>
+          <div class="legend-item"><span class="legend-marker watchlist" aria-hidden="true"></span><span style="color: #fca5a5; font-weight: 600;">Watchlist Exposure Path</span></div>
         </div>
 
-        <div id="cy"></div>
+        <div id="cy" role="region" aria-label="Interactive graph canvas showing entity relationships"></div>
 
         <!-- Interactive Node Details Inspector -->
-        <div id="nodeInspector">
+        <div id="nodeInspector" aria-live="polite">
           <span id="inspectorPrompt">Click any node in the graph to view attributes, internal node ID, and jurisdiction.</span>
         </div>
       </div>
@@ -208,12 +211,12 @@
           <table>
             <thead>
               <tr>
-                <th style="width: 220px;">Rule Identifier</th>
-                <th style="width: 130px;">Severity</th>
-                <th>Indicator Description & Graph Path</th>
+                <th scope="col" style="width: 220px;">Rule Identifier</th>
+                <th scope="col" style="width: 130px;">Severity</th>
+                <th scope="col">Indicator Description &amp; Graph Path</th>
               </tr>
             </thead>
-            <tbody id="ledgerBody">
+            <tbody id="ledgerBody" aria-live="polite">
               <tr>
                 <td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 1.5rem;">
                   No findings yet. Run an investigation to populate the evidence ledger.
@@ -230,17 +233,17 @@
           <h2>Agent Execution Trace</h2>
         </div>
         <p class="card-desc">Real-time log of Model Context Protocol (MCP) tool calls and FalkorDB query execution.</p>
-        <div class="trace-list" id="traceList">
-          <div style="color: var(--text-tertiary); padding: 0.5rem;">Awaiting investigation dispatch...</div>
+        <div class="trace-list" id="traceList" role="log" aria-live="polite">
+          <div style="color: var(--text-tertiary); padding: 0.5rem;">Awaiting investigation dispatch…</div>
         </div>
       </div>
     </main>
   </div>
 
-  <footer>
+  <footer role="contentinfo">
     <div class="footer-disclaimer">
       <p>
-        Data source: <strong>ICIJ Offshore Leaks Database</strong> (licensed under Open Database License / CC BY-SA, <a href="https://offshoreleaks.icij.org/" target="_blank" rel="noopener">offshoreleaks.icij.org</a>).
+        Data source: <strong>ICIJ Offshore Leaks Database</strong> (licensed under Open Database License / CC BY-SA, <a href="https://offshoreleaks.icij.org/" target="_blank" rel="noopener noreferrer">offshoreleaks.icij.org</a>).
       </p>
       <p style="margin-top: 0.35rem;">
         <strong>Disclaimer:</strong> Inclusion in ICIJ data does not imply wrongdoing or illegal activity. Watchlist targets are selected for structural graph demonstration. All outputs represent exposure indicators requiring human compliance review.
@@ -249,6 +252,6 @@
   </footer>
 
   <script src="config.js"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>
