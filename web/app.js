@@ -1,4 +1,5 @@
-// web/app.js — Ownership Lens client application logic
+// web/app.js — Ownership Lens Client Application Logic
+// Institutional Forensic Interface with Interactive Cytoscape Graph Canvas
 
 let cy = null;
 const apiBase = window.CONFIG?.API_BASE || "";
@@ -19,19 +20,27 @@ function initCytoscape() {
         selector: "node",
         style: {
           "label": "data(label)",
-          "color": "#e2e8f0",
+          "color": "#f1f5f9",
           "font-size": "11px",
+          "font-family": "Plus Jakarta Sans, sans-serif",
           "text-valign": "bottom",
-          "text-margin-y": "4px",
+          "text-margin-y": "5px",
           "background-color": "#3b82f6",
+          "border-color": "#1d4ed8",
+          "border-width": "1.5px",
           "width": "28px",
           "height": "28px",
+          "text-background-color": "rgba(10, 15, 26, 0.8)",
+          "text-background-opacity": 0.8,
+          "text-background-padding": "2px 4px",
+          "text-background-shape": "roundrectangle",
         },
       },
       {
         selector: "node[type = 'Officer']",
         style: {
-          "background-color": "#eab308",
+          "background-color": "#f59e0b",
+          "border-color": "#b45309",
           "shape": "diamond",
         },
       },
@@ -39,6 +48,7 @@ function initCytoscape() {
         selector: "node[type = 'Address']",
         style: {
           "background-color": "#a855f7",
+          "border-color": "#7e22ce",
           "shape": "round-rectangle",
         },
       },
@@ -46,6 +56,7 @@ function initCytoscape() {
         selector: "node[type = 'Intermediary']",
         style: {
           "background-color": "#f97316",
+          "border-color": "#c2410c",
           "shape": "hexagon",
         },
       },
@@ -54,7 +65,7 @@ function initCytoscape() {
         style: {
           "background-color": "#ef4444",
           "border-color": "#fca5a5",
-          "border-width": "3px",
+          "border-width": "3.5px",
           "width": "36px",
           "height": "36px",
         },
@@ -62,14 +73,17 @@ function initCytoscape() {
       {
         selector: "edge",
         style: {
-          "width": 2,
-          "line-color": "#475569",
-          "target-arrow-color": "#475569",
+          "width": 1.75,
+          "line-color": "#334155",
+          "target-arrow-color": "#334155",
           "target-arrow-shape": "triangle",
           "curve-style": "bezier",
           "label": "data(type)",
-          "font-size": "8px",
+          "font-size": "8.5px",
+          "font-family": "JetBrains Mono, monospace",
           "color": "#94a3b8",
+          "text-rotation": "autorotate",
+          "text-margin-y": "-4px",
         },
       },
       {
@@ -78,6 +92,15 @@ function initCytoscape() {
           "line-color": "#ef4444",
           "target-arrow-color": "#ef4444",
           "width": 3,
+          "color": "#fca5a5",
+          "font-weight": "bold",
+        },
+      },
+      {
+        selector: ":selected",
+        style: {
+          "border-width": "3px",
+          "border-color": "#38bdf8",
         },
       },
     ],
@@ -86,6 +109,47 @@ function initCytoscape() {
       animate: false,
     },
   });
+
+  // Tap node event for details inspection
+  cy.on("tap", "node", (evt) => {
+    const nodeData = evt.target.data();
+    showNodeDetails(nodeData);
+  });
+
+  // Tap background clears inspection prompt
+  cy.on("tap", (evt) => {
+    if (evt.target === cy) {
+      resetNodeInspector();
+    }
+  });
+}
+
+function showNodeDetails(data) {
+  const inspector = document.getElementById("nodeInspector");
+  if (!inspector) return;
+
+  const nodeType = data.type || "Entity";
+  const label = data.fullLabel || data.label || data.id;
+  const isWatchlist = data.isWatchlist ? "<span style='color: #ef4444; font-weight: 700;'>[WATCHLIST TARGET]</span>" : "";
+
+  inspector.innerHTML = `
+    <div class="inspector-meta">
+      <div><strong>${label}</strong> ${isWatchlist}</div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="inspector-tag">${nodeType}</span>
+        <span class="inspector-tag">ID: ${data.id}</span>
+      </div>
+    </div>
+    <div style="font-size: 0.72rem; color: var(--text-tertiary);">Click graph canvas to reset.</div>
+  `;
+}
+
+function resetNodeInspector() {
+  const inspector = document.getElementById("nodeInspector");
+  if (!inspector) return;
+  inspector.innerHTML = `
+    <span id="inspectorPrompt">Click any node in the graph to view attributes, internal node ID, and jurisdiction.</span>
+  `;
 }
 
 async function checkHealth() {
@@ -96,9 +160,9 @@ async function checkHealth() {
     if (!res.ok) throw new Error("Health check failed");
     const data = await res.json();
     dot.className = `health-dot ${data.db === "ok" ? "ok" : "down"}`;
-    const llmStatus = data.llm_key ? "LLM: live" : "LLM: fallback";
-    const dataLabel = data.data_source === "icij" ? "Data: ICIJ" : "Data: synthetic";
-    text.textContent = `DB: ${data.db} | Graph: ${data.graph} | ${llmStatus} | ${dataLabel} | Mode: ${data.mode}`;
+    const llmStatus = data.llm_key ? "NVIDIA LLM: Connected" : "LLM: Fallback";
+    const dataLabel = data.data_source === "icij" ? "Panama Papers (SAM/SEY)" : "Synthetic Data";
+    text.textContent = `FalkorDB: Ready • ${dataLabel} • ${llmStatus}`;
     text.title = data.data_disclaimer || "";
   } catch (err) {
     dot.className = "health-dot down";
@@ -119,14 +183,38 @@ async function loadDemoConfig() {
     const picksContainer = document.getElementById("demoPicks");
     picksContainer.innerHTML = "";
     (data.demo_entities || []).forEach((item) => {
-      const btn = document.createElement("button");
-      btn.className = "quick-pick-btn";
-      btn.textContent = `🏢 ${item.name}`;
-      btn.title = item.description || "";
-      btn.addEventListener("click", () => {
+      const card = document.createElement("div");
+      card.className = "demo-dossier-card";
+      card.tabIndex = 0;
+      card.role = "button";
+
+      const flipPill = (item.expected_depth_1 && item.expected_depth_3)
+        ? `<span class="demo-dossier-pill">${item.expected_depth_1.toUpperCase()} → ${item.expected_depth_3.toUpperCase()}</span>`
+        : "";
+
+      card.innerHTML = `
+        <div class="demo-dossier-top">
+          <span class="demo-dossier-name" title="${item.name}">${item.name}</span>
+          ${flipPill}
+        </div>
+        <div class="demo-dossier-desc">${item.description || "Offshore entity investigation scenario."}</div>
+      `;
+
+      card.addEventListener("click", () => {
         document.getElementById("entityInput").value = item.name;
+        // Visual select highlight
+        document.querySelectorAll(".demo-dossier-card").forEach((c) => c.style.borderColor = "var(--border-subtle)");
+        card.style.borderColor = "var(--border-focus)";
       });
-      picksContainer.appendChild(btn);
+
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          card.click();
+        }
+      });
+
+      picksContainer.appendChild(card);
     });
   } catch (err) {
     console.error("Failed to load demo config:", err);
@@ -154,14 +242,16 @@ function setupAutocomplete() {
         suggestionsBox.innerHTML = "";
         candidates.slice(0, 5).forEach((c) => {
           const item = document.createElement("div");
-          item.style.padding = "0.35rem 0.5rem";
-          item.style.background = "var(--bg-secondary)";
-          item.style.border = "1px solid var(--border-color)";
-          item.style.borderRadius = "4px";
-          item.style.cursor = "pointer";
-          item.style.fontSize = "0.75rem";
-          item.innerHTML = `<div><strong>${c.name}</strong> <span style="color: var(--accent); font-family: var(--font-mono);">[${c.node_id}]</span></div>
-            <div style="color: var(--text-muted); font-size: 0.7rem;">${c.jurisdiction || 'N/A'} • ${c.source || 'N/A'} • ${c.status || 'Active'}</div>`;
+          item.className = "suggestion-item";
+          item.innerHTML = `
+            <div class="suggestion-title">
+              <span>${c.name}</span>
+              <span class="suggestion-id">${c.node_id}</span>
+            </div>
+            <div class="suggestion-meta">
+              ${c.jurisdiction || 'N/A'} • ${c.source || 'N/A'} • ${c.status || 'Active'}
+            </div>
+          `;
           item.addEventListener("click", () => {
             input.value = c.node_id;
             suggestionsBox.innerHTML = "";
@@ -171,19 +261,53 @@ function setupAutocomplete() {
       } catch (err) {
         console.debug("Autocomplete error:", err);
       }
-    }, 250);
+    }, 220);
+  });
+
+  // Hide suggestions when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!suggestionsBox.contains(e.target) && e.target !== input) {
+      suggestionsBox.innerHTML = "";
+    }
   });
 }
 
 function setupEventListeners() {
   document.getElementById("btnRun").addEventListener("click", () => runSingleInvestigation());
   document.getElementById("btnCompare").addEventListener("click", () => runDepthComparison());
+
+  // Graph canvas controls
+  const btnZoomIn = document.getElementById("btnZoomIn");
+  const btnZoomOut = document.getElementById("btnZoomOut");
+  const btnFitGraph = document.getElementById("btnFitGraph");
+  const btnResetGraph = document.getElementById("btnResetGraph");
+
+  if (btnZoomIn) {
+    btnZoomIn.addEventListener("click", () => {
+      if (cy) cy.zoom({ level: cy.zoom() * 1.3, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    });
+  }
+  if (btnZoomOut) {
+    btnZoomOut.addEventListener("click", () => {
+      if (cy) cy.zoom({ level: cy.zoom() * 0.77, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    });
+  }
+  if (btnFitGraph) {
+    btnFitGraph.addEventListener("click", () => {
+      if (cy) cy.fit(null, 35);
+    });
+  }
+  if (btnResetGraph) {
+    btnResetGraph.addEventListener("click", () => {
+      if (cy) cy.layout({ name: "cose", animate: true, padding: 35 }).run();
+    });
+  }
 }
 
 async function runSingleInvestigation(depthOverride = null) {
   const entityName = document.getElementById("entityInput").value.trim();
   if (!entityName) {
-    alert("Please enter an entity name or node_id.");
+    alert("Please enter an entity name or node ID.");
     return;
   }
 
@@ -193,14 +317,20 @@ async function runSingleInvestigation(depthOverride = null) {
 
   const btn = document.getElementById("btnRun");
   btn.disabled = true;
-  btn.textContent = "Investigating...";
+  btn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M12 2a10 10 0 0 1 10 10"></path>
+    </svg>
+    <span>Investigating...</span>
+  `;
 
   const traceList = document.getElementById("traceList");
   traceList.innerHTML = "";
 
   document.getElementById("verdictBadge").className = "badge badge-insufficient_evidence";
-  document.getElementById("verdictBadge").textContent = "RUNNING...";
-  document.getElementById("memoText").textContent = "Gathering graph evidence...";
+  document.getElementById("verdictBadge").textContent = "ANALYZING GRAPH...";
+  document.getElementById("memoText").textContent = "Traversing beneficial ownership and control paths in FalkorDB...";
 
   const t0 = performance.now();
 
@@ -221,7 +351,12 @@ async function runSingleInvestigation(depthOverride = null) {
   } catch (err) {
     alert(`Error: ${err.message}`);
     btn.disabled = false;
-    btn.textContent = "Investigate";
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <span>Investigate</span>
+    `;
   }
 }
 
@@ -234,12 +369,12 @@ function listenToStream(runId, startTime) {
     const item = document.createElement("div");
     item.className = "trace-item";
     item.innerHTML = `
-      <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
         <span class="trace-tool">${step.tool}</span>
-        <span style="color: var(--text-muted); font-size: 0.75rem;">(${step.status})</span>
+        <span style="color: var(--text-tertiary); font-size: 0.72rem;">(${step.status})</span>
       </div>
-      <div>
-        <span style="color: var(--text-muted); margin-right: 0.5rem;">${step.elapsed_ms}ms</span>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="color: var(--text-tertiary); font-size: 0.72rem;">${step.elapsed_ms}ms</span>
         <span class="trace-source">${step.source}</span>
       </div>
     `;
@@ -266,17 +401,27 @@ function listenToStream(runId, startTime) {
 
     const btn = document.getElementById("btnRun");
     btn.disabled = false;
-    btn.textContent = "Investigate";
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <span>Investigate</span>
+    `;
 
     renderGraph(finalResult.evidence);
     renderRecalledCases(finalResult.evidence?.recalled_cases || []);
   });
 
-  eventSource.addEventListener("error", (e) => {
+  eventSource.addEventListener("error", () => {
     eventSource.close();
     const btn = document.getElementById("btnRun");
     btn.disabled = false;
-    btn.textContent = "Investigate";
+    btn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <span>Investigate</span>
+    `;
   });
 }
 
@@ -284,6 +429,7 @@ function updateVerdictUI(verdict, evaluation, candidates = [], status = null, di
   const badge = document.getElementById("verdictBadge");
   badge.className = `badge badge-${verdict}`;
   const depth = document.getElementById("depthSelect") ? document.getElementById("depthSelect").value : "2";
+
   if (displayVerdict) {
     badge.textContent = displayVerdict.toUpperCase();
   } else if (verdict === "clear") {
@@ -295,14 +441,14 @@ function updateVerdictUI(verdict, evaluation, candidates = [], status = null, di
   const tbody = document.getElementById("ledgerBody");
   tbody.innerHTML = "";
 
-  // If ambiguous entity, render candidate picker allowing selection by node_id
+  // Ambiguous disambiguation handler
   if (status === "ambiguous" && candidates && candidates.length > 0) {
     const trPrompt = document.createElement("tr");
     trPrompt.innerHTML = `
-      <td colspan="3" style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 0.5rem;">
-        <strong>Ambiguous Entity: Multiple Matches Found</strong><br>
-        <span style="font-size: 0.75rem; color: var(--text-muted);">Please select a candidate by Node ID to investigate:</span>
-        <div id="disambiguationList" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;"></div>
+      <td colspan="3" style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 0.85rem;">
+        <strong style="color: #fbbf24;">Ambiguous Entity: Multiple Registrations Found</strong><br>
+        <span style="font-size: 0.78rem; color: var(--text-secondary);">Select the precise target by internal Node ID:</span>
+        <div id="disambiguationList" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.6rem;"></div>
       </td>
     `;
     tbody.appendChild(trPrompt);
@@ -310,9 +456,8 @@ function updateVerdictUI(verdict, evaluation, candidates = [], status = null, di
     const listDiv = trPrompt.querySelector("#disambiguationList");
     candidates.forEach((cand) => {
       const btn = document.createElement("button");
-      btn.className = "quick-pick-btn";
+      btn.className = "demo-dossier-card";
       btn.style.textAlign = "left";
-      btn.style.padding = "0.35rem 0.5rem";
       btn.innerHTML = `<strong>${cand.name}</strong> — Node ID: <code>${cand.node_id}</code> (${cand.jurisdiction || 'N/A'}, ${cand.source || 'N/A'}, ${cand.status || 'Active'})`;
       btn.addEventListener("click", () => {
         document.getElementById("entityInput").value = cand.node_id;
@@ -326,17 +471,18 @@ function updateVerdictUI(verdict, evaluation, candidates = [], status = null, di
   const findings = evaluation?.findings || [];
   if (findings.length === 0) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="3" style="text-align: center; color: var(--text-muted);">No risk findings. Clean evaluation.</td>`;
+    tr.innerHTML = `<td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 1.5rem;">No exposure indicators found. Evaluation returned clean within specified depth.</td>`;
     tbody.appendChild(tr);
     return;
   }
 
   findings.forEach((f) => {
     const tr = document.createElement("tr");
+    const severityBadge = f.severity === 'high' ? 'escalate' : f.severity === 'medium' ? 'review' : 'insufficient_evidence';
     tr.innerHTML = `
-      <td style="font-family: var(--font-mono); font-weight: 600;">${f.rule_id}</td>
-      <td><span class="badge badge-${f.severity === 'high' ? 'escalate' : f.severity === 'medium' ? 'review' : 'insufficient_evidence'}">${f.severity.toUpperCase()}</span></td>
-      <td>${f.text}</td>
+      <td class="rule-cell">${f.rule_id}</td>
+      <td><span class="badge badge-${severityBadge}" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">${f.severity.toUpperCase()}</span></td>
+      <td style="color: #cbd5e1; font-size: 0.82rem; line-height: 1.45;">${f.text}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -353,7 +499,6 @@ function renderGraph(evidence) {
   function addNode(n, isWatchlist = false) {
     if (!n || !n.id || addedNodes.has(n.id)) return;
     addedNodes.add(n.id);
-    // Use name for Entity/Officer/Intermediary; address for Address nodes
     const label = n.name || n.address || n.id;
     elements.push({
       data: {
@@ -386,7 +531,7 @@ function renderGraph(evidence) {
     addNode(evidence.resolved_entity);
   }
 
-  // 2. Ownership chain — use actual rel types from data
+  // 2. Ownership chain
   (evidence.ownership_chain || []).forEach((path) => {
     const nodes = path.nodes || [];
     const rels = path.relationships || [];
@@ -397,7 +542,7 @@ function renderGraph(evidence) {
     }
   });
 
-  // 3. Watchlist paths — actual rel types, red highlight
+  // 3. Watchlist paths
   (evidence.paths_to_watchlist || []).forEach((wp) => {
     const nodes = wp.nodes || [];
     const rels = wp.relationships || [];
@@ -416,7 +561,7 @@ function renderGraph(evidence) {
   });
 
   cy.add(elements);
-  cy.layout({ name: "cose", animate: true, padding: 30, randomize: false }).run();
+  cy.layout({ name: "cose", animate: true, padding: 35, randomize: false }).run();
 }
 
 function renderRecalledCases(cases) {
@@ -432,17 +577,14 @@ function renderRecalledCases(cases) {
 
   cases.forEach((c) => {
     const div = document.createElement("div");
-    div.style.background = "var(--bg-secondary)";
-    div.style.padding = "0.5rem";
-    div.style.borderRadius = "4px";
-    div.style.border = "1px solid var(--border-color)";
+    div.className = "recalled-item";
     div.innerHTML = `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-        <span style="font-family: var(--font-mono); font-size: 0.75rem;">${c.case_id}</span>
-        <span class="badge badge-${c.verdict}">${c.verdict.toUpperCase()}</span>
+      <div class="recalled-header">
+        <span class="recalled-case-id">${c.case_id}</span>
+        <span class="badge badge-${c.verdict}" style="padding: 0.15rem 0.45rem; font-size: 0.68rem;">${c.verdict.toUpperCase()}</span>
       </div>
-      <div style="font-size: 0.75rem; color: var(--text-muted);">
-        Shared nodes: ${(c.shared_nodes || []).join(", ") || "Direct"}
+      <div style="font-size: 0.74rem; color: var(--text-secondary);">
+        Shared graph nodes: ${(c.shared_nodes || []).join(", ") || "Direct entity link"}
       </div>
     `;
     list.appendChild(div);
@@ -465,9 +607,9 @@ async function runDepthComparison() {
   const d3Memo = document.getElementById("contrastD3Memo");
 
   d1Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 1...</span>`;
-  d1Memo.textContent = "Executing single-hop exploration...";
+  d1Memo.textContent = "Executing single-hop neighborhood exploration...";
   d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">AWAITING...</span>`;
-  d3Memo.textContent = "Awaiting depth 1 completion...";
+  d3Memo.textContent = "Awaiting depth 1 completion before starting multi-hop traversal...";
 
   const watchlistRaw = document.getElementById("watchlistInput").value;
   const watchlist = watchlistRaw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -488,7 +630,7 @@ async function runDepthComparison() {
 
     // Run Depth 3
     d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 3...</span>`;
-    d3Memo.textContent = "Traversing 3 hops across nominee hubs and intermediaries...";
+    d3Memo.textContent = "Traversing 3 hops across nominee hubs and intermediary layers in FalkorDB...";
 
     const res3 = await fetch(`${apiBase}/investigate`, {
       method: "POST",
@@ -505,7 +647,7 @@ async function runDepthComparison() {
     renderGraph(r3Data.evidence);
     updateVerdictUI(r3Data.verdict, r3Data.evaluation);
     document.getElementById("memoText").textContent = r3Data.memo;
-    document.getElementById("memoSource").textContent = "Source: DEPTH COMPARISON";
+    document.getElementById("memoSource").textContent = "Source: DEPTH COMPARISON ENGINE";
   } catch (err) {
     alert(`Comparison failed: ${err.message}`);
   }
@@ -518,7 +660,7 @@ function awaitRunComplete(runId) {
       es.close();
       resolve(JSON.parse(e.data));
     });
-    es.addEventListener("error", (e) => {
+    es.addEventListener("error", () => {
       es.close();
       reject(new Error("Stream terminated"));
     });

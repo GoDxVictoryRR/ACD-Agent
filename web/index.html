@@ -4,83 +4,149 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ownership Lens | Offshore Network Investigator</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="Autonomous Graph Agent for Offshore Control and Beneficial Ownership Networks powered by FalkorDB and Model Context Protocol.">
+  <link rel="stylesheet" href="style.css?v=2">
   <!-- Pinned Cytoscape.js from cdnjs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
 </head>
 <body>
+  <!-- Top Navigation & System Health Bar -->
   <header>
-    <div class="brand">
-      <h1>🌐 Ownership Lens</h1>
-      <p>Autonomous Graph Agent for Offshore Control & Ownership Networks</p>
+    <div class="brand-wrapper">
+      <div class="brand-icon" aria-hidden="true" style="width: 42px; height: 42px; min-width: 42px; max-width: 42px; max-height: 42px; overflow: hidden;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <circle cx="11" cy="11" r="3"></circle>
+        </svg>
+      </div>
+      <div class="brand-title-group">
+        <div class="brand-title-row">
+          <h1>Ownership Lens</h1>
+          <span class="track-badge">FalkorDB Graph Agent</span>
+        </div>
+        <p class="brand-subtitle">Autonomous Investigator for Beneficial Ownership & Offshore Control Networks</p>
+      </div>
     </div>
-    <div id="healthBadge" class="health-badge">
-      <span id="healthDot" class="health-dot"></span>
-      <span id="healthText">Connecting...</span>
+
+    <div class="health-status-bar">
+      <div id="healthBadge" class="health-badge">
+        <span id="healthDot" class="health-dot" title="Database connectivity indicator"></span>
+        <span id="healthText">Connecting to FalkorDB...</span>
+      </div>
     </div>
   </header>
 
   <div class="layout-grid">
-    <!-- Left Column: Search & Settings -->
+    <!-- Left Column: Scope, Inputs, and Dossier Scenarios -->
     <aside>
+      <!-- Target Configuration Card -->
       <div class="card">
-        <h2>Target Entity</h2>
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>Investigation Target</h2>
+          </div>
+        </div>
+        <p class="card-desc">Resolve corporate entities and traverse multi-hop ownership chains in FalkorDB.</p>
+
         <div class="form-group">
-          <label for="entityInput">Entity Name</label>
-          <input type="text" id="entityInput" placeholder="e.g. Blue Star Maritime Holdings Ltd" autocomplete="off">
-          <div id="suggestions" style="margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.2rem;"></div>
+          <label for="entityInput">
+            <span>Entity Name or ID</span>
+            <span class="label-hint">Exact or autocomplete</span>
+          </label>
+          <div class="input-container">
+            <input type="text" id="entityInput" placeholder="e.g. MOSSACK FONSECA & CO. (SAMOA) LIMITED." autocomplete="off" spellcheck="false">
+            <div id="suggestions"></div>
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="watchlistInput">Watchlist Entities (comma-separated)</label>
-          <textarea id="watchlistInput" rows="2" placeholder="e.g. Ironclad Sanctions Entity Inc, Apex Nominees Ltd"></textarea>
+          <label for="watchlistInput">
+            <span>Watchlist Targets</span>
+            <span class="label-hint">Comma-separated</span>
+          </label>
+          <textarea id="watchlistInput" rows="2" placeholder="e.g. TIANSHENG INDUSTRY AND TRADING CO., LTD."></textarea>
         </div>
 
         <div class="form-group">
-          <label for="depthSelect">Traversal Depth</label>
+          <label for="depthSelect">
+            <span>Traversal Radius</span>
+            <span class="label-hint">Exploration depth</span>
+          </label>
           <select id="depthSelect">
-            <option value="1">Depth 1 (Immediate connections only)</option>
-            <option value="2" selected>Depth 2 (Two hops - Default)</option>
-            <option value="3">Depth 3 (Three hops - Full exposure)</option>
+            <option value="1">Depth 1 — Immediate connections only</option>
+            <option value="2">Depth 2 — Two hops (Intermediary hubs)</option>
+            <option value="3" selected>Depth 3 — Three hops (Concealed nominee chains)</option>
           </select>
         </div>
 
         <div class="btn-group">
-          <button id="btnRun" class="btn-primary">Investigate</button>
-          <button id="btnCompare" class="btn-secondary" title="Runs both depth 1 and depth 3 to prove graph value">Compare D1 vs D3</button>
+          <button id="btnRun" class="btn-primary" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Investigate</span>
+          </button>
+          <button id="btnCompare" class="btn-secondary" type="button" title="Runs Depth 1 vs Depth 3 to demonstrate concealed multi-hop exposure">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+            </svg>
+            <span>Compare D1 vs D3</span>
+          </button>
         </div>
 
-        <div class="quick-picks">
-          <label>Pre-configured Demo Entities</label>
+        <!-- Curated Demo Entities -->
+        <div class="quick-picks-section">
+          <div class="quick-picks-header">
+            <span>Curated Demo Dossiers</span>
+          </div>
           <div id="demoPicks"></div>
         </div>
       </div>
 
-      <!-- Recalled Prior Cases -->
+      <!-- Recalled Prior Cases Card -->
       <div class="card" id="recalledCard" style="display: none;">
-        <h2>Prior Cases Recalled</h2>
-        <div id="recalledList" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;"></div>
+        <div class="card-header">
+          <h2>Prior Cases Recalled</h2>
+        </div>
+        <p class="card-desc">Graph memory nodes retrieved via past investigation write-backs.</p>
+        <div id="recalledList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
       </div>
     </aside>
 
-    <!-- Right Column: Results & Graph -->
+    <!-- Right Column: Results, Topology, and Ledger -->
     <main>
-      <!-- Depth Contrast Side-by-Side Panel (Initially Hidden) -->
+      <!-- Depth Contrast Side-by-Side Panel (Proves Graph Value) -->
       <div class="card" id="contrastCard" style="display: none;">
-        <h2>Depth Contrast Comparison: Proving the Graph Matters</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-          Shows how shallow depth 1 investigation misses concealed multi-hop nominee ownership paths uncovered at depth 3.
+        <div class="card-header">
+          <h2>Depth Contrast: Proving Connected Data Matters</h2>
+        </div>
+        <p class="card-desc">
+          Compare shallow relational visibility (Depth 1) against deep topological graph traversal (Depth 3). Uncovers concealed nominee directors and multi-hop sanctions exposure.
         </p>
         <div class="contrast-container">
           <div class="contrast-panel" id="contrastD1">
-            <h3>Depth 1 Evaluation</h3>
-            <div id="contrastD1Badge"></div>
-            <p id="contrastD1Memo" style="margin-top: 0.5rem; font-size: 0.8rem;"></p>
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Depth 1 Evaluation (Shallow)</span>
+            </h3>
+            <div id="contrastD1Badge" class="contrast-badge-wrapper"></div>
+            <p id="contrastD1Memo" class="contrast-memo"></p>
           </div>
           <div class="contrast-panel" id="contrastD3">
-            <h3>Depth 3 Evaluation</h3>
-            <div id="contrastD3Badge"></div>
-            <p id="contrastD3Memo" style="margin-top: 0.5rem; font-size: 0.8rem;"></p>
+            <h3>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <span>Depth 3 Evaluation (Multi-Hop)</span>
+            </h3>
+            <div id="contrastD3Badge" class="contrast-badge-wrapper"></div>
+            <p id="contrastD3Memo" class="contrast-memo"></p>
           </div>
         </div>
       </div>
@@ -88,67 +154,101 @@
       <!-- Verdict & Memo Card -->
       <div class="card" id="verdictCard">
         <div class="verdict-header">
-          <h2>Investigation Verdict</h2>
+          <div>
+            <h2>Compliance Findings & Memorandum</h2>
+            <p class="card-desc" style="margin-bottom: 0;">Deterministic rule evaluation backed by anti-hallucination verification.</p>
+          </div>
           <div id="verdictBadge" class="badge badge-insufficient_evidence">READY TO RUN</div>
         </div>
-        <div class="memo-box" id="memoText">Enter an offshore entity name on the left or pick a demo entity to begin investigation.</div>
+        <div class="memo-box" id="memoText">Select a curated dossier on the left or enter an entity name to initiate graph analysis.</div>
         <div class="memo-meta">
-          <span id="memoSource">Source: -</span>
-          <span id="investigationTime">Elapsed: -</span>
+          <span id="memoSource">Source: DETERMINISTIC RULES ENGINE</span>
+          <span id="investigationTime">Elapsed: —</span>
+        </div>
+      </div>
+
+      <!-- Subgraph Cytoscape View -->
+      <div class="card">
+        <div class="graph-card-header">
+          <div>
+            <h2>Network Topology View</h2>
+            <p class="card-desc" style="margin-bottom: 0;">Interactive k-hop subnetwork rendered from FalkorDB traversal paths.</p>
+          </div>
+          <div class="graph-toolbar">
+            <button type="button" class="graph-tool-btn" id="btnZoomIn" title="Zoom in">+</button>
+            <button type="button" class="graph-tool-btn" id="btnZoomOut" title="Zoom out">−</button>
+            <button type="button" class="graph-tool-btn" id="btnFitGraph" title="Fit to screen">Fit</button>
+            <button type="button" class="graph-tool-btn" id="btnResetGraph" title="Reset layout">Reset</button>
+          </div>
+        </div>
+
+        <div class="graph-legend">
+          <div class="legend-item"><span class="legend-marker entity"></span><span>Entity</span></div>
+          <div class="legend-item"><span class="legend-marker officer"></span><span>Officer / Director</span></div>
+          <div class="legend-item"><span class="legend-marker intermediary"></span><span>Intermediary</span></div>
+          <div class="legend-item"><span class="legend-marker address"></span><span>Registered Address</span></div>
+          <div class="legend-item"><span class="legend-marker watchlist"></span><span style="color: #fca5a5; font-weight: 600;">Watchlist Exposure Path</span></div>
+        </div>
+
+        <div id="cy"></div>
+
+        <!-- Interactive Node Details Inspector -->
+        <div id="nodeInspector">
+          <span id="inspectorPrompt">Click any node in the graph to view attributes, internal node ID, and jurisdiction.</span>
         </div>
       </div>
 
       <!-- Evidence Ledger Table -->
       <div class="card" id="ledgerCard">
-        <h2>Evidence Ledger (Deterministic Findings)</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Rule ID</th>
-              <th>Severity</th>
-              <th>Indicator Description</th>
-            </tr>
-          </thead>
-          <tbody id="ledgerBody">
-            <tr>
-              <td colspan="3" style="text-align: center; color: var(--text-muted);">No findings yet. Run an investigation to populate the ledger.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Subgraph Cytoscape View -->
-      <div class="card">
-        <h2>Subnetwork Graph View</h2>
-        <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 1rem; align-items: center;">
-          <span>🔵 Entity</span>
-          <span>🟡 Officer</span>
-          <span>🟣 Address</span>
-          <span>🟠 Intermediary</span>
-          <span style="color: #ef4444; font-weight: bold;">🔴 Watchlist / High-Risk Path</span>
+        <div class="card-header">
+          <h2>Evidence Ledger (Deterministic Findings)</h2>
         </div>
-        <div id="cy"></div>
+        <p class="card-desc">Calibrated indicators derived exclusively from graph traversal paths and centrality metrics.</p>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 220px;">Rule Identifier</th>
+                <th style="width: 130px;">Severity</th>
+                <th>Indicator Description & Graph Path</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerBody">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 1.5rem;">
+                  No findings yet. Run an investigation to populate the evidence ledger.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Streaming Tool Execution Trace -->
       <div class="card">
-        <h2>Agent Execution Trace</h2>
+        <div class="card-header">
+          <h2>Agent Execution Trace</h2>
+        </div>
+        <p class="card-desc">Real-time log of Model Context Protocol (MCP) tool calls and FalkorDB query execution.</p>
         <div class="trace-list" id="traceList">
-          <div style="color: var(--text-muted);">Awaiting investigation start...</div>
+          <div style="color: var(--text-tertiary); padding: 0.5rem;">Awaiting investigation dispatch...</div>
         </div>
       </div>
     </main>
   </div>
 
   <footer>
-    <p>
-      Data source: <strong>ICIJ Offshore Leaks Database</strong> (licensed under Open Database License / CC BY-SA, <a href="https://offshoreleaks.icij.org/" target="_blank" rel="noopener">offshoreleaks.icij.org</a>).
-      <br>
-      <strong>Disclaimer:</strong> Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All outputs represent exposure indicators requiring human review.
-    </p>
+    <div class="footer-disclaimer">
+      <p>
+        Data source: <strong>ICIJ Offshore Leaks Database</strong> (licensed under Open Database License / CC BY-SA, <a href="https://offshoreleaks.icij.org/" target="_blank" rel="noopener">offshoreleaks.icij.org</a>).
+      </p>
+      <p style="margin-top: 0.35rem;">
+        <strong>Disclaimer:</strong> Inclusion in ICIJ data does not imply wrongdoing or illegal activity. Watchlist targets are selected for structural graph demonstration. All outputs represent exposure indicators requiring human compliance review.
+      </p>
+    </div>
   </footer>
 
   <script src="config.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </body>
 </html>
