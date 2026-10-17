@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ownership Lens | Offshore Network Investigator</title>
+  <title>Ownership Lens | Autonomous Offshore Network Investigator</title>
   <meta name="description" content="Autonomous Graph Agent for Offshore Control and Beneficial Ownership Networks powered by FalkorDB and Model Context Protocol.">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=forensic_v5">
   <!-- Pinned Cytoscape.js from cdnjs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
 </head>
@@ -13,26 +13,29 @@
   <!-- Accessible Skip Link for Keyboard & Screen Reader Users -->
   <a href="#verdictCard" class="skip-link">Skip to investigation findings</a>
 
-  <!-- Top Navigation & System Health Bar -->
+  <!-- Command Masthead & Live Telemetry Bar -->
   <header role="banner">
     <div class="brand-wrapper">
-      <div class="brand-icon" aria-hidden="true" style="width: 42px; height: 42px; min-width: 42px; max-width: 42px; max-height: 42px; overflow: hidden;">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          <circle cx="11" cy="11" r="3"></circle>
+      <div class="brand-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+          <circle cx="12" cy="12" r="4"></circle>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
         </svg>
       </div>
       <div class="brand-title-group">
         <div class="brand-title-row">
-          <h1>Ownership Lens</h1>
-          <span class="track-badge">FalkorDB Graph Agent</span>
+          <h1>OWNERSHIP LENS</h1>
+          <span class="track-badge">FALKORDB GRAPH AGENT</span>
         </div>
-        <p class="brand-subtitle">Autonomous Investigator for Beneficial Ownership &amp; Offshore Control Networks</p>
+        <p class="brand-subtitle">Autonomous Investigation Engine for Beneficial Ownership &amp; Concealed Control Networks</p>
       </div>
     </div>
 
-    <div class="health-status-bar" role="status" aria-label="Database connectivity status">
+    <!-- Real-time Database & Agent Telemetry Pill -->
+    <div class="health-status-bar" role="status" aria-label="System telemetry">
       <div id="healthBadge" class="health-badge">
         <span id="healthDot" class="health-dot" title="Database connectivity indicator"></span>
         <span id="healthText" aria-live="polite">Connecting to FalkorDB…</span>
@@ -40,24 +43,37 @@
     </div>
   </header>
 
+  <!-- Main Workstation Layout -->
   <div class="layout-grid">
     <!-- Left Column: Scope, Inputs, and Dossier Scenarios -->
     <aside aria-label="Investigation parameters">
-      <!-- Target Configuration Card -->
+      <!-- Target Configuration Console -->
       <div class="card">
         <div class="card-header">
           <div class="card-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
             <h2>Investigation Target</h2>
           </div>
+          <span class="coord-tag">PARAM // 01</span>
         </div>
         <p class="card-desc">Resolve corporate entities and traverse multi-hop ownership chains in FalkorDB.</p>
 
         <div class="form-group">
           <label for="entityInput">
-            <span>Entity Name or ID</span>
+            <span>Entity Name or Internal ID</span>
             <span class="label-hint">Exact or autocomplete</span>
           </label>
           <div class="input-container">
+            <div class="input-icon-prefix" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
             <input type="text" id="entityInput" placeholder="e.g. MOSSACK FONSECA & CO. (SAMOA) LIMITED." autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="suggestions">
             <div id="suggestions" role="listbox" aria-label="Entity suggestions"></div>
           </div>
@@ -65,7 +81,7 @@
 
         <div class="form-group">
           <label for="watchlistInput">
-            <span>Watchlist Targets</span>
+            <span>High-Risk Watchlist Targets</span>
             <span class="label-hint">Comma-separated</span>
           </label>
           <textarea id="watchlistInput" rows="2" placeholder="e.g. TIANSHENG INDUSTRY AND TRADING CO., LTD."></textarea>
@@ -73,13 +89,13 @@
 
         <div class="form-group">
           <label for="depthSelect">
-            <span>Traversal Radius</span>
+            <span>Graph Traversal Radius</span>
             <span class="label-hint">Exploration depth</span>
           </label>
           <select id="depthSelect">
-            <option value="1">Depth 1 — Immediate connections only</option>
-            <option value="2">Depth 2 — Two hops (Intermediary hubs)</option>
-            <option value="3" selected>Depth 3 — Three hops (Concealed nominee chains)</option>
+            <option value="1">Depth 1 — Immediate connections only (Shallow relational)</option>
+            <option value="2">Depth 2 — Two hops (Intermediary nominee hubs)</option>
+            <option value="3" selected>Depth 3 — Three hops (Concealed multi-hop chains)</option>
           </select>
         </div>
 
@@ -88,7 +104,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
-            <span>Investigate</span>
+            <span>Investigate Target</span>
           </button>
           <button id="btnCompare" class="btn-secondary" type="button" aria-label="Compare Depth 1 versus Depth 3 findings side-by-side" title="Runs Depth 1 vs Depth 3 to demonstrate concealed multi-hop exposure">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -99,10 +115,10 @@
           </button>
         </div>
 
-        <!-- Curated Demo Entities -->
+        <!-- Curated Evidentiary Benchmark Dossiers -->
         <div class="quick-picks-section">
           <div class="quick-picks-header">
-            <span>Curated Demo Dossiers</span>
+            <span>Benchmark Investigation Dossiers</span>
           </div>
           <div id="demoPicks"></div>
         </div>
@@ -111,7 +127,13 @@
       <!-- Recalled Prior Cases Card -->
       <div class="card" id="recalledCard" style="display: none;">
         <div class="card-header">
-          <h2>Prior Cases Recalled</h2>
+          <div class="card-title-group">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-bright)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+            <h2>Prior Cases Recalled</h2>
+          </div>
         </div>
         <p class="card-desc">Graph memory nodes retrieved via past investigation write-backs.</p>
         <div id="recalledList" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
@@ -123,7 +145,13 @@
       <!-- Depth Contrast Side-by-Side Panel (Proves Graph Value) -->
       <div class="card" id="contrastCard" style="display: none;">
         <div class="card-header">
-          <h2>Depth Contrast: Proving Connected Data Matters</h2>
+          <div class="card-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <h2>Depth Contrast: Proving Connected Data Matters</h2>
+          </div>
+          <span class="coord-tag" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">GRAPH VALUE PROOF</span>
         </div>
         <p class="card-desc">
           Compare shallow relational visibility (Depth 1) against deep topological graph traversal (Depth 3). Uncovers concealed nominee directors and multi-hop sanctions exposure.
@@ -136,7 +164,7 @@
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              <span>Depth 1 Evaluation (Shallow)</span>
+              <span>Depth 1 Evaluation (Shallow Relational)</span>
             </h3>
             <div id="contrastD1Badge" class="contrast-badge-wrapper"></div>
             <p id="contrastD1Memo" class="contrast-memo"></p>
@@ -146,7 +174,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
-              <span>Depth 3 Evaluation (Multi-Hop)</span>
+              <span>Depth 3 Evaluation (Multi-Hop Graph Agent)</span>
             </h3>
             <div id="contrastD3Badge" class="contrast-badge-wrapper"></div>
             <p id="contrastD3Memo" class="contrast-memo"></p>
@@ -154,16 +182,16 @@
         </div>
       </div>
 
-      <!-- Verdict & Memo Card -->
+      <!-- Verdict & Memorandum Card -->
       <div class="card" id="verdictCard">
         <div class="verdict-header">
           <div>
             <h2>Compliance Findings &amp; Memorandum</h2>
-            <p class="card-desc" style="margin-bottom: 0;">Deterministic rule evaluation backed by anti-hallucination verification.</p>
+            <p class="card-desc" style="margin-bottom: 0;">Deterministic rule evaluation backed by anti-hallucination graph verification.</p>
           </div>
           <div id="verdictBadge" class="badge badge-insufficient_evidence" aria-live="polite">READY TO RUN</div>
         </div>
-        <div class="memo-box" id="memoText" aria-live="polite">Select a curated dossier on the left or enter an entity name to initiate graph analysis.</div>
+        <div class="memo-box" id="memoText" aria-live="polite">Select a curated benchmark dossier or enter an entity name to initiate graph analysis.</div>
         <div class="memo-meta">
           <span id="memoSource">Source: DETERMINISTIC RULES ENGINE</span>
           <span id="investigationTime">Elapsed: —</span>
@@ -173,9 +201,15 @@
       <!-- Subgraph Cytoscape View -->
       <div class="card">
         <div class="graph-card-header">
-          <div>
+          <div class="card-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
             <h2>Network Topology View</h2>
-            <p class="card-desc" style="margin-bottom: 0;">Interactive k-hop subnetwork rendered from FalkorDB traversal paths.</p>
           </div>
           <div class="graph-toolbar" role="toolbar" aria-label="Graph navigation controls">
             <button type="button" class="graph-tool-btn" id="btnZoomIn" aria-label="Zoom in" title="Zoom in">+</button>
@@ -184,13 +218,14 @@
             <button type="button" class="graph-tool-btn" id="btnResetGraph" aria-label="Reset graph layout" title="Reset layout">Reset</button>
           </div>
         </div>
+        <p class="card-desc" style="margin-top: -0.5rem; margin-bottom: 0.85rem;">Interactive k-hop subnetwork rendered from FalkorDB traversal paths.</p>
 
         <div class="graph-legend" aria-label="Graph legend">
           <div class="legend-item"><span class="legend-marker entity" aria-hidden="true"></span><span>Entity</span></div>
           <div class="legend-item"><span class="legend-marker officer" aria-hidden="true"></span><span>Officer / Director</span></div>
-          <div class="legend-item"><span class="legend-marker intermediary" aria-hidden="true"></span><span>Intermediary</span></div>
+          <div class="legend-item"><span class="legend-marker intermediary" aria-hidden="true"></span><span>Intermediary Hub</span></div>
           <div class="legend-item"><span class="legend-marker address" aria-hidden="true"></span><span>Registered Address</span></div>
-          <div class="legend-item"><span class="legend-marker watchlist" aria-hidden="true"></span><span style="color: #fca5a5; font-weight: 600;">Watchlist Exposure Path</span></div>
+          <div class="legend-item"><span class="legend-marker watchlist" aria-hidden="true"></span><span style="color: #fda4af; font-weight: 700;">Watchlist Exposure Path</span></div>
         </div>
 
         <div id="cy" role="region" aria-label="Interactive graph canvas showing entity relationships"></div>
@@ -204,7 +239,17 @@
       <!-- Evidence Ledger Table -->
       <div class="card" id="ledgerCard">
         <div class="card-header">
-          <h2>Evidence Ledger (Deterministic Findings)</h2>
+          <div class="card-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h2>Evidence Ledger (Deterministic Findings)</h2>
+          </div>
+          <span class="coord-tag">AUDIT // LEDGER</span>
         </div>
         <p class="card-desc">Calibrated indicators derived exclusively from graph traversal paths and centrality metrics.</p>
         <div class="table-container">
@@ -230,7 +275,14 @@
       <!-- Streaming Tool Execution Trace -->
       <div class="card">
         <div class="card-header">
-          <h2>Agent Execution Trace</h2>
+          <div class="card-title-group">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <h2>Agent Execution Trace Console</h2>
+          </div>
+          <span class="coord-tag">MCP // STREAM</span>
         </div>
         <p class="card-desc">Real-time log of Model Context Protocol (MCP) tool calls and FalkorDB query execution.</p>
         <div class="trace-list" id="traceList" role="log" aria-live="polite">
@@ -252,6 +304,6 @@
   </footer>
 
   <script src="config.js"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=forensic_v5"></script>
 </body>
 </html>

@@ -46,6 +46,8 @@ services:
     depends_on:
       falkordb:
         condition: service_healthy
+    volumes:
+      - ./web:/app/web
     mem_limit: 512m
     cpus: 0.5
     restart: unless-stopped
