@@ -5,7 +5,7 @@ Fails if:
 1. Forbidden packages imported (pandas, langchain, langgraph, graphiti, graphrag-sdk).
 2. Raw Cypher keywords appear in agent/ or prompts.py.
 3. Secrets (nvapi-...) or .env files are tracked by git.
-4. Non-read-only queries (rw / query) occur outside allowed write paths.
+4. data/raw/ is not in .gitignore (must never commit raw ICIJ data).
 """
 from __future__ import annotations
 
@@ -54,7 +54,6 @@ def check_cypher_in_agent() -> list[str]:
             if re.search(pat, content, re.IGNORECASE):
                 violations.append(f"Cypher pattern '{pat}' found in agent file: {p.relative_to(REPO_ROOT)}")
     return violations
-    return violations
 
 
 def check_git_tracked_secrets() -> list[str]:
@@ -79,6 +78,31 @@ def check_git_tracked_secrets() -> list[str]:
     return violations
 
 
+def check_raw_data_not_tracked() -> list[str]:
+    """Invariant: data/raw/ must be in .gitignore and NEVER tracked by git.
+    Raw ICIJ Offshore Leaks CSVs are gitignored to prevent committing personal data.
+    """
+    violations = []
+    gitignore_path = REPO_ROOT / ".gitignore"
+    # Check data/raw/ is in .gitignore
+    if gitignore_path.exists():
+        gitignore_content = gitignore_path.read_text(encoding="utf-8")
+        if "data/raw/" not in gitignore_content and "data/raw" not in gitignore_content:
+            violations.append("data/raw/ is NOT in .gitignore — raw ICIJ data could be committed accidentally")
+    else:
+        violations.append(".gitignore file missing — data/raw/ protection unverified")
+
+    # Check that no files in data/raw/ are git-tracked
+    try:
+        tracked = subprocess.check_output(["git", "ls-files", "data/raw/"], cwd=str(REPO_ROOT), text=True).strip()
+        if tracked:
+            violations.append(f"Raw data files are tracked by git: {tracked[:200]}")
+    except Exception as exc:
+        violations.append(f"Git ls-files data/raw/ check failed: {exc}")
+
+    return violations
+
+
 def main() -> int:
     all_violations = []
 
@@ -93,6 +117,10 @@ def main() -> int:
     print("Checking Invariant 3: Git tracked secrets and .env...")
     secret_errs = check_git_tracked_secrets()
     all_violations.extend(secret_errs)
+
+    print("Checking Invariant 4: data/raw/ not tracked by git (ICIJ data protection)...")
+    raw_errs = check_raw_data_not_tracked()
+    all_violations.extend(raw_errs)
 
     if all_violations:
         print("\n[FAIL] INVARIANT CHECK FAILED:")

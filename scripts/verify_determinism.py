@@ -1,6 +1,7 @@
 """Verify determinism: each demo entity 3 times via deterministic path gives identical verdict and findings."""
 import json
 from pathlib import Path
+
 from agent.fallback import run_deterministic_investigation
 
 demo_path = Path("data/demo.json")
@@ -22,7 +23,7 @@ for ent in entities:
                 "verdict": res.get("verdict"),
                 "findings": [f["rule_id"] for f in res.get("evaluation", {}).get("findings", [])]
             })
-        
+
         # Check equality
         v0 = runs[0]["verdict"]
         f0 = runs[0]["findings"]

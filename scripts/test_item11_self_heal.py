@@ -1,12 +1,14 @@
 """Test Item 11: Self-healing on startup.
 Deletes the graph, restarts the app, verifies /health goes seeding -> ready, and records elapsed seconds.
 """
-import time
 import subprocess
+import time
+
 import httpx
+
+from core.config import GRAPH_NAME
 from core.db import drop_graph, ping
 from data.load import get_graph_counts
-from core.config import GRAPH_NAME
 
 API = "http://localhost:8000"
 

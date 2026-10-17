@@ -1,6 +1,8 @@
 """Verify cross-surface consistency: CLI vs API for demo entities at depth 1 and 3."""
 import json
+
 import httpx
+
 from agent.loop import run_investigation
 
 API_BASE = "http://localhost:8000"
@@ -20,7 +22,7 @@ for ent in entities:
         cli_res = run_investigation(name, watchlist=watchlist, depth=depth, force_fallback=True)
         cli_verdict = cli_res.get("verdict")
         cli_findings = sorted([f["rule_id"] for f in cli_res.get("evaluation", {}).get("findings", [])])
-        
+
         # 2. API run
         resp = httpx.post(f"{API_BASE}/investigate", json={
             "entity": name,
@@ -33,7 +35,7 @@ for ent in entities:
             all_consistent = False
             continue
         run_id = resp.json()["run_id"]
-        
+
         # Read API stream to get result
         api_verdict = None
         api_findings = None
@@ -50,7 +52,7 @@ for ent in entities:
                         api_findings = sorted([f["rule_id"] for f in data.get("evaluation", {}).get("findings", [])])
                     elif current_event in ("done", "error"):
                         break
-        
+
         match = (cli_verdict == api_verdict) and (cli_findings == api_findings)
         status = "PASS" if match else "FAIL"
         if not match:

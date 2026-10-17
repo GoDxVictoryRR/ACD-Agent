@@ -1,5 +1,6 @@
 """Pollution test: verify Case nodes and ABOUT/CITED edges do not pollute traversals."""
 import json
+
 from agent.fallback import run_deterministic_investigation
 
 with open("data/demo.json", encoding="utf-8") as f:

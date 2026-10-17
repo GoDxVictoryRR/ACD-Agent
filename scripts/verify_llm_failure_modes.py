@@ -7,6 +7,7 @@ All end with valid verdict and template memo.
 """
 import os
 import unittest.mock as mock
+
 from agent.loop import run_investigation
 
 ENTITY = "Blue Star Maritime Holdings Ltd"
@@ -21,8 +22,8 @@ with mock.patch("agent.llm.NVIDIA_API_KEY", "dummy-invalid-key"):
         print(f"[PASS] Invalid key handled: verdict={res['verdict']}, memo_source={res['memo_source']}")
 
 print("\n=== 2. Testing Simulated 429 Rate Limit ===")
-from openai import RateLimitError
 import httpx
+from openai import RateLimitError
 
 fake_response = httpx.Response(429, request=httpx.Request("POST", "http://test"))
 err_429 = RateLimitError("Rate limit exceeded", response=fake_response, body={"message": "Too many requests"})

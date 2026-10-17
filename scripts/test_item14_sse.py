@@ -1,5 +1,6 @@
 """Test Item 14: SSE event order, error event on failure, and client disconnect handling."""
 import time
+
 import httpx
 
 API = "http://localhost:8000"

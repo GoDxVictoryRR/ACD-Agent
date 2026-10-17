@@ -3,9 +3,11 @@ Runs 10 investigations under 512MB RAM cap, checks for OOM, records RSS and Falk
 """
 import subprocess
 import time
+
 import httpx
-from core.db import ro, rw
+
 from core.config import GRAPH_NAME
+from core.db import ro, rw
 
 API = "http://localhost:8000"
 
@@ -71,6 +73,7 @@ print(f"Total Case nodes in graph: {total_cases}")
 
 # Check Redis memory
 import redis
+
 r_client = redis.Redis(host="localhost", port=6379)
 info_mem = r_client.info("memory")
 used_memory_human = info_mem.get("used_memory_human")

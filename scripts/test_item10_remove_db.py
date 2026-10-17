@@ -1,6 +1,7 @@
 """Test Item 10: Remove FalkorDB and verify health + error handling."""
 import subprocess
 import time
+
 import httpx
 
 API = "http://localhost:8000"
