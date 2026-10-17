@@ -20,19 +20,19 @@ function initCytoscape() {
         selector: "node",
         style: {
           "label": "data(label)",
-          "color": "#f8fafc",
+          "color": "#ffffff",
           "font-size": "10.5px",
           "font-weight": "600",
           "font-family": "Plus Jakarta Sans, sans-serif",
           "text-valign": "bottom",
           "text-margin-y": "6px",
-          "background-color": "#0284c7",
-          "border-color": "#38bdf8",
+          "background-color": "#10b981",
+          "border-color": "#34d399",
           "border-width": "2px",
           "width": "30px",
           "height": "30px",
-          "text-background-color": "rgba(7, 11, 19, 0.9)",
-          "text-background-opacity": 0.9,
+          "text-background-color": "rgba(9, 4, 18, 0.92)",
+          "text-background-opacity": 0.95,
           "text-background-padding": "3px 5px",
           "text-background-shape": "roundrectangle",
         },
@@ -40,7 +40,7 @@ function initCytoscape() {
       {
         selector: "node[type = 'Officer']",
         style: {
-          "background-color": "#d97706",
+          "background-color": "#f59e0b",
           "border-color": "#fbbf24",
           "border-width": "2px",
           "shape": "diamond",
@@ -51,7 +51,7 @@ function initCytoscape() {
       {
         selector: "node[type = 'Address']",
         style: {
-          "background-color": "#7c3aed",
+          "background-color": "#a855f7",
           "border-color": "#c084fc",
           "border-width": "2px",
           "shape": "round-rectangle",
@@ -62,8 +62,8 @@ function initCytoscape() {
       {
         selector: "node[type = 'Intermediary']",
         style: {
-          "background-color": "#ea580c",
-          "border-color": "#fb923c",
+          "background-color": "#ec4899",
+          "border-color": "#f472b6",
           "border-width": "2px",
           "shape": "hexagon",
           "width": "30px",
@@ -73,21 +73,21 @@ function initCytoscape() {
       {
         selector: "node[?isWatchlist]",
         style: {
-          "background-color": "#e11d48",
+          "background-color": "#f43f5e",
           "border-color": "#ffffff",
           "border-width": "3.5px",
           "width": "38px",
           "height": "38px",
           "color": "#ffe4e6",
-          "text-background-color": "rgba(225, 29, 72, 0.95)",
+          "text-background-color": "rgba(244, 63, 94, 0.95)",
         },
       },
       {
         selector: "edge",
         style: {
           "width": 1.8,
-          "line-color": "#334155",
-          "target-arrow-color": "#475569",
+          "line-color": "#5b21b6",
+          "target-arrow-color": "#8b5cf6",
           "target-arrow-shape": "triangle",
           "arrow-scale": 0.9,
           "curve-style": "bezier",
@@ -95,11 +95,11 @@ function initCytoscape() {
           "font-size": "8px",
           "font-family": "JetBrains Mono, monospace",
           "font-weight": "500",
-          "color": "#94a3b8",
+          "color": "#e9d5ff",
           "text-rotation": "autorotate",
           "text-margin-y": "-4px",
-          "text-background-color": "#070b13",
-          "text-background-opacity": 0.85,
+          "text-background-color": "#090412",
+          "text-background-opacity": 0.9,
           "text-background-padding": "1px 3px",
         },
       },
@@ -108,7 +108,7 @@ function initCytoscape() {
         style: {
           "line-color": "#f43f5e",
           "target-arrow-color": "#f43f5e",
-          "width": 3.2,
+          "width": 3.4,
           "color": "#fecdd3",
           "font-weight": "bold",
           "text-background-color": "#4c0519",
@@ -119,7 +119,7 @@ function initCytoscape() {
         selector: ":selected",
         style: {
           "border-width": "4px",
-          "border-color": "#38bdf8",
+          "border-color": "#ec4899",
         },
       },
     ],
@@ -222,8 +222,8 @@ async function loadDemoConfig() {
       card.addEventListener("click", () => {
         document.getElementById("entityInput").value = item.name;
         // Visual select highlight
-        document.querySelectorAll(".demo-dossier-card").forEach((c) => c.style.borderColor = "var(--border-subtle)");
-        card.style.borderColor = "var(--border-focus)";
+        document.querySelectorAll(".demo-dossier-card").forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
       });
 
       card.addEventListener("keydown", (e) => {
