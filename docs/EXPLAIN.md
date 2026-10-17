@@ -11,7 +11,7 @@ Ownership Lens investigates offshore corporate networks to detect hidden control
 The system is deliberately split into four strict layers:
 1. **Primary Database (FalkorDB)**: Holds the property graph of Entities, Officers, Intermediaries, and Addresses. All multi-hop queries and graph algorithms execute here.
 2. **Deterministic Rules Engine (`core/rules.py`)**: Computes the final verdict (`clear`, `review`, `escalate`, `insufficient_evidence`). The LLM **never** decides or alters the verdict.
-3. **Agent Loop (`agent/loop.py`)**: An NVIDIA-hosted LLM (Llama 3.3 Nemotron) that chooses which read tools to invoke and writes a concise investigation memorandum.
+3. **Agent Loop (`agent/loop.py`)**: An NVIDIA-hosted LLM (`meta/llama-3.2-11b-vision-instruct`) that chooses which read tools to invoke and writes a concise investigation memorandum.
 4. **Memo Verifier (`core/verifier.py`)**: Verifies that every named entity in the LLM's memorandum exists in the graph tool outputs. If the LLM hallucinates an unverified name, the memo is instantly discarded and replaced with a deterministic template memo.
 
 ---

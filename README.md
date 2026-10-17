@@ -25,14 +25,16 @@
 The defining feature of Ownership Lens is proving that **the graph is essential, not decorative**:
 
 ```
-Depth 1: Target Entity -> 1 Director, 1 Address              => Verdict: CLEAR / INSUFFICIENT EVIDENCE
+Depth 1: Target Entity -> 1 Director, 1 Address              => Verdict: CLEAR
                                                                (Shallow checks reveal zero exposure)
 
-Depth 3: Target Entity -> Marcus Sterling (Director)
-                       -> Apex Nominees Ltd (Co-Directorship)
-                       -> Apex Corporate Services (Intermediary)
+Depth 3: Target Entity -> Marcus Sterling (Officer)
+                       -> Sterling Bridge Holdings Ltd
+                       -> Apex Nominees Ltd
                        -> Ironclad Sanctions Entity Inc (Watchlist) => Verdict: ESCALATE
 ```
+
+![Depth Contrast: Blue Star Maritime Holdings at Depth 1 vs Depth 3](docs/screens/desktop_comparison.png)
 
 At depth 1, the entity appears completely benign. At depth 3, multi-hop weighted traversal across nominee directors and intermediaries uncovers direct exposure to an entity on the sanctions watchlist.
 
@@ -45,7 +47,7 @@ graph TD
     User([User / Browser]) <--> UI[Web UI: Cytoscape.js + SSE Trace]
     UI <--> API[FastAPI Backend: api/main.py]
     API <--> Loop[Agent Loop: agent/loop.py]
-    Loop <--> LLM[NVIDIA Hosted LLM: Llama 3.3 Nemotron]
+    Loop <--> LLM[NVIDIA Hosted LLM: meta/llama-3.2-11b-vision-instruct]
     Loop <--> Tools[Typed Tools: core/tools.py / MCP Server]
     Tools <--> DB[(FalkorDB Graph: core/db.py)]
     Loop --> Rules[Rules Engine: core/rules.py]
@@ -141,7 +143,7 @@ Tested across 10 distinct entities using the deterministic evaluation path to ve
 
 | Entity Name | Depth 1 Verdict | Depth 3 Verdict | Verdict Flips? | Primary Finding |
 |---|---|---|---|---|
-| `Blue Star Maritime Holdings Ltd` | `insufficient_evidence` | `escalate` | **YES (Key Demo)** | 3-hop path to `Ironclad Sanctions Entity Inc` |
+| `Blue Star Maritime Holdings Ltd` | `clear` | `escalate` | **YES (Key Demo)** | 3-hop path to `Ironclad Sanctions Entity Inc` |
 | `Silverline Capital Management Ltd`| `review` | `review` | No | `NOMINEE_OFFICER_HUB` (John Alexander Vance, 50 entities) |
 | `Orion Global Logistics Corp` | `review` | `review` | No | `ADDRESS_HUB` (Suite 301, St. James Court, 60 entities) |
 | `Solitary Enterprises Ltd` | `clear` | `clear` | No | Zero hub exposure, solitary address |

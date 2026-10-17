@@ -1,0 +1,105 @@
+# HUMAN_TODO.md — Actions Required by the Human
+
+This document lists all tasks, decisions, and deployment steps that only the human team member can perform.
+
+---
+
+## 1. Approve PROVISIONAL Choices
+
+Please review and approve the following choices implemented and verified with test evidence:
+
+| Item | Choice | Status | Evidence / Verification File |
+|---|---|---|---|
+| **Demo Entity 1 (Primary Depth Flip)** | `Blue Star Maritime Holdings Ltd` (d=1: `clear`, d=3: `escalate`) | PROVISIONAL | [`scripts/verify_depth.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/verify_depth.py), [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
+| **Demo Entity 2 (Nominee Hub)** | `Silverline Capital Management Ltd` (d=2: `review` via `NOMINEE_OFFICER_HUB` 50+ shells) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Demo Entity 3 (Address Hub)** | `Orion Global Logistics Corp` (d=2: `review` via `ADDRESS_HUB` 60+ shells) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Demo Entity 4 (Clean Entity)** | `Solitary Enterprises Ltd` (d=1, 2, 3: `clear`, 0 findings) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Watchlist Entities** | `Ironclad Sanctions Entity Inc`, `Apex Nominees Ltd` | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Regression Verdicts (10 Cases)** | Snapshot in `tests/regression/expected.json` (10/10 PASS) | PROVISIONAL | [`scripts/verify_regression.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/verify_regression.py) |
+| **Primary Dataset** | Seed synthetic graph (10,122 nodes, 13,208 edges, 10.32MB RAM, self-seeding in 44.8s) | PROVISIONAL | [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
+
+---
+
+## 2. FalkorDB Cloud Free Instance Setup
+
+1. Sign up / log in to [FalkorDB Cloud Console](https://app.falkordb.cloud).
+2. Create a **Free Tier** database instance:
+   - Cloud provider: AWS or GCP (default free region)
+   - Note: 100MB RAM, ephemeral, no TLS
+3. Copy instance connection details:
+   - Host (e.g. `falkordb-free-xxxx.cloud.falkordb.com`)
+   - Port (e.g. `6379`)
+   - Password
+4. Load seed data from local machine into FalkorDB Cloud:
+   ```powershell
+   $env:FALKORDB_HOST="<cloud-host>"
+   $env:FALKORDB_PORT="<cloud-port>"
+   $env:FALKORDB_PASSWORD="<cloud-password>"
+   .\.venv\Scripts\python.exe data/load.py --reset
+   ```
+
+---
+
+## 3. Render Web Service Deployment
+
+1. Sign up / log in to [Render.com](https://render.com).
+2. Create a **New Web Service**:
+   - Source: Connect your public GitHub repository (`https://github.com/GoDxVictoryRR/ACD-Agent`)
+   - Environment: **Docker** (Render will auto-detect `Dockerfile` and `render.yaml`)
+   - Plan: **Free** (512MB RAM)
+   - Health check path: `/health`
+3. Configure Environment Variables in Render dashboard:
+   - `NVIDIA_API_KEY`: your `nvapi-...` key
+   - `NVIDIA_MODEL`: `meta/llama-3.2-11b-vision-instruct`
+   - `FALKORDB_HOST`: FalkorDB Cloud instance host
+   - `FALKORDB_PORT`: FalkorDB Cloud port
+   - `FALKORDB_PASSWORD`: FalkorDB Cloud password
+   - `FALKORDB_SSL`: `false`
+   - `GRAPH_NAME`: `ownership`
+   - `ALLOWED_ORIGINS`: `*`
+   - `DAILY_LLM_CAP`: `300`
+4. Click **Deploy Web Service** and copy the live URL (e.g. `https://ownership-lens.onrender.com`).
+
+---
+
+## 4. Static UI on Vercel / Netlify (Optional)
+
+*Note: The FastAPI Docker backend on Render already serves the static UI directly at `/` (bundled). If you wish to host the UI separately on Vercel/Netlify:*
+1. Connect repo on Vercel or Netlify.
+2. Root directory: `web`.
+3. In `web/config.js`, set `API_BASE`: `https://ownership-lens.onrender.com`.
+
+---
+
+## 5. Post-Deployment Verification Commands
+
+Run these commands against your live Render endpoint:
+```powershell
+# 1. Health check
+curl.exe -s https://<your-render-url>/health
+
+# 2. Entity search
+curl.exe -s "https://<your-render-url>/entities/search?q=Blue"
+
+# 3. Investigate Blue Star
+curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"Blue Star Maritime Holdings Ltd\",\"watchlist\":[\"Ironclad Sanctions Entity Inc\",\"Apex Nominees Ltd\"],\"depth\":3}'
+```
+
+---
+
+## 6. Submission Deliverables (Before Sun 18 Oct 2026, 23:59 IST)
+
+1. **Record 2-3 Minute Demo Video**:
+   - Follow [`docs/demo_runbook.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_runbook.md).
+   - Show Blue Star d=1 (CLEAR) vs d=3 (ESCALATE) depth flip live.
+   - Show Silverline nominee hub (REVIEW).
+   - Show prior cases memory recall.
+   - Upload to YouTube / Loom.
+2. **Publish Blog Post**:
+   - Copy text from [`docs/blog.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/blog.md) to Dev.to, Medium, or Hashnode.
+3. **Submit WeMakeDevs Form**:
+   - Track: **Track 1: Agents That Act on Connected Data**
+   - GitHub Repo URL: `https://github.com/GoDxVictoryRR/ACD-Agent`
+   - Live URL: `https://<your-render-url>` (or local instructions documented in README)
+   - Video URL
+   - Blog URL

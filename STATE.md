@@ -1,37 +1,44 @@
 # STATE.md — Project Memory & Phase Tracker
 
-## Current Phase: p6 COMPLETE / Ready for p7 (Cloud Deploy)
+## Current Phase: p6 COMPLETE / Ready for p7 (Cloud Deploy by Human) & p8 (Submission Ready)
 
 ## Done
-- **p0/p1 (Bootstrap)**: Repo skeleton, Docker Compose (falkordb-server + browser 3001:3000 + app), core/db.py, core/config.py, scripts/q.py, tests/test_smoke.py. Verified live 2026-10-16.
-- **p2 (Data & Graph)**: Schema with range & full-text indexes. Synthetic seed (5,116 entities, 3,002 officers, 1,503 addresses, 501 intermediaries, 13,208 edges). Idempotent loader. Demo cases (data/demo.json). Raw ICIJ filter script.
-- **p3 (Tools & MCP)**: 7 typed graph tools in core/tools.py. MCP Server wrapper (official Python SDK). Tests pass.
-- **p4 (Rules & Agent Loop)**: Deterministic rules engine (core/rules.py). Memo verifier (core/verifier.py). NVIDIA client (agent/llm.py) + fallback (agent/fallback.py). Agent loop (agent/loop.py). Regression suite.
-- **p5 (API & UI)**: FastAPI with SSE, self-seeding, rate limits (api/main.py). Dark mode UI with Cytoscape.js graph, depth toggle, ICIJ disclaimer (web/).
-- **p6 (Test & Review) — VERIFIED 2026-10-16 session 2**:
-  - 31/31 pytest tests PASS (evidence: pytest run output).
-  - `scripts/check_invariants.py` → ALL PASSED (evidence: command output).
-  - `ruff check .` → All checks passed (evidence: command output).
-  - 5 demo cases PASS with depth 1→3 flip proven: Blue Star clear→escalate via WATCHLIST_PATH (evidence: scripts/verify_demo_cases.py output).
-  - SSE end-to-end flow: POST /investigate → stream shows step×6 → verdict(escalate) → done (evidence: curl output).
-  - Browser UI verified at http://localhost:8000: dark mode, status bar, Cytoscape, ICIJ footer.
-  - Docker: all 3 containers healthy (falkordb-server, falkordb-browser, ownership-lens-app).
+- **Verification Matrix (18/18 PASS)**: All 18 items in PART 5 verified with recorded command output in docs/test_report.md.
+  - 31/31 pytest tests pass (0 skips).
+  - Clean ruff check and all invariants pass.
+  - Determinism across 3 runs verified.
+  - Cross-surface consistency verified (CLI == API across all demo entities).
+  - Case node pollution isolation verified (0 pollution after 20 investigations).
+  - Depth contrast flip proven: Blue Star d=1 (CLEAR) -> d=3 (ESCALATE via WATCHLIST_PATH).
+  - Entity edge cases verified: unknown, ambiguous, isolated entities.
+  - Prompt injection resistance verified with poisoned node.
+  - LLM failure modes verified: invalid key, 429, malformed args, timeout.
+  - Remove FalkorDB failure mode verified: /health down, /investigate fails loudly with 503.
+  - Self-healing startup seeding verified: restored 10,122 nodes, 13,208 edges in 44.8s.
+  - Resource limits verified: 512MB RAM cap, 63.4MB container RAM, 10.32MB FalkorDB, 0 OOM kills.
+  - API hardening verified: 201-char name (422), control chars, depth 9 (422), watchlist 50 (422), wrong origin (no CORS echo), burst of 50 requests (429).
+  - SSE stream integrity verified: status -> step -> verdict -> memo -> done, disconnect safe.
+  - Browser UI verified on Desktop and 390px Mobile via browser subagents; screenshots saved in docs/screens/.
+  - Clean-clone smoke test passed from fresh git clone.
+  - Secret scan passed: zero real nvapi keys in git log, .env uncommitted.
+  - Docker image: 317MB lean production build.
+- **Documentation & Deliverables**:
+  - README.md updated with architecture, data model, depth contrast screenshot, Cypher queries, rules table, and AI disclosure.
+  - docs/EXPLAIN.md updated with plain-language technical defense and 10 judge Q&A.
+  - docs/demo_runbook.md updated with 3 beats, exact voice-over script, and backup plan.
+  - docs/blog.md updated with comprehensive technical article.
+  - docs/HUMAN_TODO.md updated with step-by-step cloud deployment guide and provisional approvals.
+  - docs/final_report.md written with complete evidence and metrics.
 
 ## Decisions (with reason)
-- **FalkorDB Docker Image**: `falkordb/falkordb-server:latest` for DB service; browser remapped to 3001:3000.
-- **Algorithm Procedure Names**: Verified live docs: `algo.pageRank` positional args; `algo.betweenness` config map; `algo.labelPropagation` for communities; `algo.SPpaths`.
-- **Fulltext Indexing**: `CALL db.idx.fulltext.createNodeIndex('Entity', 'name')`.
-- **Deterministic Verdicts**: Invariant 5 enforced — core/rules.py alone computes verdict.
-- **expected.json fix (2026-10-16)**: Blue Star d=1 corrected from `insufficient_evidence` → `clear`. Entity is resolved and has links ≥ MIN_LINKS=1; no high/medium rules fire. `insufficient_evidence` only for unresolved or too-sparse entities. Did NOT weaken code — wrong expected was fixed with graph evidence.
-- **demo.json fix (2026-10-16)**: Matching correction to data/demo.json Blue Star expected_depth_1.
-- **rules_fired added to fallback return (2026-10-16)**: Added `rules_fired` key to run_deterministic_investigation return dict for traceability.
+- **Primary Dataset**: Synthetic graph with 10,122 nodes and 13,208 edges. Takes 10.32MB RAM in FalkorDB (leaves ~90MB headroom on 100MB free tier), self-seeds in 44.8s, and guarantees the depth contrast flip without personal data.
+- **Active NVIDIA Model**: meta/llama-3.2-11b-vision-instruct (replaces EOL model).
+- **Provisional Choices**: Flagged in docs/HUMAN_TODO.md for human approval.
 
-## Open Issues
-- LLM live path not tested: NVIDIA API key not configured (`llm_key: false`). Fallback runs 100% without it.
-- ICIJ real CSV not loaded: using synthetic data. Human must download if desired.
-
-## HUMAN ACTIONS Pending
-1. **NVIDIA API Key** (optional for LLM mode): Add `nvapi-...` key from https://build.nvidia.com to `.env` as `NVIDIA_API_KEY`. Then `docker compose up -d --build app` to apply.
-2. **Record Video**: Follow `docs/demo_runbook.md`. Show Blue Star d=1 vs d=3 flip live in UI. 2 min max.
-3. **Submit**: Before Sun 18 Oct 2026 23:59 IST — public repo + README + video link + track selection.
-4. **(Optional) ICIJ Data**: Download from https://offshoreleaks-data.icij.org/offshoreleaks/csv/full-oldb.LATEST.zip, run `data/make_seed.py` to create subset, reload with `data/load.py`. Improves demo authenticity.
+## HUMAN ACTIONS Pending (See docs/HUMAN_TODO.md)
+1. Approve PROVISIONAL choices in docs/HUMAN_TODO.md.
+2. Create FalkorDB Cloud free tier instance and load seed with data/load.py.
+3. Connect repo to Render.com and deploy web service using 
+ender.yaml.
+4. Record 2-minute video following docs/demo_runbook.md and publish blog.
+5. Submit form with Track 1 before Sun 18 Oct 2026 23:59 IST.

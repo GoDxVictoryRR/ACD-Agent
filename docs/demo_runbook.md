@@ -11,10 +11,10 @@
 3. Point out the Watchlist containing: `Ironclad Sanctions Entity Inc, Apex Nominees Ltd`.
 4. Click **"Compare D1 vs D3"**.
 5. **Observation**:
-   - **Depth 1 Panel**: Verdict is **INSUFFICIENT EVIDENCE** or **CLEAR**. The memo notes only 1 director and 1 registered address.
+   - **Depth 1 Panel**: Verdict is **CLEAR** (no exposure indicators found within depth 1). The memo notes only 1 director and 1 registered address.
    - **Depth 3 Panel**: Verdict flips to **ESCALATE**!
    - Look at the Cytoscape graph: A bright red exposure path appears:
-     `Blue Star Maritime Holdings Ltd -> Marcus Sterling (Director) -> Apex Nominees Ltd -> Apex Corporate Services SA -> Ironclad Sanctions Entity Inc`.
+     `Blue Star Maritime Holdings Ltd -> Marcus Sterling (Officer) -> Sterling Bridge Holdings Ltd -> Apex Nominees Ltd / Ironclad Sanctions Entity Inc`.
    - **Takeaway**: Relational databases and shallow depth 1 checks fail completely. Only multi-hop graph traversal reveals the concealed sanctions exposure.
 
 ---
