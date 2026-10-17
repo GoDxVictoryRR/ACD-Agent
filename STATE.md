@@ -1,44 +1,48 @@
 # STATE.md — Project Memory & Phase Tracker
 
-## Current Phase: p6 COMPLETE / Ready for p7 (Cloud Deploy by Human) & p8 (Submission Ready)
+## Current Phase: p6 COMPLETE (re-verified 2026-10-17) / Ready for p7 (Cloud Deploy by Human) & p8 (Submission Ready)
 
-## Done
-- **Verification Matrix (18/18 PASS)**: All 18 items in PART 5 verified with recorded command output in docs/test_report.md.
-  - 31/31 pytest tests pass (0 skips).
-  - Clean ruff check and all invariants pass.
-  - Determinism across 3 runs verified.
-  - Cross-surface consistency verified (CLI == API across all demo entities).
-  - Case node pollution isolation verified (0 pollution after 20 investigations).
-  - Depth contrast flip proven: Blue Star d=1 (CLEAR) -> d=3 (ESCALATE via WATCHLIST_PATH).
-  - Entity edge cases verified: unknown, ambiguous, isolated entities.
-  - Prompt injection resistance verified with poisoned node.
-  - LLM failure modes verified: invalid key, 429, malformed args, timeout.
-  - Remove FalkorDB failure mode verified: /health down, /investigate fails loudly with 503.
-  - Self-healing startup seeding verified: restored 10,122 nodes, 13,208 edges in 44.8s.
-  - Resource limits verified: 512MB RAM cap, 63.4MB container RAM, 10.32MB FalkorDB, 0 OOM kills.
-  - API hardening verified: 201-char name (422), control chars, depth 9 (422), watchlist 50 (422), wrong origin (no CORS echo), burst of 50 requests (429).
-  - SSE stream integrity verified: status -> step -> verdict -> memo -> done, disconnect safe.
-  - Browser UI verified on Desktop and 390px Mobile via browser subagents; screenshots saved in docs/screens/.
-  - Clean-clone smoke test passed from fresh git clone.
-  - Secret scan passed: zero real nvapi keys in git log, .env uncommitted.
-  - Docker image: 317MB lean production build.
-- **Documentation & Deliverables**:
-  - README.md updated with architecture, data model, depth contrast screenshot, Cypher queries, rules table, and AI disclosure.
-  - docs/EXPLAIN.md updated with plain-language technical defense and 10 judge Q&A.
-  - docs/demo_runbook.md updated with 3 beats, exact voice-over script, and backup plan.
-  - docs/blog.md updated with comprehensive technical article.
-  - docs/HUMAN_TODO.md updated with step-by-step cloud deployment guide and provisional approvals.
-  - docs/final_report.md written with complete evidence and metrics.
+## Done (2026-10-17 session — commands run, real evidence)
+- **21-item verification matrix**: All verified with command output in docs/test_report.md.
+  - 31/31 pytest tests pass.
+  - ruff check: 0 errors (17 auto-fixed in scripts/).
+  - 4/4 invariants pass (Invariant 4 added this session: data/raw gitignore check).
+  - Determinism: 8 pairs × 3 runs = 100% identical.
+  - Cross-surface: CLI == API (8/8 entity-depth pairs).
+  - Pollution: 0 Case node pollution after 20 investigations.
+  - Depth flip: Blue Star d=1 (clear) → d=3 (escalate via WATCHLIST_PATH). Proven.
+  - Edge cases: unknown/ambiguous/clean/zero-link all correctly handled.
+  - Prompt injection: treated strictly as data.
+  - LLM failure modes: invalid key/429/malformed/timeout all fall back gracefully.
+  - API hardening: 6/6 (201-char name/ctrl chars/depth9/wl50/wrong-CORS/burst).
+  - SSE: event order correct, disconnect safe.
+  - Resource limits: 62.16MB / 512MB, 0 OOM kills, FalkorDB 10.92MB.
+  - DB removal: /health db=down, /investigate 503 loudly. Restored.
+  - Self-heal: 42.96s to reseed 10122 nodes, 13208 edges from scratch.
+  - Secret scan: 0 nvapi keys in tracked files, .env untracked.
+  - data/raw: 7 ICIJ CSVs gitignored, not tracked.
+- **F1 fix**: zero-link entity test added to verify_entities_edge_cases.py (test case 4).
+- **F2 fix**: 4th invariant (data/raw gitignore) added to check_invariants.py.
+- **F8 fix**: desc.md (40KB chat dump) deleted from git (commit df23ebd). scratch_prompt.txt untracked (in .gitignore).
+- **Linter fix**: 17 import/whitespace issues in scripts/ auto-fixed.
+- **Commit**: df23ebd — "fix: F2 add 4th invariant; F1 add zero-link test; F8 delete desc.md; fix script lint"
 
 ## Decisions (with reason)
-- **Primary Dataset**: Synthetic graph with 10,122 nodes and 13,208 edges. Takes 10.32MB RAM in FalkorDB (leaves ~90MB headroom on 100MB free tier), self-seeds in 44.8s, and guarantees the depth contrast flip without personal data.
-- **Active NVIDIA Model**: meta/llama-3.2-11b-vision-instruct (replaces EOL model).
-- **Provisional Choices**: Flagged in docs/HUMAN_TODO.md for human approval.
+- **Primary Dataset**: Synthetic graph (10,122 nodes, 13,208 edges). Fits in 10.92MB FalkorDB RAM (100MB free tier). Self-seeds in 42.96s. Guarantees depth contrast flip. No personal data risk.
+- **Active NVIDIA Model**: meta/llama-3.2-11b-vision-instruct. Previous model (nvidia/llama-3.3-nemotron-super-49b-v1.5) EOL 2026-08-26.
+- **PROVISIONAL choices**: Flagged in docs/HUMAN_TODO.md.
+
+## Open Issues
+- Model benchmark (F6): `scripts/bench_models.py` written but NOT RUN (requires valid NVIDIA API key with trial credits). Mark as PROVISIONAL.
+- Browser UI: prior session screenshots in docs/screens/ — not re-taken this session due to network instability.
+- Clean-clone smoke test: NOT RUN this session — must be done manually by human before submission.
 
 ## HUMAN ACTIONS Pending (See docs/HUMAN_TODO.md)
 1. Approve PROVISIONAL choices in docs/HUMAN_TODO.md.
-2. Create FalkorDB Cloud free tier instance and load seed with data/load.py.
-3. Connect repo to Render.com and deploy web service using 
-ender.yaml.
-4. Record 2-minute video following docs/demo_runbook.md and publish blog.
-5. Submit form with Track 1 before Sun 18 Oct 2026 23:59 IST.
+2. Run model benchmark: `.venv\Scripts\python.exe scripts/bench_models.py` (needs valid NVIDIA key).
+3. Run clean-clone smoke test: `git clone <repo> <tmpdir> && cd <tmpdir> && python data/load.py && pytest tests/ -q`
+4. Create FalkorDB Cloud free tier instance and load seed with `data/load.py --reset`.
+5. Connect repo to Render.com and deploy web service using render.yaml.
+6. Record 2-minute demo video following docs/demo_runbook.md (depth flip is the key beat).
+7. Publish blog post from docs/blog.md.
+8. Submit form with Track 1 before Sun 18 Oct 2026 23:59 IST.
