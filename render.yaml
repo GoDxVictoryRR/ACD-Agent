@@ -8,7 +8,7 @@ services:
       - key: NVIDIA_API_KEY
         sync: false
       - key: NVIDIA_MODEL
-        value: meta/llama-3.2-11b-vision-instruct
+        value: nvidia/nemotron-3-super-120b-a12b
       - key: FALKORDB_HOST
         sync: false
       - key: FALKORDB_PORT
@@ -23,5 +23,7 @@ services:
         value: ownership
       - key: DAILY_LLM_CAP
         value: "300"
+      - key: DATA_SOURCE
+        value: icij
       - key: ALLOWED_ORIGINS
         value: "*"

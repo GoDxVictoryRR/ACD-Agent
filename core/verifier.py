@@ -6,6 +6,7 @@ Every entity, officer, address, and intermediary name mentioned in the LLM memo
 must appear in this run's tool output data; otherwise discard the LLM memo
 and fall back to the deterministic template memo built from the evidence ledger.
 """
+
 from __future__ import annotations
 
 import re
@@ -71,12 +72,54 @@ def verify_memo(
 
     # Standard legal/financial stopwords to ignore when analyzing capitalized words
     stopwords = {
-        "the", "a", "an", "this", "that", "these", "those", "entity", "officer", "address",
-        "jurisdiction", "director", "shareholder", "intermediary", "verdict", "review",
-        "clear", "escalate", "evidence", "ledger", "exposure", "indicators", "graph",
-        "depth", "panama", "papers", "paradise", "bvi", "holding", "holdings", "corp",
-        "ltd", "inc", "llc", "sa", "company", "network", "investigation", "hub", "degree",
-        "centrality", "community", "path", "cost", "risk", "level", "analysis", "case",
+        "the",
+        "a",
+        "an",
+        "this",
+        "that",
+        "these",
+        "those",
+        "entity",
+        "officer",
+        "address",
+        "jurisdiction",
+        "director",
+        "shareholder",
+        "intermediary",
+        "verdict",
+        "review",
+        "clear",
+        "escalate",
+        "evidence",
+        "ledger",
+        "exposure",
+        "indicators",
+        "graph",
+        "depth",
+        "panama",
+        "papers",
+        "paradise",
+        "bvi",
+        "holding",
+        "holdings",
+        "corp",
+        "ltd",
+        "inc",
+        "llc",
+        "sa",
+        "company",
+        "network",
+        "investigation",
+        "hub",
+        "degree",
+        "centrality",
+        "community",
+        "path",
+        "cost",
+        "risk",
+        "level",
+        "analysis",
+        "case",
     }
 
     # Extract capitalized phrases / named entities (e.g., 'Alpha Corp', 'John Vance')
@@ -113,11 +156,12 @@ def generate_template_memo(
     verdict = evaluation.verdict
     findings = evaluation.findings
 
+    verdict_label = f"NO INDICATORS FOUND WITHIN DEPTH {depth}" if verdict == "clear" else verdict.upper()
     lines = [
         "INVESTIGATION MEMORANDUM (Template Generated)",
         f"Target Entity: {entity_name}",
         f"Investigation Depth: {depth}",
-        f"Verdict: {verdict.upper()} (Exposure indicators requiring human review)",
+        f"Verdict: {verdict_label} (Exposure indicators requiring human review)",
         "",
         "Summary:",
     ]
@@ -141,5 +185,9 @@ def generate_template_memo(
             lines.append(f"{i}. [{f.severity.upper()}] {f.text}")
 
     lines.append("")
-    lines.append("Disclaimer: Presence in offshore leaks data does not imply illegality or wrongdoing.")
+    lines.append(
+        "Disclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. "
+        "Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. "
+        "All findings are exposure indicators requiring human review."
+    )
     return "\n".join(lines)

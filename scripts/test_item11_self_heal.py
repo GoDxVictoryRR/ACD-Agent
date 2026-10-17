@@ -1,6 +1,7 @@
 """Test Item 11: Self-healing on startup.
 Deletes the graph, restarts the app, verifies /health goes seeding -> ready, and records elapsed seconds.
 """
+
 import subprocess
 import time
 

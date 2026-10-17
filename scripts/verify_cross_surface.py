@@ -1,4 +1,5 @@
 """Verify cross-surface consistency: CLI vs API for demo entities at depth 1 and 3."""
+
 import json
 
 import httpx
@@ -24,12 +25,11 @@ for ent in entities:
         cli_findings = sorted([f["rule_id"] for f in cli_res.get("evaluation", {}).get("findings", [])])
 
         # 2. API run
-        resp = httpx.post(f"{API_BASE}/investigate", json={
-            "entity": name,
-            "watchlist": watchlist,
-            "depth": depth,
-            "no_llm": True
-        }, timeout=30)
+        resp = httpx.post(
+            f"{API_BASE}/investigate",
+            json={"entity": name, "watchlist": watchlist, "depth": depth, "no_llm": True},
+            timeout=30,
+        )
         if resp.status_code != 200:
             print(f"API Error {resp.status_code}: {resp.text}")
             all_consistent = False
@@ -57,7 +57,9 @@ for ent in entities:
         status = "PASS" if match else "FAIL"
         if not match:
             all_consistent = False
-        print(f"[{status}] {name} (d={depth}): CLI({cli_verdict}, {cli_findings}) == API({api_verdict}, {api_findings})")
+        print(
+            f"[{status}] {name} (d={depth}): CLI({cli_verdict}, {cli_findings}) == API({api_verdict}, {api_findings})"
+        )
 
 if all_consistent:
     print("\nOVERALL: CROSS-SURFACE CONSISTENCY VERIFIED (CLI == API)")

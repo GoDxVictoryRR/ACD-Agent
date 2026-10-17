@@ -7,6 +7,7 @@ Prompt rules:
 - Invariant 9: Neutral wording ("exposure indicators requiring human review").
 - Invariant 1: No Cypher seen or generated.
 """
+
 from __future__ import annotations
 
 SYSTEM_PROMPT = """You are an offshore ownership network investigator examining corporate control structures in a graph database.

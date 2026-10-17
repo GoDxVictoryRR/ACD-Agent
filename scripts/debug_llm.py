@@ -1,4 +1,5 @@
 """Debug LLM investigation trace to find why evidence is not collected."""
+
 import json
 import logging
 import sys
@@ -21,11 +22,18 @@ def run_investigation_debug(entity_name, watchlist=None, depth=2):
     watchlist = watchlist or []
     print(f"LLM available: {llm.is_available()}")
 
-    evidence = {"resolved_entity": None, "ownership_chain": [], "shared_links": [],
-                "paths_to_watchlist": [], "cluster_view": [], "recalled_cases": []}
+    evidence = {
+        "resolved_entity": None,
+        "ownership_chain": [],
+        "shared_links": [],
+        "paths_to_watchlist": [],
+        "cluster_view": [],
+        "recalled_cases": [],
+    }
     tools_called = set()
 
     from agent.prompts import SYSTEM_PROMPT
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": f"Investigate entity '{entity_name}' at depth {depth}. Watchlist: {watchlist}."},
@@ -86,15 +94,18 @@ def run_investigation_debug(entity_name, watchlist=None, depth=2):
             elif func_name == "ownership_chain" and result.status == "ok":
                 evidence["ownership_chain"].extend(result.data)
 
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc_id,
-                "content": f"<tool_output>\n{result.model_dump_json()}\n</tool_output>",
-            })
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tc_id,
+                    "content": f"<tool_output>\n{result.model_dump_json()}\n</tool_output>",
+                }
+            )
 
     print(f"\nFinal evidence['resolved_entity']: {evidence['resolved_entity']}")
     rules_eval = evaluate(evidence, max_depth=depth, watchlist=watchlist)
     print(f"Verdict: {rules_eval.verdict}")
+
 
 watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
 run_investigation_debug("Blue Star Maritime Holdings Ltd", watchlist=watchlist, depth=3)

@@ -5,6 +5,7 @@ Usage:
     python scripts/q.py "MATCH (n) RETURN count(n)" --graph ownership
     python scripts/q.py "CREATE (n:Test {name: 'demo'})" --write
 """
+
 from __future__ import annotations
 
 import argparse

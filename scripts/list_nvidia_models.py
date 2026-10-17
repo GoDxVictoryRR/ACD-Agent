@@ -1,4 +1,5 @@
 """Probe NVIDIA API for available models with tool calling support."""
+
 import json
 import sys
 

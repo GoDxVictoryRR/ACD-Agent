@@ -3,6 +3,7 @@ tests/test_tools.py — Unit tests for the 7 typed graph tools and MCP wrapper.
 
 Runs against a temporary fixture graph test_ownership_<uuid8> and tears it down.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -71,6 +72,7 @@ def test_ownership_chain_depth_cap(fixture_graph):
     # Enforces max depth <= MAX_DEPTH even if requested depth is 99
     # MAX_DEPTH was bumped to 4 to support 3-hop demo contrast; evidence: core/config.py
     from core.config import MAX_DEPTH
+
     res = tools.ownership_chain("E_ALPHA", max_depth=99, graph_name=fixture_graph)
     assert res.params["max_depth"] <= MAX_DEPTH
 
@@ -94,6 +96,7 @@ def test_cluster_view_and_cleanup(fixture_graph):
     assert res.status in ("ok", "empty")
     # Verify scratch graph was deleted (fixture_graph still works)
     from core.db import ro as db_ro
+
     scratch_check = db_ro(fixture_graph, "RETURN 1")
     assert scratch_check["rows"][0][0] == 1
     # Verify cluster result has viz keys if ok
@@ -159,3 +162,42 @@ def test_mcp_wrapper_tools_registered():
         "record_decision",
     }
     assert expected == tool_names
+
+
+def test_resolve_entity_ambiguous_duplicate_names(fixture_graph):
+    # Insert two entities with the exact same name in different jurisdictions
+    rw(
+        fixture_graph,
+        """
+        CREATE (:Entity {node_id: 'E_DUP1', name: 'Acme Duplicate Corp', jurisdiction: 'SAM', sourceID: 'Panama Papers', status: 'Active'})
+        CREATE (:Entity {node_id: 'E_DUP2', name: 'Acme Duplicate Corp', jurisdiction: 'SEY', sourceID: 'Panama Papers', status: 'Defaulted'})
+        """,
+    )
+    res = tools.resolve_entity("Acme Duplicate Corp", graph_name=fixture_graph)
+    assert res.status == "ambiguous"
+    assert len(res.data) == 2
+    for cand in res.data:
+        assert "node_id" in cand
+        assert "jurisdiction" in cand
+        assert "source" in cand
+        assert "status" in cand
+        assert cand["name"] == "Acme Duplicate Corp"
+    node_ids = {c["node_id"] for c in res.data}
+    assert node_ids == {"E_DUP1", "E_DUP2"}
+
+
+def test_resolve_entity_by_node_id(fixture_graph):
+    # Picking directly by node_id should resolve unambiguously
+    rw(
+        fixture_graph,
+        "CREATE (:Entity {node_id: 'E_PICK_ID', name: 'Picked Entity Corp', jurisdiction: 'BVI', sourceID: 'Panama Papers', status: 'Active'})",
+    )
+    res = tools.resolve_entity("E_PICK_ID", graph_name=fixture_graph)
+    assert res.status == "ok"
+    assert len(res.data) == 1
+    cand = res.data[0]
+    assert cand["node_id"] == "E_PICK_ID"
+    assert cand["name"] == "Picked Entity Corp"
+    assert cand["jurisdiction"] == "BVI"
+    assert cand["source"] == "Panama Papers"
+    assert cand["status"] == "Active"

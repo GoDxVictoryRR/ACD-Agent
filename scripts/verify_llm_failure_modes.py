@@ -5,6 +5,7 @@
 4. LLM timeout -> caught and falls back to deterministic
 All end with valid verdict and template memo.
 """
+
 import os
 import unittest.mock as mock
 
@@ -37,20 +38,21 @@ with mock.patch("agent.llm.LLMClient.chat_completion", side_effect=err_429):
 print("\n=== 3. Testing Malformed Tool Args from LLM ===")
 # Simulate LLM returning a tool call with unparseable JSON arguments
 fake_malformed_choice = {
-    "choices": [{
-        "message": {
-            "role": "assistant",
-            "content": None,
-            "tool_calls": [{
-                "id": "call_1",
-                "type": "function",
-                "function": {
-                    "name": "ownership_chain",
-                    "arguments": "{invalid json: true, broken...}"
-                }
-            }]
+    "choices": [
+        {
+            "message": {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_1",
+                        "type": "function",
+                        "function": {"name": "ownership_chain", "arguments": "{invalid json: true, broken...}"},
+                    }
+                ],
+            }
         }
-    }]
+    ]
 }
 
 with mock.patch("agent.llm.LLMClient.chat_completion", return_value=fake_malformed_choice):

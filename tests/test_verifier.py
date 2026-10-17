@@ -1,6 +1,7 @@
 """
 tests/test_verifier.py — Unit tests for the memo verifier and template generator.
 """
+
 from __future__ import annotations
 
 from core.rules import evaluate
@@ -50,10 +51,11 @@ def test_verify_memo_rejects_hallucinated_name():
 def test_generate_template_memo():
     evidence = {
         "resolved_entity": {"id": "E1", "name": "Blue Star Maritime Holdings Ltd"},
-        "ownership_chain": [{"nodes": [{"id": "E1", "name": "Blue Star Maritime"}]}],
-        "shared_links": [],
+        "ownership_chain": [{"nodes": [{"id": "E1", "name": "Blue Star Maritime"}, {"id": "A1", "name": "Addr"}]}],
+        "shared_links": [{"hub_type": "Address", "hub_name": "Addr", "hub_id": "A1", "linked_count": 1}],
         "paths_to_watchlist": [
             {
+                "is_watchlist": True,
                 "path_weight": 4.0,
                 "nodes": [
                     {"id": "E1", "name": "Blue Star Maritime"},

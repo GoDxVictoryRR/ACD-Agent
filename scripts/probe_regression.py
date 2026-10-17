@@ -1,4 +1,5 @@
 """Probe actual verdicts for all regression entities."""
+
 from agent.fallback import run_deterministic_investigation
 
 watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]

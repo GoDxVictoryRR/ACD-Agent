@@ -7,6 +7,7 @@ Verifies:
 3. Read-only query reads them back.
 4. Temporary graph is cleaned up.
 """
+
 from __future__ import annotations
 
 import uuid

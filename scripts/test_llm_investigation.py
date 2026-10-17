@@ -1,4 +1,5 @@
 """Test full LLM investigation pipeline (not NO_LLM)."""
+
 import sys
 
 sys.path.insert(0, r"C:\Users\hardi\Downloads\ACD-agent")
@@ -24,7 +25,7 @@ try:
     )
     print(f"Verdict: {result['verdict']!r}")
     print(f"Memo source: {result.get('memo_source')!r}")
-    rules = [f['rule_id'] for f in result.get('evaluation', {}).get('findings', [])]
+    rules = [f["rule_id"] for f in result.get("evaluation", {}).get("findings", [])]
     print(f"Rules fired: {rules}")
     print(f"Trace steps: {len(result.get('trace', []))}")
     print()
@@ -35,4 +36,5 @@ try:
 except Exception as e:
     print(f"FAIL: {e}")
     import traceback
+
     traceback.print_exc()

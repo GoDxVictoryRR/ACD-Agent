@@ -1,36 +1,35 @@
 {
   "demo_entities": [
     {
-      "id": "ENT_BLUESTAR_01",
-      "name": "Blue Star Maritime Holdings Ltd",
+      "id": "10001171",
+      "name": "MOSSACK FONSECA & CO. (SAMOA) LIMITED.",
       "expected_depth_1": "clear",
       "expected_depth_3": "escalate",
-      "description": "At depth 1, appears clean (no alarming rules fire). At depth 3, links through nominee director to Ironclad Sanctions Entity Inc — verdict flips from clear to escalate."
+      "description": "At depth 1, appears clear. At depth 3, links through nominee officer MOSSFON SUBSCRIBERS LTD. to watchlist entity TIANSHENG INDUSTRY AND TRADING CO., LTD. \u2014 verdict flips to escalate."
     },
     {
-      "id": "ENT_SILVERLINE_01",
-      "name": "Silverline Capital Management Ltd",
+      "id": "10014876",
+      "name": "Millex International Limited",
       "expected_depth_1": "review",
       "expected_depth_3": "review",
-      "description": "Exposed to high-degree nominee officer John Alexander Vance (officer in 50+ offshore shells)."
+      "description": "Connected to nominee officer hub and intermediary concentration; review verdict without escalating to watchlist."
     },
     {
-      "id": "ENT_ORION_01",
-      "name": "Orion Global Logistics Corp",
-      "expected_depth_1": "review",
-      "expected_depth_3": "review",
-      "description": "Registered at mass incorporation address hub (Suite 301, St. James Court) shared by 60+ entities."
-    },
-    {
-      "id": "ENT_SOLITARY_01",
-      "name": "Solitary Enterprises Ltd",
+      "id": "10017419",
+      "name": "Skytrack Investments Limited",
       "expected_depth_1": "clear",
       "expected_depth_3": "clear",
-      "description": "Clean entity with a single solitary address, zero hub overlap, zero sanctions connection."
+      "description": "Connected entity with no high-risk hubs or watchlist connections; remains clear at depth 1 and depth 3."
+    },
+    {
+      "id": "10000290",
+      "name": "Dewburn Enterprises Inc.",
+      "expected_depth_1": "clear",
+      "expected_depth_3": "clear",
+      "description": "Low-link entity (degree 1) with clean structure and zero watchlist exposure."
     }
   ],
   "watchlist": [
-    "Ironclad Sanctions Entity Inc",
-    "Apex Nominees Ltd"
+    "TIANSHENG INDUSTRY AND TRADING CO., LTD."
   ]
 }

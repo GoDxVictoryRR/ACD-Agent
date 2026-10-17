@@ -1,4 +1,5 @@
 """Test Item 10: Remove FalkorDB and verify health + error handling."""
+
 import subprocess
 import time
 
@@ -25,11 +26,9 @@ try:
     print("[PASS] /health shows db=down and mode=replay-only")
 
     print("\n=== 4. POST /investigate when DB is DOWN ===")
-    r_inv = httpx.post(f"{API}/investigate", json={
-        "entity": "Blue Star Maritime Holdings Ltd",
-        "watchlist": [],
-        "depth": 3
-    }, timeout=5)
+    r_inv = httpx.post(
+        f"{API}/investigate", json={"entity": "Blue Star Maritime Holdings Ltd", "watchlist": [], "depth": 3}, timeout=5
+    )
     print("Investigate response:", r_inv.status_code, r_inv.json())
     assert r_inv.status_code == 503
     print(f"[PASS] /investigate failed loudly with 503: {r_inv.json()['detail']}")

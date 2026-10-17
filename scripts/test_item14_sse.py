@@ -1,4 +1,5 @@
 """Test Item 14: SSE event order, error event on failure, and client disconnect handling."""
+
 import time
 
 import httpx
@@ -6,12 +7,16 @@ import httpx
 API = "http://localhost:8000"
 
 print("=== 1. Testing SSE Event Order ===")
-resp = httpx.post(f"{API}/investigate", json={
-    "entity": "Blue Star Maritime Holdings Ltd",
-    "watchlist": ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"],
-    "depth": 3,
-    "no_llm": True
-}, timeout=10)
+resp = httpx.post(
+    f"{API}/investigate",
+    json={
+        "entity": "Blue Star Maritime Holdings Ltd",
+        "watchlist": ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"],
+        "depth": 3,
+        "no_llm": True,
+    },
+    timeout=10,
+)
 assert resp.status_code == 200
 run_id = resp.json()["run_id"]
 
@@ -43,11 +48,9 @@ print("[PASS] Event order verified: status -> steps -> verdict -> memo -> done")
 
 print("\n=== 2. Testing Early Client Disconnect (No Resource Leak) ===")
 # Start investigation and disconnect after reading first step
-resp2 = httpx.post(f"{API}/investigate", json={
-    "entity": "Silverline Capital Management Ltd",
-    "depth": 2,
-    "no_llm": True
-}, timeout=10)
+resp2 = httpx.post(
+    f"{API}/investigate", json={"entity": "Silverline Capital Management Ltd", "depth": 2, "no_llm": True}, timeout=10
+)
 run_id2 = resp2.json()["run_id"]
 
 with httpx.stream("GET", f"{API}/stream/{run_id2}", timeout=30) as s:

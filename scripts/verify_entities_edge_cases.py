@@ -6,6 +6,7 @@ Test cases:
 3. Clean entity (has links but no suspicious findings) -> clear
 4. Zero-link entity (resolved but no ownership paths or hubs) -> insufficient_evidence
 """
+
 from __future__ import annotations
 
 from agent.fallback import run_deterministic_investigation

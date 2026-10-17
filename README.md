@@ -143,18 +143,38 @@ Tested across 10 distinct entities using the deterministic evaluation path to ve
 
 | Entity Name | Depth 1 Verdict | Depth 3 Verdict | Verdict Flips? | Primary Finding |
 |---|---|---|---|---|
-| `Blue Star Maritime Holdings Ltd` | `clear` | `escalate` | **YES (Key Demo)** | 3-hop path to `Ironclad Sanctions Entity Inc` |
-| `Silverline Capital Management Ltd`| `review` | `review` | No | `NOMINEE_OFFICER_HUB` (John Alexander Vance, 50 entities) |
-| `Orion Global Logistics Corp` | `review` | `review` | No | `ADDRESS_HUB` (Suite 301, St. James Court, 60 entities) |
-| `Solitary Enterprises Ltd` | `clear` | `clear` | No | Zero hub exposure, solitary address |
-| `Vance Shell Entity 001 Ltd` | `review` | `review` | No | Nominee officer concentration |
-| `St James Resident 001 Corp` | `review` | `review` | No | Address hub concentration |
-| `Apex Nominees Ltd` | `review` | `escalate` | **YES** | Intermediary to watchlist entity |
-| `Ironclad Sanctions Entity Inc` | `escalate` | `escalate` | No | Direct watchlist target |
-| `Unknown Entity Alpha` | `insufficient_evidence`| `insufficient_evidence` | No | Unresolved entity |
-| `Unknown Entity Beta` | `insufficient_evidence`| `insufficient_evidence` | No | Unresolved entity |
+| `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` | `clear` | `escalate` | **YES (Key Demo)** | 3-hop path to `TIANSHENG INDUSTRY AND TRADING CO., LTD.` |
+| `Millex International Limited` | `review` | `review` | No | Nominee officer hub |
+| `Skytrack Investments Limited` | `review` | `review` | No | `HUB_CENTRALITY` bridge hub |
+| `OMNIA TECHNOLOGIES S.A.` | `review` | `review` | No | Nominee officer hub |
+| `GAO SHENG LIMITED` | `review` | `review` | No | Nominee officer hub |
+| `KIRBY GARDENS LTD.` | `review` | `review` | No | Nominee officer hub |
+| `Dewburn Enterprises Inc.` | `review` | `review` | No | Nominee officer hub |
+| `TIANSHENG INDUSTRY AND TRADING CO., LTD.` | `review` | `escalate` | **YES** | Direct watchlist target & redundant paths |
+| `Unknown Entity Alpha` | `insufficient_evidence` | `insufficient_evidence` | No | Unresolved entity |
+| `Unknown Entity Beta` | `insufficient_evidence` | `insufficient_evidence` | No | Unresolved entity |
 
-*Note: This benchmark proves verdict stability and architectural consistency.*
+---
+
+## 8.1 Ablation Study: Verdict Stability & Layer Contributions
+
+Systematic ablation across 5 configurations ([docs/ablation.md](file:///c:/Users/hardi/Downloads/ACD-agent/docs/ablation.md)) isolating the contribution of each architectural layer:
+
+| Entity Name | Category | Full Rules (Depth 3) | Depth 1 Only | Depth 2 Only | No Algorithm Rules | No Path Rules | Verdict Shifts? |
+|---|---|---|---|---|---|---|---|
+| `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` | Primary Demo (Depth Flip) | **escalate** | `clear` | `review` | `escalate` | `review` | **YES** (Flippable) |
+| `TIANSHENG INDUSTRY AND TRADING CO., LTD.` | Redundant Paths Demo | **review** | `review` | `review` | `review` | `review` | No (Stable) |
+| `CRYSTAL RISE HOLDINGS LIMITED` | Hub Centrality Demo | **review` | `review` | `review` | `review` | `review` | No (Stable) |
+| `Millex International Limited` | Nominee Hub Demo | **review** | `review` | `review` | `review` | `review` | No (Stable) |
+| `Unknown Entity Alpha` | Negative Control: Unknown Entity | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
+| `Isolated Shell Corp` | Negative Control: Isolated (0 links) | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
+| `Single Link LLC` | Negative Control: Low-Link (1 link) | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
+| `Solitary Clean Trading Ltd` | Negative Control: Clean (No indicators) | **clear** | `clear` | `clear` | `clear` | `clear` | No (Stable) |
+
+*Key Findings:*
+1. **Depth Traversal Proves Graph Value**: `MOSSACK FONSECA` flips from `clear` ("No indicators found within depth 1") at Depth 1 to `escalate` at Depth 3.
+2. **Algorithm Rules (`algo.betweenness`, `algo.labelPropagation`)**: Uncover structural hubs (`CRYSTAL RISE`) and community risk that path queries alone miss.
+3. **Low-Link Invariant**: Disconnected entities strictly return `insufficient_evidence`, preventing false clearances.
 
 ---
 
@@ -199,17 +219,18 @@ python scripts/check_invariants.py
 
 ---
 
-## 11. Ethics & Limitations
+## 11. Ethics & Disclaimers
 
-1. **Inclusion is not wrongdoing**: Inclusion of an entity, officer, or address in offshore leaks records does not indicate illegal activity or wrongdoing.
-2. **Exposure indicators only**: Output is strictly presented as *"exposure indicators requiring human review"*.
-3. **Historical snapshot**: Offshore leaks records represent historical filings and do not reflect real-time registry status.
+1. **Inclusion is not evidence of wrongdoing**: Inclusion of an entity, officer, or address in offshore records is not evidence of illegal activity or wrongdoing.
+2. **Demo watchlist criteria**: Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations.
+3. **Exposure indicators only**: Output is strictly presented as *"exposure indicators requiring human review"*.
+4. **Historical snapshot**: Offshore leaks records represent historical filings and do not reflect real-time registry status.
 
 ---
 
 ## 12. Attribution & License
 
-- **Data Attribution**: Data sourced from the [ICIJ Offshore Leaks Database](https://offshoreleaks.icij.org/pages/database) licensed under the Open Database License (ODbL) and CC BY-SA.
+- **Data Attribution**: Data sourced from the [ICIJ Offshore Leaks Database](https://offshoreleaks.icij.org/) licensed under the Open Database License (ODbL) and Creative Commons Attribution-ShareAlike (CC BY-SA). This project utilizes a filtered subset (Panama Papers Samoa & Seychelles jurisdictions).
 - **Code License**: [MIT License](LICENSE).
 
 ---

@@ -10,13 +10,13 @@ Please review and approve the following choices implemented and verified with te
 
 | Item | Choice | Status | Evidence / Verification File |
 |---|---|---|---|
-| **Demo Entity 1 (Primary Depth Flip)** | `Blue Star Maritime Holdings Ltd` (d=1: `clear`, d=3: `escalate`) | PROVISIONAL | [`scripts/verify_depth.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/verify_depth.py), [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
-| **Demo Entity 2 (Nominee Hub)** | `Silverline Capital Management Ltd` (d=2: `review` via `NOMINEE_OFFICER_HUB` 50+ shells) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
-| **Demo Entity 3 (Address Hub)** | `Orion Global Logistics Corp` (d=2: `review` via `ADDRESS_HUB` 60+ shells) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
-| **Demo Entity 4 (Clean Entity)** | `Solitary Enterprises Ltd` (d=1, 2, 3: `clear`, 0 findings) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
-| **Watchlist Entities** | `Ironclad Sanctions Entity Inc`, `Apex Nominees Ltd` | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
-| **Regression Verdicts (10 Cases)** | Snapshot in `tests/regression/expected.json` (10/10 PASS) | PROVISIONAL | [`scripts/verify_regression.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/verify_regression.py) |
-| **Primary Dataset** | Seed synthetic graph (10,122 nodes, 13,208 edges, 10.32MB RAM, self-seeding in 44.8s) | PROVISIONAL | [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
+| **Demo Entity 1 (Primary Depth Flip)** | `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` (d=1: `clear`, d=3: `escalate` to `TIANSHENG INDUSTRY AND TRADING CO., LTD.`) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md), [`scripts/find_remaining_demo_cases.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/find_remaining_demo_cases.py) |
+| **Demo Watchlist Target** | `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (Entity node only, 10000001) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
+| **Demo Isolated Entity** | `Dewburn Enterprises Inc.` (degree 1, d=1..3 `clear`) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
+| **Demo Related Recall Entity** | `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (recalls Case recorded on 10001171) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
+| **Demo Negative Controls (>=4)** | `Skytrack Investments Limited`, `OMNIA TECHNOLOGIES S.A.`, `GAO SHENG LIMITED`, `KIRBY GARDENS LTD.`, `Millex International Limited`, `SINOWAY HOLDINGS LTD.` | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
+| **Synthetic Fallback Demo Case** | `Blue Star Maritime Holdings Ltd` (d=1: `clear`, d=3: `escalate`) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Primary Dataset** | ICIJ Panama Papers Samoa/Seychelles subset (51,940 nodes, 58,891 edges, 40.91MB RAM) | PROVISIONAL | [`docs/data_notes.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/data_notes.md), [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
 
 ---
 

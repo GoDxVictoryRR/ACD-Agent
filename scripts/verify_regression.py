@@ -1,4 +1,5 @@
 """Verify all regression expected.json cases."""
+
 import json
 import sys
 

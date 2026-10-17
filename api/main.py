@@ -11,6 +11,7 @@ Features:
 - In-memory rate limiting and concurrency throttling.
 - Static web UI serving.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -79,6 +80,7 @@ def check_rate_limit(client_ip: str) -> bool:
 def get_rss_mb() -> float:
     try:
         import psutil  # type: ignore
+
         proc = psutil.Process(os.getpid())
         return round(proc.memory_info().rss / (1024 * 1024), 1)
     except Exception:
@@ -201,23 +203,36 @@ def execute_run(run_id: str, req: InvestigateRequest):
             _runs_events[run_id].append({"event": "step", "data": json.dumps(step)})
 
         # Stream out findings and verdict
-        _runs_events[run_id].append({
-            "event": "verdict",
-            "data": json.dumps({
-                "verdict": res.get("verdict"),
-                "evaluation": res.get("evaluation"),
-                "resolved_id": res.get("resolved_id"),
-            }),
-        })
+        eval_data = res.get("evaluation") or {}
+        display_v = eval_data.get("display_verdict") or res.get("verdict")
+        _runs_events[run_id].append(
+            {
+                "event": "verdict",
+                "data": json.dumps(
+                    {
+                        "verdict": res.get("verdict"),
+                        "display_verdict": display_v,
+                        "evaluation": eval_data,
+                        "resolved_id": res.get("resolved_id"),
+                        "candidates": res.get("candidates", []),
+                        "status": res.get("status"),
+                    }
+                ),
+            }
+        )
 
         # Stream out memo
-        _runs_events[run_id].append({
-            "event": "memo",
-            "data": json.dumps({
-                "memo": res.get("memo"),
-                "memo_source": res.get("memo_source"),
-            }),
-        })
+        _runs_events[run_id].append(
+            {
+                "event": "memo",
+                "data": json.dumps(
+                    {
+                        "memo": res.get("memo"),
+                        "memo_source": res.get("memo_source"),
+                    }
+                ),
+            }
+        )
 
         _runs_events[run_id].append({"event": "done", "data": json.dumps(res)})
     except Exception as exc:
@@ -336,4 +351,5 @@ if WEB_DIR.exists():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)

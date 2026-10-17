@@ -7,6 +7,7 @@ Verified with official Python MCP SDK:
 - Runs over stdio by default.
 - Thin wrapper: delegates all logic to core.tools.
 """
+
 from __future__ import annotations
 
 import json
@@ -51,16 +52,38 @@ def shared_links(entity_id: str, limit: int = 10) -> str:
 
 
 @server.tool()
-def path_between(a_id: str, b_id: str, max_depth: int = 3) -> str:
+def path_between(
+    a_id: str,
+    b_id: str,
+    max_depth: int = 4,
+    is_watchlist: bool = False,
+    watchlist: list[str] | None = None,
+) -> str:
     """Find shortest weighted path between two entity nodes within max_depth."""
-    res = tools.path_between(a_id=a_id, b_id=b_id, max_depth=max_depth)
+    res = tools.path_between(
+        a_id=a_id,
+        b_id=b_id,
+        max_depth=max_depth,
+        is_watchlist=is_watchlist,
+        watchlist=watchlist,
+    )
     return res.model_dump_json()
 
 
 @server.tool()
-def cluster_view(entity_id: str, max_depth: int = 2, node_cap: int = 500) -> str:
+def cluster_view(
+    entity_id: str,
+    max_depth: int = 2,
+    node_cap: int = 500,
+    watchlist: list[str] | None = None,
+) -> str:
     """Compute PageRank, Betweenness, and Community Detection on the entity's 2-hop neighborhood."""
-    res = tools.cluster_view(entity_id=entity_id, max_depth=max_depth, node_cap=node_cap)
+    res = tools.cluster_view(
+        entity_id=entity_id,
+        max_depth=max_depth,
+        node_cap=node_cap,
+        watchlist=watchlist,
+    )
     return res.model_dump_json()
 
 

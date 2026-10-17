@@ -1,4 +1,5 @@
 """Verify depth contrast for demo cases after graph reload."""
+
 import sys
 
 sys.path.insert(0, r"C:\Users\hardi\Downloads\ACD-agent")
@@ -21,7 +22,7 @@ print("=== Demo Case Depth Verification ===")
 print()
 for name, depth, _ in cases:
     r = run_deterministic_investigation(name, watchlist=watchlist, depth=depth)
-    print(f"d={depth} | {r['verdict']:25s} | rules={r.get('rules_fired',[])} | {name}")
+    print(f"d={depth} | {r['verdict']:25s} | rules={r.get('rules_fired', [])} | {name}")
     # Print path text if available
     if r.get("evidence", {}).get("paths_to_watchlist"):
         for p in r["evidence"]["paths_to_watchlist"][:1]:

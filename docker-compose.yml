@@ -38,6 +38,8 @@ services:
       - FALKORDB_HOST=falkordb
       - FALKORDB_PORT=6379
       - GRAPH_NAME=ownership
+      - DATA_SOURCE=icij
+      - NVIDIA_MODEL=nvidia/nemotron-3-super-120b-a12b
       - ALLOWED_ORIGINS=http://localhost:8000,http://localhost:3000,http://localhost:3001
     env_file:
       - .env

@@ -1,4 +1,5 @@
 """Pollution test: verify Case nodes and ABOUT/CITED edges do not pollute traversals."""
+
 import json
 
 from agent.fallback import run_deterministic_investigation
@@ -44,13 +45,15 @@ for ent in entities:
             "total_links": res["evaluation"]["total_links"],
         }
         b = baseline[key]
-        match = (after == b)
+        match = after == b
         status = "PASS" if match else "FAIL"
         if not match:
             all_clean = False
             print(f"[{status}] {name} (d={depth}): baseline={b} vs after={after}")
         else:
-            print(f"[{status}] {name} (d={depth}): links={after['total_links']}, verdict={after['verdict']} (unpolluted)")
+            print(
+                f"[{status}] {name} (d={depth}): links={after['total_links']}, verdict={after['verdict']} (unpolluted)"
+            )
 
 if all_clean:
     print("\nOVERALL: POLLUTION TEST PASS (Zero Case node pollution)")

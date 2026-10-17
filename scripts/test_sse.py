@@ -1,4 +1,5 @@
 """Test the full investigate + SSE stream flow."""
+
 import json
 
 import httpx
@@ -7,12 +8,16 @@ API = "http://localhost:8000"
 
 # 1. POST /investigate
 print("=== POST /investigate ===")
-resp = httpx.post(f"{API}/investigate", json={
-    "entity": "Blue Star Maritime Holdings Ltd",
-    "watchlist": ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"],
-    "depth": 3,
-    "no_llm": True,
-}, timeout=30)
+resp = httpx.post(
+    f"{API}/investigate",
+    json={
+        "entity": "Blue Star Maritime Holdings Ltd",
+        "watchlist": ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"],
+        "depth": 3,
+        "no_llm": True,
+    },
+    timeout=30,
+)
 data = resp.json()
 run_id = data["run_id"]
 print(f"run_id: {run_id}")

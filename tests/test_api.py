@@ -1,6 +1,7 @@
 """
 tests/test_api.py — Unit tests for the FastAPI backend using TestClient.
 """
+
 from __future__ import annotations
 
 from fastapi.testclient import TestClient

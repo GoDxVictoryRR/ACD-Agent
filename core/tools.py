@@ -8,6 +8,7 @@ Invariants:
 - Case nodes and ABOUT/CITED edges are ALWAYS excluded from read traversals (Invariant: Case nodes
   must never pollute ownership path counts, link counts, or rule inputs).
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -41,17 +42,12 @@ logger = logging.getLogger(__name__)
 _META_RELS = frozenset({"ABOUT", "CITED"})
 
 # Ownership relationship types used for traversal in ownership_chain
-_OWNERSHIP_REL_TYPES = "OFFICER_OF|SHAREHOLDER_OF|INTERMEDIARY_OF|REGISTERED_ADDRESS|CONNECTED_TO|BENEFICIARY_OF|DIRECTOR_OF|UNDERLYING|SAME_NAME_AS|SAME_ADDRESS_AS|RELATED_ENTITY|ADDRESS_OF"
+_OWNERSHIP_REL_TYPES = "OFFICER_OF|SHAREHOLDER_OF|INTERMEDIARY_OF|REGISTERED_ADDRESS|CONNECTED_TO|BENEFICIARY_OF|DIRECTOR_OF|UNDERLYING|SAME_NAME_AS|SAME_ADDRESS_AS|RELATED_ENTITY|ADDRESS_OF|SAME_AS|SAME_COMPANY_AS|SIMILAR"
 
 
 def _node_display_name(node_map: dict) -> str:
     """Return the best display name for a node (name > address > node_id > 'unknown')."""
-    return (
-        node_map.get("name")
-        or node_map.get("address")
-        or node_map.get("node_id")
-        or "unknown"
-    )
+    return node_map.get("name") or node_map.get("address") or node_map.get("node_id") or "unknown"
 
 
 class ToolResult(BaseModel):
@@ -70,10 +66,12 @@ def resolve_entity(
     graph_name: str = GRAPH_NAME,
 ) -> ToolResult:
     """
-    Resolve an entity name to a node_id via full-text search and prefix/exact matching.
-    Exact case-insensitive match takes precedence.
-    If two entities share an exact name → status ambiguous.
-    Returns status: ok, ambiguous, unknown_entity, or error.
+    Resolve an entity name or node_id to an entity node.
+    - If name matches node_id directly -> status: ok.
+    - If exactly one case-insensitive exact name match -> status: ok.
+    - If multiple exact matches or partial matches -> status: ambiguous with candidates
+      containing (node_id, jurisdiction, source, status).
+    - If no entity matches -> status: unknown_entity.
     """
     t0 = time.perf_counter()
     clean_name = name.strip()
@@ -88,65 +86,108 @@ def resolve_entity(
             notes="Empty entity name provided",
         )
 
-    # 1. First attempt exact case-insensitive match (Entity only — not Case)
-    exact_q = """
-    MATCH (e:Entity)
-    WHERE toLower(e.name) = toLower($name)
-    RETURN e.node_id AS id, e.name AS name, labels(e)[0] AS label, e.jurisdiction AS jurisdiction
-    LIMIT 3
+    def _build_candidate(r: list[Any]) -> dict[str, Any]:
+        return {
+            "id": r[0],
+            "node_id": r[0],
+            "name": r[1],
+            "label": r[2],
+            "jurisdiction": r[3] or "",
+            "source": r[4] or "",
+            "status": r[5] or "",
+        }
+
+    # 1. Check direct node_id match
+    id_q = """
+    MATCH (e:Entity {node_id: $name})
+    RETURN e.node_id AS node_id, e.name AS name, labels(e)[0] AS label,
+           coalesce(e.jurisdiction, '') AS jurisdiction,
+           coalesce(e.sourceID, '') AS source,
+           coalesce(e.status, '') AS status
+    LIMIT 1
     """
     try:
-        res = ro(graph_name, exact_q, {"name": clean_name})
-        rows = res.get("rows", [])
-        if len(rows) == 1:
-            r = rows[0]
+        id_res = ro(graph_name, id_q, {"name": clean_name})
+        id_rows = id_res.get("rows", [])
+        if id_rows:
             elapsed = (time.perf_counter() - t0) * 1000
             return ToolResult(
                 tool="resolve_entity",
                 params={"name": name, "limit": limit},
                 status="ok",
-                data=[{"id": r[0], "name": r[1], "label": r[2], "jurisdiction": r[3]}],
+                data=[_build_candidate(id_rows[0])],
                 elapsed_ms=round(elapsed, 2),
-                notes="Exact match found",
+                notes=f"Direct node_id match found: '{clean_name}'",
+            )
+    except Exception as exc:
+        logger.debug("Direct node_id match check error: %s", exc)
+
+    # 2. Exact case-insensitive name match
+    exact_q = """
+    MATCH (e:Entity)
+    WHERE toLower(e.name) = toLower($name)
+    RETURN e.node_id AS node_id, e.name AS name, labels(e)[0] AS label,
+           coalesce(e.jurisdiction, '') AS jurisdiction,
+           coalesce(e.sourceID, '') AS source,
+           coalesce(e.status, '') AS status
+    LIMIT $limit
+    """
+    try:
+        res = ro(graph_name, exact_q, {"name": clean_name, "limit": limit})
+        rows = res.get("rows", [])
+        if len(rows) == 1:
+            elapsed = (time.perf_counter() - t0) * 1000
+            return ToolResult(
+                tool="resolve_entity",
+                params={"name": name, "limit": limit},
+                status="ok",
+                data=[_build_candidate(rows[0])],
+                elapsed_ms=round(elapsed, 2),
+                notes="Single exact case-insensitive match found",
             )
         elif len(rows) > 1:
             elapsed = (time.perf_counter() - t0) * 1000
-            candidates = [{"id": r[0], "name": r[1], "label": r[2], "jurisdiction": r[3]} for r in rows]
+            candidates = [_build_candidate(r) for r in rows]
             return ToolResult(
                 tool="resolve_entity",
                 params={"name": name, "limit": limit},
                 status="ambiguous",
                 data=candidates,
                 elapsed_ms=round(elapsed, 2),
-                notes=f"Multiple exact matches found for '{clean_name}' — please disambiguate",
+                notes=f"Multiple exact matches found for '{clean_name}' ({len(candidates)} candidates) — disambiguate by node_id",
             )
     except Exception as exc:
         logger.debug("Exact match failed: %s", exc)
 
-    # 2. Attempt full-text search if available, fallback to contains
+    # 3. Full-text search fallback, then contains fallback
     ft_q = """
     CALL db.idx.fulltext.queryNodes('Entity', $query)
     YIELD node
-    RETURN node.node_id AS id, node.name AS name, labels(node)[0] AS label, node.jurisdiction AS jurisdiction
+    RETURN node.node_id AS node_id, node.name AS name, labels(node)[0] AS label,
+           coalesce(node.jurisdiction, '') AS jurisdiction,
+           coalesce(node.sourceID, '') AS source,
+           coalesce(node.status, '') AS status
     LIMIT $limit
     """
     candidates = []
     try:
         res = ro(graph_name, ft_q, {"query": clean_name, "limit": limit})
         for r in res.get("rows", []):
-            candidates.append({"id": r[0], "name": r[1], "label": r[2], "jurisdiction": r[3]})
+            candidates.append(_build_candidate(r))
     except Exception:
-        # Fallback to contains match
         contains_q = """
         MATCH (e:Entity)
         WHERE toLower(e.name) CONTAINS toLower($name)
-        RETURN e.node_id AS id, e.name AS name, labels(e)[0] AS label, e.jurisdiction AS jurisdiction
+        RETURN e.node_id AS node_id, e.name AS name, labels(e)[0] AS label,
+               coalesce(e.jurisdiction, '') AS jurisdiction,
+               coalesce(e.sourceID, '') AS source,
+               coalesce(e.status, '') AS status
         LIMIT $limit
         """
         try:
             res = ro(graph_name, contains_q, {"name": clean_name, "limit": limit})
             for r in res.get("rows", []):
-                candidates.append({"id": r[0], "name": r[1], "label": r[2], "jurisdiction": r[3]})
+                candidates.append(_build_candidate(r))
         except Exception as exc:
             elapsed = (time.perf_counter() - t0) * 1000
             return ToolResult(
@@ -167,14 +208,14 @@ def resolve_entity(
             elapsed_ms=round(elapsed, 2),
             notes=f"No entity matching '{clean_name}' found in graph",
         )
-    elif len(candidates) == 1:
+    elif len(candidates) == 1 and candidates[0]["name"].strip().lower() == clean_name.lower():
         return ToolResult(
             tool="resolve_entity",
             params={"name": name, "limit": limit},
             status="ok",
             data=candidates,
             elapsed_ms=round(elapsed, 2),
-            notes="Single candidate matched",
+            notes="Single exact candidate matched",
         )
     else:
         return ToolResult(
@@ -183,7 +224,7 @@ def resolve_entity(
             status="ambiguous",
             data=candidates,
             elapsed_ms=round(elapsed, 2),
-            notes=f"{len(candidates)} candidate entities found — please disambiguate",
+            notes=f"{len(candidates)} candidate entities found for '{clean_name}' — disambiguate by node_id",
         )
 
 
@@ -230,17 +271,19 @@ def ownership_chain(
             # Build human-readable path string: A -[REL_TYPE]-> B (Label) -> ...
             path_text_parts = []
             if nodes:
-                path_text_parts.append(f"{nodes[0].get('name','?')} ({nodes[0].get('label','?')})")
+                path_text_parts.append(f"{nodes[0].get('name', '?')} ({nodes[0].get('label', '?')})")
                 for i, rel in enumerate(rels):
                     next_node = nodes[i + 1] if i + 1 < len(nodes) else {}
                     path_text_parts.append(
-                        f"-[{rel.get('type','?')}]-> {next_node.get('name','?')} ({next_node.get('label','?')})"
+                        f"-[{rel.get('type', '?')}]-> {next_node.get('name', '?')} ({next_node.get('label', '?')})"
                     )
-            paths.append({
-                "nodes": nodes,
-                "relationships": rels,
-                "path_text": " ".join(path_text_parts),
-            })
+            paths.append(
+                {
+                    "nodes": nodes,
+                    "relationships": rels,
+                    "path_text": " ".join(path_text_parts),
+                }
+            )
 
         elapsed = (time.perf_counter() - t0) * 1000
         status = "ok" if paths else "empty"
@@ -293,12 +336,14 @@ def shared_links(
         rows = res.get("rows", [])
         hubs = []
         for r in rows:
-            hubs.append({
-                "hub_type": r[0],
-                "hub_name": r[1],
-                "hub_id": r[2],
-                "linked_count": r[3],
-            })
+            hubs.append(
+                {
+                    "hub_type": r[0],
+                    "hub_name": r[1],
+                    "hub_id": r[2],
+                    "linked_count": r[3],
+                }
+            )
 
         elapsed = (time.perf_counter() - t0) * 1000
         status = "ok" if hubs else "empty"
@@ -322,20 +367,67 @@ def shared_links(
 
 
 # ── Tool 4: path_between ────────────────────────────────────────────────────
+def _find_disjoint_bfs(
+    a_id: str,
+    b_id: str,
+    excluded_ids: set[str],
+    max_depth: int = 4,
+    graph_name: str = GRAPH_NAME,
+) -> dict[str, Any] | None:
+    """Find an alternative path between a_id and b_id excluding intermediate nodes."""
+    from collections import deque
+
+    queue = deque([(a_id, [a_id], 0.0)])
+    visited = {a_id} | excluded_ids
+
+    while queue:
+        curr, path_nodes, cost = queue.popleft()
+        if len(path_nodes) - 1 >= max_depth:
+            continue
+        q = f"""
+        MATCH (n {{node_id: $curr}})-[r:{_OWNERSHIP_REL_TYPES}]-(nbr)
+        WHERE NOT nbr:Case
+        RETURN nbr.node_id, coalesce(r.weight, 2.0), type(r), coalesce(nbr.name, nbr.address, nbr.node_id), labels(nbr)[0]
+        """
+        try:
+            res = ro(graph_name, q, {"curr": curr})
+            for nid, weight, rtype, name, lbl in res.get("rows", []):
+                if nid == b_id:
+                    return {
+                        "node_ids": path_nodes + [nid],
+                        "cost": cost + float(weight),
+                        "hops": len(path_nodes),
+                    }
+                if nid not in visited:
+                    visited.add(nid)
+                    queue.append((nid, path_nodes + [nid], cost + float(weight)))
+        except Exception:
+            break
+    return None
+
+
+# ── Tool 4: path_between ────────────────────────────────────────────────────
 def path_between(
     a_id: str,
     b_id: str,
     max_depth: int = 4,
     graph_name: str = GRAPH_NAME,
+    is_watchlist: bool = False,
+    watchlist: list[str] | None = None,
 ) -> ToolResult:
     """
     Find shortest weighted path between two nodes within max_depth.
     Uses algo.SPpaths (or shortestPath Cypher fallback).
+    Tags results with target_id and is_watchlist flag.
+    Checks for node-disjoint paths (PATH_REDUNDANCY / PATH_DEPENDENCY).
     Case nodes and meta-edges strictly excluded.
-    Returns full hop detail: name, label, relationship type for each node.
     """
     t0 = time.perf_counter()
     depth = max(1, min(max_depth, MAX_DEPTH))
+
+    nodes = None
+    rels = None
+    path_weight = None
 
     # First attempt algo.SPpaths with relDirection: 'both' and ownership rel types only
     sp_q = f"""
@@ -359,78 +451,94 @@ def path_between(
            [r in relationships(path) | {{type: type(r), weight: coalesce(r.weight, 2.0)}}] AS path_rels,
            pathWeight
     """
+    sp_succeeded = False
     try:
         res = ro(graph_name, sp_q, {"a_id": str(a_id), "b_id": str(b_id)})
         rows = res.get("rows", [])
+        sp_succeeded = True
         if rows:
             nodes, rels = rows[0][0], rows[0][1]
-            elapsed = (time.perf_counter() - t0) * 1000
-            return ToolResult(
-                tool="path_between",
-                params={"a_id": a_id, "b_id": b_id, "max_depth": depth},
-                status="ok",
-                data=[{
-                    "nodes": nodes,
-                    "relationships": rels,
-                    "path_weight": float(rows[0][2]),
-                    "path_text": _build_path_text(nodes, rels),
-                }],
-                elapsed_ms=round(elapsed, 2),
-                notes="SPpaths shortest path found",
-            )
+            path_weight = float(rows[0][2])
     except Exception as sp_exc:
-        logger.debug("SPpaths raised: %s; falling back to Cypher shortestPath", sp_exc)
+        logger.debug("SPpaths raised: %s; falling back to BFS traversal", sp_exc)
 
-    # Fallback to OpenCypher shortestPath — only ownership rel types, no Case
-    fallback_q = f"""
-    MATCH (a {{node_id: $a_id}}), (b {{node_id: $b_id}})
-    WHERE NOT a:Case AND NOT b:Case
-    MATCH path = shortestPath((a)-[:{_OWNERSHIP_REL_TYPES}*1..{depth}]-(b))
-    WHERE none(n IN nodes(path) WHERE n:Case)
-    RETURN [n in nodes(path) | {{
-               id: coalesce(n.node_id, ''),
-               name: coalesce(n.name, n.address, n.node_id, 'unknown'),
-               label: labels(n)[0]
-           }}] AS path_nodes,
-           [r in relationships(path) | {{type: type(r), weight: coalesce(r.weight, 2.0)}}] AS path_rels,
-           reduce(cost = 0.0, r in relationships(path) | cost + coalesce(r.weight, 2.0)) AS path_weight
-    """
-    try:
-        res = ro(graph_name, fallback_q, {"a_id": str(a_id), "b_id": str(b_id)})
-        rows = res.get("rows", [])
-        elapsed = (time.perf_counter() - t0) * 1000
-        if rows:
-            nodes, rels = rows[0][0], rows[0][1]
-            return ToolResult(
-                tool="path_between",
-                params={"a_id": a_id, "b_id": b_id, "max_depth": depth},
-                status="ok",
-                data=[{
-                    "nodes": nodes,
-                    "relationships": rels,
-                    "path_weight": float(rows[0][2]),
-                    "path_text": _build_path_text(nodes, rels),
-                }],
-                elapsed_ms=round(elapsed, 2),
-                notes="Cypher shortestPath found",
+    # Fallback to BFS traversal only if SPpaths raised an error
+    if not sp_succeeded and nodes is None:
+        bfs_res = _find_disjoint_bfs(str(a_id), str(b_id), set(), max_depth=depth, graph_name=graph_name)
+        if bfs_res:
+            path_weight = bfs_res["cost"]
+            # Fetch node details for found BFS path
+            nodes = [{"id": nid, "name": nid, "label": "Node"} for nid in bfs_res["node_ids"]]
+            rels = [{"type": "CONNECTED_TO", "weight": 2.0} for _ in range(len(nodes) - 1)]
+
+    elapsed = (time.perf_counter() - t0) * 1000
+    if nodes:
+        target_id = str(b_id)
+        target_name = nodes[-1].get("name", "") if nodes else ""
+
+        # Determine is_watchlist flag
+        is_wl = bool(is_watchlist)
+        if not is_wl and watchlist:
+            target_names_ids = {target_id.lower(), target_name.lower()}
+            wl_clean = {w.strip().lower() for w in watchlist if w.strip()}
+            if any(w in target_names_ids or target_name.lower() in w for w in wl_clean):
+                is_wl = True
+
+        # Node-disjoint path evaluation (Requirement 5)
+        intermediate_nodes = nodes[1:-1]
+        intermediate_ids = {n.get("id") for n in intermediate_nodes if n.get("id")}
+
+        disjoint_count = 1
+        independent_paths = False
+        exposure_depends_on = None
+
+        if intermediate_ids:
+            disjoint_path = _find_disjoint_bfs(
+                str(a_id), str(b_id), intermediate_ids, max_depth=depth, graph_name=graph_name
             )
+            if disjoint_path is not None:
+                disjoint_count = 2
+                independent_paths = True
+            else:
+                disjoint_count = 1
+                independent_paths = False
+                if len(intermediate_nodes) == 1:
+                    exposure_depends_on = intermediate_nodes[0].get("name") or intermediate_nodes[0].get("id")
+                else:
+                    exposure_depends_on = ", ".join([n.get("name") or n.get("id") for n in intermediate_nodes])
         else:
-            return ToolResult(
-                tool="path_between",
-                params={"a_id": a_id, "b_id": b_id, "max_depth": depth},
-                status="empty",
-                data=[],
-                elapsed_ms=round(elapsed, 2),
-                notes=f"No path between {a_id} and {b_id} within depth {depth}",
-            )
-    except Exception as exc:
-        elapsed = (time.perf_counter() - t0) * 1000
+            disjoint_count = 1
+            independent_paths = False
+
         return ToolResult(
             tool="path_between",
             params={"a_id": a_id, "b_id": b_id, "max_depth": depth},
-            status="error",
+            status="ok",
+            data=[
+                {
+                    "nodes": nodes,
+                    "relationships": rels,
+                    "path_weight": path_weight,
+                    "path_text": _build_path_text(nodes, rels),
+                    "target_id": target_id,
+                    "target_name": target_name,
+                    "is_watchlist": is_wl,
+                    "disjoint_paths_count": disjoint_count,
+                    "independent_paths": independent_paths,
+                    "exposure_depends_on": exposure_depends_on,
+                }
+            ],
             elapsed_ms=round(elapsed, 2),
-            notes=f"Query error: {exc}",
+            notes=f"Path found (is_watchlist={is_wl}, disjoint_count={disjoint_count})",
+        )
+    else:
+        return ToolResult(
+            tool="path_between",
+            params={"a_id": a_id, "b_id": b_id, "max_depth": depth},
+            status="empty",
+            data=[],
+            elapsed_ms=round(elapsed, 2),
+            notes=f"No path between {a_id} and {b_id} within depth {depth}",
         )
 
 
@@ -441,9 +549,7 @@ def _build_path_text(nodes: list[dict], rels: list[dict]) -> str:
     parts = [f"{nodes[0].get('name', '?')} ({nodes[0].get('label', '?')})"]
     for i, rel in enumerate(rels):
         next_node = nodes[i + 1] if i + 1 < len(nodes) else {}
-        parts.append(
-            f"-[{rel.get('type', '?')}]-> {next_node.get('name', '?')} ({next_node.get('label', '?')})"
-        )
+        parts.append(f"-[{rel.get('type', '?')}]-> {next_node.get('name', '?')} ({next_node.get('label', '?')})")
     return " ".join(parts)
 
 
@@ -453,10 +559,12 @@ def cluster_view(
     max_depth: int = 2,
     node_cap: int = CLUSTER_NODE_CAP,
     graph_name: str = GRAPH_NAME,
+    watchlist: list[str] | None = None,
 ) -> ToolResult:
     """
     Build a scratch graph case_<uuid8> containing the entity's 2-hop neighborhood.
-    Computes PageRank, Betweenness, and WCC community detection.
+    Computes PageRank, Betweenness, WCC, and Label Propagation community detection.
+    Evaluates COMMUNITY_WATCHLIST and HUB_CENTRALITY.
     Returns metrics and always deletes scratch graph in finally block.
     Case nodes and meta-edges excluded from neighborhood fetch.
     """
@@ -504,14 +612,20 @@ def cluster_view(
             for n in r[0]:
                 nodes_map[n["id"]] = n
             for rel in r[1]:
+                # Insert bidirectional edges so scratch graph algorithms compute true network centrality & community propagation
                 edges_set.add((rel["start_id"], rel["end_id"], rel["type"], float(rel["weight"])))
+                edges_set.add((rel["end_id"], rel["start_id"], rel["type"], float(rel["weight"])))
 
         # Build scratch graph
         node_batch = list(nodes_map.values())
-        rw(scratch_name, """
+        rw(
+            scratch_name,
+            """
         UNWIND $batch AS n
         CREATE (:ScratchNode {node_id: n.id, name: n.name, label: n.label})
-        """, {"batch": node_batch})
+        """,
+            {"batch": node_batch},
+        )
 
         edge_batch = [
             {"src": s, "dst": d, "type": t, "weight": w}
@@ -520,53 +634,134 @@ def cluster_view(
         ]
 
         if edge_batch:
-            rw(scratch_name, """
+            rw(
+                scratch_name,
+                """
             UNWIND $batch AS e
             MATCH (src:ScratchNode {node_id: e.src})
             MATCH (dst:ScratchNode {node_id: e.dst})
             CREATE (src)-[:CONNECTED_TO {weight: e.weight}]->(dst)
-            """, {"batch": edge_batch})
+            """,
+                {"batch": edge_batch},
+            )
 
-        # Run algorithms on scratch graph
+        # Run algorithms on scratch graph (documented names and casing)
+        # 1. algo.pageRank
         pagerank_top = []
         try:
-            pr_res = ro(scratch_name, "CALL algo.pageRank('ScratchNode', 'CONNECTED_TO') YIELD node, score RETURN node.name, score ORDER BY score DESC LIMIT 5")
-            pagerank_top = [{"name": r[0], "score": round(float(r[1]), 4)} for r in pr_res.get("rows", [])]
+            pr_res = ro(
+                scratch_name,
+                "CALL algo.pageRank('ScratchNode', 'CONNECTED_TO') YIELD node, score RETURN node.node_id, node.name, score ORDER BY score DESC LIMIT 5",
+            )
+            pagerank_top = [{"id": r[0], "name": r[1], "score": round(float(r[2]), 4)} for r in pr_res.get("rows", [])]
         except Exception as pr_exc:
             logger.debug("PageRank failed in cluster_view: %s", pr_exc)
 
+        # 2. algo.betweenness
         betweenness_top = []
+        bw_map: dict[str, float] = {}
         try:
-            bw_res = ro(scratch_name, "CALL algo.betweenness({nodeLabels:['ScratchNode'], relationshipTypes:['CONNECTED_TO'], samplingSize:32, samplingSeed:42}) YIELD node, score RETURN node.name, score ORDER BY score DESC LIMIT 5")
-            betweenness_top = [{"name": r[0], "score": round(float(r[1]), 4)} for r in bw_res.get("rows", [])]
+            bw_res = ro(
+                scratch_name,
+                "CALL algo.betweenness({nodeLabels:['ScratchNode'], relationshipTypes:['CONNECTED_TO'], samplingSize:32, samplingSeed:42}) YIELD node, score RETURN node.node_id, node.name, score ORDER BY score DESC",
+            )
+            for r in bw_res.get("rows", []):
+                score = round(float(r[2]), 4)
+                bw_map[str(r[0])] = score
+                if len(betweenness_top) < 5:
+                    betweenness_top.append({"id": str(r[0]), "name": r[1], "score": score})
         except Exception as bw_exc:
             logger.debug("Betweenness failed in cluster_view: %s", bw_exc)
 
+        # 3. algo.WCC
         communities = []
+        wcc_map: dict[str, int] = {}
         try:
-            wcc_res = ro(scratch_name, "CALL algo.wcc() YIELD node, componentId RETURN componentId, count(node) AS size ORDER BY size DESC LIMIT 5")
-            communities = [{"community_id": r[0], "size": r[1]} for r in wcc_res.get("rows", [])]
+            wcc_res = ro(
+                scratch_name, "CALL algo.WCC() YIELD node, componentId RETURN node.node_id, node.name, componentId"
+            )
+            comm_sizes: dict[int, int] = {}
+            for r in wcc_res.get("rows", []):
+                nid, comp_id = str(r[0]), int(r[2])
+                wcc_map[nid] = comp_id
+                comm_sizes[comp_id] = comm_sizes.get(comp_id, 0) + 1
+            communities = [
+                {"community_id": cid, "size": sz}
+                for cid, sz in sorted(comm_sizes.items(), key=lambda x: x[1], reverse=True)[:5]
+            ]
         except Exception as wcc_exc:
             logger.debug("WCC failed in cluster_view: %s", wcc_exc)
 
+        # 4. algo.labelPropagation
+        lp_map: dict[str, int] = {}
+        try:
+            lp_res = ro(
+                scratch_name,
+                "CALL algo.labelPropagation({nodeLabels:['ScratchNode'], relationshipTypes:['CONNECTED_TO'], maxIterations:10}) YIELD node, communityId RETURN node.node_id, node.name, communityId",
+            )
+            for r in lp_res.get("rows", []):
+                lp_map[str(r[0])] = int(r[2])
+        except Exception as lp_exc:
+            logger.debug("labelPropagation failed in cluster_view: %s", lp_exc)
+
+        # Identify shared watchlist communities (Requirement 4)
+        shared_watchlist_communities = []
+        target_comm = lp_map.get(str(entity_id)) if str(entity_id) in lp_map else wcc_map.get(str(entity_id))
+        if target_comm is not None and watchlist:
+            wl_clean = {w.strip().lower() for w in watchlist if w.strip()}
+            for nid, ninfo in nodes_map.items():
+                if nid == str(entity_id):
+                    continue
+                n_name = ninfo.get("name", "").lower()
+                if any(w in n_name or n_name in w for w in wl_clean):
+                    node_comm = lp_map.get(nid) if nid in lp_map else wcc_map.get(nid)
+                    if node_comm is not None and node_comm == target_comm:
+                        shared_watchlist_communities.append(
+                            {
+                                "watchlist_name": ninfo.get("name"),
+                                "watchlist_id": nid,
+                                "community_id": target_comm,
+                            }
+                        )
+
+        # Identify high centrality nodes (Requirement 4)
+        from core.config import CENTRALITY_BETWEENNESS_MIN
+
+        high_centrality_nodes = []
+        for nid, score in bw_map.items():
+            if score >= CENTRALITY_BETWEENNESS_MIN:
+                ninfo = nodes_map.get(nid, {})
+                high_centrality_nodes.append(
+                    {
+                        "id": nid,
+                        "name": ninfo.get("name", nid),
+                        "label": ninfo.get("label", ""),
+                        "score": score,
+                    }
+                )
+
         elapsed = (time.perf_counter() - t0) * 1000
-        data = [{
-            "nodes_count": len(node_batch),
-            "edges_count": len(edge_batch),
-            "top_pagerank": pagerank_top,
-            "top_betweenness": betweenness_top,
-            "communities": communities,
-            # Return nodes for graph visualization (limited to 25)
-            "viz_nodes": node_batch[:25],
-            "viz_edges": edge_batch[:50],
-        }]
+        data = [
+            {
+                "nodes_count": len(node_batch),
+                "edges_count": len(edge_batch),
+                "top_pagerank": pagerank_top,
+                "top_betweenness": betweenness_top,
+                "communities": communities,
+                "shared_watchlist_communities": shared_watchlist_communities,
+                "high_centrality_nodes": high_centrality_nodes,
+                # Return nodes for graph visualization (limited to 25)
+                "viz_nodes": node_batch[:25],
+                "viz_edges": edge_batch[:50],
+            }
+        ]
         return ToolResult(
             tool="cluster_view",
             params={"entity_id": entity_id, "max_depth": depth},
             status="ok",
             data=data,
             elapsed_ms=round(elapsed, 2),
-            notes=f"Scratch graph analyzed ({len(node_batch)} nodes, {len(edge_batch)} edges)",
+            notes=f"Scratch graph analyzed ({len(node_batch)} nodes, {len(edge_batch)} edges, high_centrality={len(high_centrality_nodes)})",
         )
     except Exception as exc:
         elapsed = (time.perf_counter() - t0) * 1000
@@ -655,14 +850,16 @@ def recall_cases(
                 cid = r[0]
                 if cid and cid not in seen:
                     seen.add(cid)
-                    cases.append({
-                        "case_id": cid,
-                        "verdict": r[1],
-                        "created_at": r[2],
-                        "depth": r[3],
-                        "related_entity": r[4],
-                        "shared_nodes": r[5] if len(r) > 5 else [],
-                    })
+                    cases.append(
+                        {
+                            "case_id": cid,
+                            "verdict": r[1],
+                            "created_at": r[2],
+                            "depth": r[3],
+                            "related_entity": r[4],
+                            "shared_nodes": r[5] if len(r) > 5 else [],
+                        }
+                    )
             if len(cases) >= limit:
                 break
 
@@ -697,12 +894,15 @@ def _make_case_id(entity_id: str, depth: int, watchlist_ids: list[str]) -> str:
     """Deterministic case_id: hash of (entity_id, depth, sorted watchlist IDs, ruleset version).
     Same inputs produce the same ID → upsert is idempotent.
     """
-    payload = json.dumps({
-        "entity_id": entity_id,
-        "depth": depth,
-        "watchlist_ids": sorted(watchlist_ids),
-        "ruleset": _RULESET_VERSION,
-    }, sort_keys=True)
+    payload = json.dumps(
+        {
+            "entity_id": entity_id,
+            "depth": depth,
+            "watchlist_ids": sorted(watchlist_ids),
+            "ruleset": _RULESET_VERSION,
+        },
+        sort_keys=True,
+    )
     return "case_" + hashlib.sha256(payload.encode()).hexdigest()[:16]
 
 
@@ -775,14 +975,18 @@ def record_decision(
 
     # Prune oldest Cases if over cap (200)
     try:
-        rw(graph_name, """
+        rw(
+            graph_name,
+            """
         MATCH (c:Case)
         WITH c ORDER BY c.created_at ASC
         WITH collect(c) AS cases
         WHERE size(cases) > 200
         UNWIND cases[..size(cases)-200] AS old
         DETACH DELETE old
-        """, {})
+        """,
+            {},
+        )
     except Exception as prune_exc:
         logger.debug("Case prune failed (non-fatal): %s", prune_exc)
 

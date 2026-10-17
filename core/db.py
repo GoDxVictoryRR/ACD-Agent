@@ -6,6 +6,7 @@ Reads connection params from core.config (which reads .env).
 Provides ro() for read-only queries and rw() for writes.
 Never logs passwords.
 """
+
 from __future__ import annotations
 
 import logging

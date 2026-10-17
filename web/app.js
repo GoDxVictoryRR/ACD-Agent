@@ -152,17 +152,18 @@ function setupAutocomplete() {
         if (!res.ok) return;
         const candidates = await res.json();
         suggestionsBox.innerHTML = "";
-        candidates.slice(0, 4).forEach((c) => {
+        candidates.slice(0, 5).forEach((c) => {
           const item = document.createElement("div");
-          item.style.padding = "0.25rem 0.5rem";
+          item.style.padding = "0.35rem 0.5rem";
           item.style.background = "var(--bg-secondary)";
           item.style.border = "1px solid var(--border-color)";
-          item.style.borderRadius = "3px";
+          item.style.borderRadius = "4px";
           item.style.cursor = "pointer";
           item.style.fontSize = "0.75rem";
-          item.textContent = `${c.name} (${c.jurisdiction || c.label})`;
+          item.innerHTML = `<div><strong>${c.name}</strong> <span style="color: var(--accent); font-family: var(--font-mono);">[${c.node_id}]</span></div>
+            <div style="color: var(--text-muted); font-size: 0.7rem;">${c.jurisdiction || 'N/A'} • ${c.source || 'N/A'} • ${c.status || 'Active'}</div>`;
           item.addEventListener("click", () => {
-            input.value = c.name;
+            input.value = c.node_id;
             suggestionsBox.innerHTML = "";
           });
           suggestionsBox.appendChild(item);
@@ -182,7 +183,7 @@ function setupEventListeners() {
 async function runSingleInvestigation(depthOverride = null) {
   const entityName = document.getElementById("entityInput").value.trim();
   if (!entityName) {
-    alert("Please enter an entity name.");
+    alert("Please enter an entity name or node_id.");
     return;
   }
 
@@ -247,7 +248,7 @@ function listenToStream(runId, startTime) {
 
   eventSource.addEventListener("verdict", (e) => {
     const data = JSON.parse(e.data);
-    updateVerdictUI(data.verdict, data.evaluation);
+    updateVerdictUI(data.verdict, data.evaluation, data.candidates, data.status, data.display_verdict);
   });
 
   eventSource.addEventListener("memo", (e) => {
@@ -279,13 +280,48 @@ function listenToStream(runId, startTime) {
   });
 }
 
-function updateVerdictUI(verdict, evaluation) {
+function updateVerdictUI(verdict, evaluation, candidates = [], status = null, displayVerdict = null) {
   const badge = document.getElementById("verdictBadge");
   badge.className = `badge badge-${verdict}`;
-  badge.textContent = verdict.toUpperCase();
+  const depth = document.getElementById("depthSelect") ? document.getElementById("depthSelect").value : "2";
+  if (displayVerdict) {
+    badge.textContent = displayVerdict.toUpperCase();
+  } else if (verdict === "clear") {
+    badge.textContent = `NO INDICATORS FOUND WITHIN DEPTH ${depth}`;
+  } else {
+    badge.textContent = verdict.toUpperCase();
+  }
 
   const tbody = document.getElementById("ledgerBody");
   tbody.innerHTML = "";
+
+  // If ambiguous entity, render candidate picker allowing selection by node_id
+  if (status === "ambiguous" && candidates && candidates.length > 0) {
+    const trPrompt = document.createElement("tr");
+    trPrompt.innerHTML = `
+      <td colspan="3" style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 0.5rem;">
+        <strong>Ambiguous Entity: Multiple Matches Found</strong><br>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Please select a candidate by Node ID to investigate:</span>
+        <div id="disambiguationList" style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem;"></div>
+      </td>
+    `;
+    tbody.appendChild(trPrompt);
+
+    const listDiv = trPrompt.querySelector("#disambiguationList");
+    candidates.forEach((cand) => {
+      const btn = document.createElement("button");
+      btn.className = "quick-pick-btn";
+      btn.style.textAlign = "left";
+      btn.style.padding = "0.35rem 0.5rem";
+      btn.innerHTML = `<strong>${cand.name}</strong> — Node ID: <code>${cand.node_id}</code> (${cand.jurisdiction || 'N/A'}, ${cand.source || 'N/A'}, ${cand.status || 'Active'})`;
+      btn.addEventListener("click", () => {
+        document.getElementById("entityInput").value = cand.node_id;
+        runSingleInvestigation();
+      });
+      listDiv.appendChild(btn);
+    });
+    return;
+  }
 
   const findings = evaluation?.findings || [];
   if (findings.length === 0) {
@@ -446,7 +482,8 @@ async function runDepthComparison() {
     const run1 = await res1.json();
     const r1Data = await awaitRunComplete(run1.run_id);
 
-    d1Badge.innerHTML = `<span class="badge badge-${r1Data.verdict}">${r1Data.verdict.toUpperCase()}</span>`;
+    const d1Text = r1Data.verdict === "clear" ? "NO INDICATORS FOUND WITHIN DEPTH 1" : r1Data.verdict.toUpperCase();
+    d1Badge.innerHTML = `<span class="badge badge-${r1Data.verdict}">${d1Text}</span>`;
     d1Memo.textContent = r1Data.memo || "Depth 1 found no immediate watchlist connections.";
 
     // Run Depth 3

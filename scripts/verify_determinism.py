@@ -1,4 +1,5 @@
 """Verify determinism: each demo entity 3 times via deterministic path gives identical verdict and findings."""
+
 import json
 from pathlib import Path
 
@@ -19,10 +20,12 @@ for ent in entities:
         runs = []
         for i in range(3):
             res = run_deterministic_investigation(name, watchlist=watchlist, depth=depth)
-            runs.append({
-                "verdict": res.get("verdict"),
-                "findings": [f["rule_id"] for f in res.get("evaluation", {}).get("findings", [])]
-            })
+            runs.append(
+                {
+                    "verdict": res.get("verdict"),
+                    "findings": [f["rule_id"] for f in res.get("evaluation", {}).get("findings", [])],
+                }
+            )
 
         # Check equality
         v0 = runs[0]["verdict"]

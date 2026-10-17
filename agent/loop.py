@@ -10,6 +10,7 @@ Features:
 - Verifier checks the LLM memo; replaces with template if hallucinated (Invariant 6).
 - Falls back to agent.fallback if LLM is unavailable or fails twice.
 """
+
 from __future__ import annotations
 
 import json
@@ -120,8 +121,8 @@ TOOL_DEFINITIONS = [
 ]
 
 
-def execute_tool_call(name: str, args: dict[str, Any], graph_name: str | None = None) -> tools.ToolResult:
-    kwargs = {"graph_name": graph_name} if graph_name else {}
+def execute_tool_call(name: str, args: dict[str, Any], **kwargs) -> tuple[tools.ToolResult, str]:
+    from core.mcp_client import invoke_tool
 
     # LLMs sometimes return int-typed schema args as strings; coerce defensively
     def _int(v: Any, default: int) -> int:
@@ -130,20 +131,19 @@ def execute_tool_call(name: str, args: dict[str, Any], graph_name: str | None = 
         except (TypeError, ValueError):
             return default
 
-    if name == "resolve_entity":
-        return tools.resolve_entity(name=args.get("name", ""), limit=_int(args.get("limit"), 5), **kwargs)
-    elif name == "ownership_chain":
-        return tools.ownership_chain(entity_id=args.get("entity_id", ""), max_depth=_int(args.get("max_depth"), 2), **kwargs)
-    elif name == "shared_links":
-        return tools.shared_links(entity_id=args.get("entity_id", ""), limit=_int(args.get("limit"), 10), **kwargs)
-    elif name == "path_between":
-        return tools.path_between(a_id=args.get("a_id", ""), b_id=args.get("b_id", ""), max_depth=_int(args.get("max_depth"), 3), **kwargs)
-    elif name == "cluster_view":
-        return tools.cluster_view(entity_id=args.get("entity_id", ""), max_depth=_int(args.get("max_depth"), 2), **kwargs)
-    elif name == "recall_cases":
-        return tools.recall_cases(entity_id=args.get("entity_id", ""), limit=_int(args.get("limit"), 5), **kwargs)
-    else:
-        return tools.ToolResult(tool=name, status="error", notes=f"Unknown tool '{name}'")
+    clean_args = dict(args)
+    if "limit" in clean_args:
+        clean_args["limit"] = _int(clean_args["limit"], 5)
+    if "max_depth" in clean_args:
+        clean_args["max_depth"] = _int(clean_args["max_depth"], 2)
+    if "node_cap" in clean_args:
+        clean_args["node_cap"] = _int(clean_args["node_cap"], 500)
+
+    try:
+        res, via = invoke_tool(name, clean_args, **kwargs)
+        return res, via
+    except Exception as exc:
+        return tools.ToolResult(tool=name, status="error", notes=f"Tool error: {exc}"), "direct"
 
 
 def run_investigation(
@@ -152,8 +152,10 @@ def run_investigation(
     depth: int = 2,
     graph_name: str | None = None,
     force_fallback: bool = False,
+    llm: LLMClient | None = None,
 ) -> dict[str, Any]:
-    llm = LLMClient()
+    if llm is None:
+        llm = LLMClient()
     watchlist = watchlist or []
 
     # If LLM disabled or not configured, use fallback immediately
@@ -183,14 +185,17 @@ def run_investigation(
     # The LLM is NOT trusted to call this correctly — some smaller models
     # hallucinate entity_id values. We resolve here and inject the grounded
     # entity_id into the conversation context.
-    res_entity = tools.resolve_entity(name=entity_name, **kwargs)
-    trace.append({
-        "tool": "resolve_entity",
-        "params": {"name": entity_name},
-        "status": res_entity.status,
-        "elapsed_ms": res_entity.elapsed_ms,
-        "source": "forced",  # always forced, per Invariant 4
-    })
+    res_entity, via_res = execute_tool_call("resolve_entity", {"name": entity_name}, **kwargs)
+    trace.append(
+        {
+            "tool": "resolve_entity",
+            "params": {"name": entity_name},
+            "status": res_entity.status,
+            "elapsed_ms": res_entity.elapsed_ms,
+            "source": "forced",  # always forced, per Invariant 4
+            "via": via_res,
+        }
+    )
 
     if res_entity.status != "ok" or not res_entity.data:
         rules_eval = evaluate(evidence, max_depth=depth, watchlist=watchlist)
@@ -204,6 +209,8 @@ def run_investigation(
             "memo_source": "template",
             "trace": trace,
             "evidence": evidence,
+            "candidates": res_entity.data if res_entity.status == "ambiguous" else [],
+            "status": res_entity.status,
         }
 
     resolved = res_entity.data[0]
@@ -266,8 +273,12 @@ def run_investigation(
                     llm_entity_id = args.get("entity_id", "")
                     # Reject if entity_id is clearly wrong (a tool name or empty)
                     if not llm_entity_id or llm_entity_id in {t["function"]["name"] for t in TOOL_DEFINITIONS}:
-                        logger.warning("LLM provided invalid entity_id %r for %s; overriding with %r",
-                                       llm_entity_id, func_name, entity_id)
+                        logger.warning(
+                            "LLM provided invalid entity_id %r for %s; overriding with %r",
+                            llm_entity_id,
+                            func_name,
+                            entity_id,
+                        )
                         args["entity_id"] = entity_id
                 elif func_name == "path_between":
                     if not args.get("a_id"):
@@ -277,17 +288,21 @@ def run_investigation(
                 if func_name == "resolve_entity":
                     logger.debug("LLM re-called resolve_entity; using cached result")
                     result = res_entity
+                    via = via_res
                 else:
-                    result = execute_tool_call(func_name, args, graph_name=graph_name)
+                    result, via = execute_tool_call(func_name, args, **kwargs)
                 tools_called.add(func_name)
 
-                trace.append({
-                    "tool": func_name,
-                    "params": args,
-                    "status": result.status,
-                    "elapsed_ms": result.elapsed_ms,
-                    "source": "llm",
-                })
+                trace.append(
+                    {
+                        "tool": func_name,
+                        "params": args,
+                        "status": result.status,
+                        "elapsed_ms": result.elapsed_ms,
+                        "source": "llm",
+                        "via": via,
+                    }
+                )
 
                 # Ingest evidence
                 if func_name == "resolve_entity" and result.status == "ok" and result.data:
@@ -302,11 +317,13 @@ def run_investigation(
                     evidence["cluster_view"].extend(result.data)
 
                 # Send tool output back inside <tool_output> tags per Invariant 7
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc_id,
-                    "content": f"<tool_output>\n{result.model_dump_json()}\n</tool_output>",
-                })
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc_id,
+                        "content": f"<tool_output>\n{result.model_dump_json()}\n</tool_output>",
+                    }
+                )
 
     except Exception as exc:
         logger.warning("LLM agent loop error: %s. Switching to fallback.", exc)
@@ -321,64 +338,97 @@ def run_investigation(
     # Note: resolve_entity + entity_id are always set above (Invariant 4).
 
     if "ownership_chain" not in tools_called:
-        res_chain = tools.ownership_chain(entity_id=entity_id, max_depth=depth, **kwargs)
+        res_chain, via = execute_tool_call("ownership_chain", {"entity_id": entity_id, "max_depth": depth}, **kwargs)
         evidence["ownership_chain"].extend(res_chain.data)
-        trace.append({
-            "tool": "ownership_chain",
-            "params": {"entity_id": entity_id, "max_depth": depth},
-            "status": res_chain.status,
-            "elapsed_ms": res_chain.elapsed_ms,
-            "source": "forced",
-        })
+        trace.append(
+            {
+                "tool": "ownership_chain",
+                "params": {"entity_id": entity_id, "max_depth": depth},
+                "status": res_chain.status,
+                "elapsed_ms": res_chain.elapsed_ms,
+                "source": "forced",
+                "via": via,
+            }
+        )
 
     if "shared_links" not in tools_called:
-        res_links = tools.shared_links(entity_id=entity_id, **kwargs)
+        res_links, via = execute_tool_call("shared_links", {"entity_id": entity_id}, **kwargs)
         evidence["shared_links"].extend(res_links.data)
-        trace.append({
-            "tool": "shared_links",
-            "params": {"entity_id": entity_id},
-            "status": res_links.status,
-            "elapsed_ms": res_links.elapsed_ms,
-            "source": "forced",
-        })
+        trace.append(
+            {
+                "tool": "shared_links",
+                "params": {"entity_id": entity_id},
+                "status": res_links.status,
+                "elapsed_ms": res_links.elapsed_ms,
+                "source": "forced",
+                "via": via,
+            }
+        )
 
     # Ensure path_between was run for each watchlist target
     for w in watchlist:
-        res_w = tools.resolve_entity(name=w, **kwargs)
+        res_w, via_w = execute_tool_call("resolve_entity", {"name": w}, **kwargs)
         if res_w.status == "ok" and res_w.data:
             target_id = res_w.data[0]["id"]
             if not any(tc.get("params", {}).get("b_id") == target_id for tc in trace if tc["tool"] == "path_between"):
-                res_path = tools.path_between(a_id=entity_id, b_id=target_id, max_depth=depth, **kwargs)
-                trace.append({
-                    "tool": "path_between",
-                    "params": {"a_id": entity_id, "b_id": target_id, "max_depth": depth},
-                    "status": res_path.status,
-                    "elapsed_ms": res_path.elapsed_ms,
-                    "source": "forced",
-                })
+                res_path, via_p = execute_tool_call(
+                    "path_between",
+                    {
+                        "a_id": entity_id,
+                        "b_id": target_id,
+                        "max_depth": depth,
+                        "is_watchlist": True,
+                        "watchlist": watchlist,
+                    },
+                    **kwargs,
+                )
+                trace.append(
+                    {
+                        "tool": "path_between",
+                        "params": {"a_id": entity_id, "b_id": target_id, "max_depth": depth},
+                        "status": res_path.status,
+                        "elapsed_ms": res_path.elapsed_ms,
+                        "source": "forced",
+                        "via": via_p,
+                    }
+                )
                 if res_path.status == "ok" and res_path.data:
                     evidence["paths_to_watchlist"].extend(res_path.data)
 
-    if "cluster_view" not in tools_called:
-        res_cluster = tools.cluster_view(entity_id=entity_id, max_depth=min(depth, 2), **kwargs)
+    if depth >= 2 and "cluster_view" not in tools_called:
+        res_cluster, via_c = execute_tool_call(
+            "cluster_view",
+            {
+                "entity_id": entity_id,
+                "max_depth": min(depth, 2),
+                "watchlist": watchlist,
+            },
+            **kwargs,
+        )
         evidence["cluster_view"].extend(res_cluster.data)
-        trace.append({
-            "tool": "cluster_view",
-            "params": {"entity_id": entity_id, "max_depth": min(depth, 2)},
-            "status": res_cluster.status,
-            "elapsed_ms": res_cluster.elapsed_ms,
-            "source": "forced",
-        })
+        trace.append(
+            {
+                "tool": "cluster_view",
+                "params": {"entity_id": entity_id, "max_depth": min(depth, 2)},
+                "status": res_cluster.status,
+                "elapsed_ms": res_cluster.elapsed_ms,
+                "source": "forced",
+                "via": via_c,
+            }
+        )
 
     # Step: Rules evaluation (Deterministic verdict)
     rules_eval = evaluate(evidence, max_depth=depth, watchlist=watchlist)
 
     # Step: Generate Memo with LLM and verify with verifier
-    evidence_ledger_json = json.dumps({
-        "findings": [f.model_dump() for f in rules_eval.findings],
-        "verdict": rules_eval.verdict,
-        "total_links": rules_eval.total_links,
-    }, indent=2)
+    evidence_ledger_json = json.dumps(
+        {
+            "findings": [f.model_dump() for f in rules_eval.findings],
+            "verdict": rules_eval.verdict,
+            "total_links": rules_eval.total_links,
+        },
+        indent=2,
+    )
 
     memo_prompt = MEMO_PROMPT_TEMPLATE.format(
         entity_name=resolved["name"],
@@ -390,10 +440,12 @@ def run_investigation(
     memo = ""
     memo_source = "llm"
     try:
-        memo_resp = llm.chat_completion(messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": memo_prompt},
-        ])
+        memo_resp = llm.chat_completion(
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": memo_prompt},
+            ]
+        )
         candidate_memo = memo_resp["choices"][0]["message"]["content"]
         is_valid, unverified = verify_memo(candidate_memo, evidence)
         if is_valid:
@@ -429,13 +481,15 @@ def run_investigation(
     # Step: Recall prior cases
     res_cases = tools.recall_cases(entity_id=entity_id, **kwargs)
     evidence["recalled_cases"] = res_cases.data
-    trace.append({
-        "tool": "recall_cases",
-        "params": {"entity_id": entity_id},
-        "status": res_cases.status,
-        "elapsed_ms": res_cases.elapsed_ms,
-        "source": "forced",
-    })
+    trace.append(
+        {
+            "tool": "recall_cases",
+            "params": {"entity_id": entity_id},
+            "status": res_cases.status,
+            "elapsed_ms": res_cases.elapsed_ms,
+            "source": "forced",
+        }
+    )
 
     return {
         "entity_name": resolved["name"],

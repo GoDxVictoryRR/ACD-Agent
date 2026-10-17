@@ -6,6 +6,7 @@ Usage:
     python -m agent.run --entity "Silverline Capital Management Ltd" --no-llm
     python -m agent.run --entity "Orion Global Logistics Corp" --watchlist data/demo.json --save-replay
 """
+
 from __future__ import annotations
 
 import argparse

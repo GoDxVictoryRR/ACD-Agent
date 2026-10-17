@@ -1,6 +1,7 @@
 """
 tests/test_agent.py — Tests for the agent loop, fallback, security invariants, and poison resistance.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -43,3 +44,58 @@ def test_fallback_completes_when_no_llm():
     assert "memo" in res
     assert "trace" in res
     assert res["memo_source"] == "template"
+
+
+def test_invalid_key_fallback():
+    """Invalid LLM key triggers fallback cleanly without crashing."""
+    bad_llm = LLMClient(api_key="mock-invalid-key")
+    res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=bad_llm)
+    assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
+    assert res["memo_source"] == "template"
+
+
+def test_simulated_429_fallback():
+    """Simulated 429 triggers fallback cleanly without crashing."""
+    from unittest.mock import patch
+
+    import openai
+
+    mock_llm = LLMClient(api_key="mock-test-key")
+    with patch.object(
+        mock_llm.client.chat.completions,
+        "create",
+        side_effect=openai.RateLimitError(
+            message="429 Rate Limited",
+            response=MagicMock(status_code=429, headers={}),
+            body={"error": "Too Many Requests"},
+        ),
+    ):
+        res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=mock_llm)
+        assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
+
+
+def test_timeout_fallback():
+    """LLM timeout triggers fallback cleanly without crashing."""
+    from unittest.mock import patch
+
+    import openai
+
+    mock_llm = LLMClient(api_key="mock-test-key")
+    with patch.object(
+        mock_llm.client.chat.completions, "create", side_effect=openai.APITimeoutError(request=MagicMock())
+    ):
+        res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=mock_llm)
+        assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
+
+
+def test_malformed_tool_args():
+    """Malformed tool args are defensively parsed/coerced without crashing."""
+    from agent.loop import execute_tool_call
+
+    malformed_args = {
+        "entity_id": "10001171",
+        "max_depth": "invalid_integer_string",
+        "unexpected_extra": {"nested": 123},
+    }
+    res, via = execute_tool_call("ownership_chain", malformed_args)
+    assert res.status in ("ok", "error")

@@ -7,6 +7,7 @@ Features:
 - Daily call rate cap tracking.
 - Response cache under cache/ to conserve rate limits.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -45,9 +46,14 @@ def _get_cache_path(model: str, messages: list[dict[str, Any]], tools: list[dict
 
 
 class LLMClient:
-    def __init__(self, enable_cache: bool = True):
-        self.api_key = NVIDIA_API_KEY
-        self.model = NVIDIA_MODEL
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str | None = None,
+        enable_cache: bool = True,
+    ):
+        self.api_key = api_key if api_key is not None else NVIDIA_API_KEY
+        self.model = model if model is not None else NVIDIA_MODEL
         self.base_url = NVIDIA_BASE_URL
         self.enable_cache = enable_cache
         self.run_call_count = 0

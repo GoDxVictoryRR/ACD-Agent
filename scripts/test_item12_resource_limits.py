@@ -1,6 +1,7 @@
 """Test Item 12: Resource limits and memory measurement.
 Runs 10 investigations under 512MB RAM cap, checks for OOM, records RSS and FalkorDB graph memory with 200 Cases.
 """
+
 import subprocess
 import time
 
@@ -28,11 +29,7 @@ t_start = time.time()
 for i in range(10):
     ent = entities[i % len(entities)]
     depth = 3 if (i % 2 == 0) else 1
-    resp = httpx.post(f"{API}/investigate", json={
-        "entity": ent,
-        "depth": depth,
-        "no_llm": True
-    }, timeout=10)
+    resp = httpx.post(f"{API}/investigate", json={"entity": ent, "depth": depth, "no_llm": True}, timeout=10)
     assert resp.status_code == 200
     run_id = resp.json()["run_id"]
     # Wait for completion via stream
@@ -40,7 +37,7 @@ for i in range(10):
         for line in s.iter_lines():
             if "event: done" in line or "event: error" in line:
                 break
-    print(f"  [{i+1}/10] {ent} (d={depth}) complete")
+    print(f"  [{i + 1}/10] {ent} (d={depth}) complete")
 
 duration = round(time.time() - t_start, 2)
 print(f"10 investigations completed in {duration}s")
@@ -48,7 +45,9 @@ print(f"10 investigations completed in {duration}s")
 print("\n=== 3. Checking for OOM and final RSS ===")
 oom_proc = subprocess.run(
     ["docker", "inspect", "-f", "{{.State.OOMKilled}}", "ownership-lens-app"],
-    capture_output=True, text=True, check=True
+    capture_output=True,
+    text=True,
+    check=True,
 )
 oom_killed = oom_proc.stdout.strip()
 print(f"Docker OOMKilled: {oom_killed}")
@@ -56,7 +55,9 @@ assert oom_killed == "false", "App was killed by OOM!"
 
 stats_proc = subprocess.run(
     ["docker", "stats", "--no-stream", "--format", "{{.MemUsage}}", "ownership-lens-app"],
-    capture_output=True, text=True, check=True
+    capture_output=True,
+    text=True,
+    check=True,
 )
 mem_usage = stats_proc.stdout.strip()
 print(f"Container Memory Usage: {mem_usage}")
