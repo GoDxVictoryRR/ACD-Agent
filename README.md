@@ -11,32 +11,51 @@
 
 ## 1. Overview & Pitch
 
-**Ownership Lens** investigates corporate control structures in offshore jurisdictions to uncover concealed risk: nominee directorship hubs, mass-incorporation address clusters, and multi-hop paths to sanctioned entities. The system pairs an NVIDIA-hosted LLM with **FalkorDB** through the Model Context Protocol (MCP). The LLM selects typed graph traversal tools and drafts an audit memo, while a deterministic rules engine evaluates graph evidence to compute the final verdict (`clear`, `review`, `escalate`, `insufficient_evidence`). Every verdict is supported by an evidence ledger and persisted back into FalkorDB as a `(:Case)` node, enabling subsequent investigations to recall prior compliance intelligence.
+### The User Story
+Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **MOSSACK FONSECA & CO. (SAMOA) LIMITED.**. Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets. But compliance policies require uncovering whether beneficial control traces to high-risk actors.
+
+With 30 minutes to make an onboarding decision, manually cross-referencing hundreds of shell companies, intermediary law firms, and nominee directors across international registry databases is impossible.
+
+The analyst opens **Ownership Lens** and enters the entity name. Within seconds:
+1. **Entity Resolution**: The system resolves the entity in FalkorDB without table scans.
+2. **Autonomous Graph Traversal**: The agent investigates multi-hop ownership chains, discovers nominee hubs and shared addresses, and traverses control links up to depth 3.
+3. **Deterministic Rules Evaluation**: The engine identifies a 3-hop control path (`MOSSACK FONSECA` -> `MOSSFON SUBSCRIBERS LTD.` -> `TIANSHENG INDUSTRY AND TRADING CO., LTD.`) and computes an explainable **ESCALATE** verdict backed by an immutable evidence ledger.
+4. **Graph Memory Recall**: The verdict is written back to FalkorDB as a `(:Case)` node, ensuring future queries on related entities immediately surface prior compliance decisions.
 
 - **Track**: Track 1 — Agents That Act on Connected Data
-- **Demo Video**: [Watch Demo Video](https://youtu.be/placeholder-demo-video) *(Uploaded by team)*
+- **Demo Video**: VIDEO LINK: TBD by author
 - **Blog Post**: [Read Technical Article](docs/blog.md)
-- **Live Deployment**: [https://ownership-lens.onrender.com](https://ownership-lens.onrender.com) *(Free tier)*
+- **Live Deployment**: Pending human cloud provisioning (see [`docs/HUMAN_TODO.md`](docs/HUMAN_TODO.md) for Render & Vercel deployment runbook; local Docker stack fully functional)
 
 ---
 
-## 2. Depth 1 vs Depth 3 Contrast
+## 2. Depth 1 vs Depth 3 Contrast: Proving Graph Value
 
-The defining feature of Ownership Lens is proving that **the graph is essential, not decorative**:
+The core architectural requirement of Ownership Lens is proving that **the graph is essential, not decorative**:
 
 ```
-Depth 1: Target Entity -> 1 Director, 1 Address              => Verdict: CLEAR
-                                                               (Shallow checks reveal zero exposure)
+Depth 1: MOSSACK FONSECA & CO. (SAMOA) LIMITED. -> 1 Intermediary, 1 Address
+         => Verdict: CLEAR ("No indicators found within depth 1")
+         (Shallow checks reveal zero exposure to watchlist entities)
 
-Depth 3: Target Entity -> Marcus Sterling (Officer)
-                       -> Sterling Bridge Holdings Ltd
-                       -> Apex Nominees Ltd
-                       -> Ironclad Sanctions Entity Inc (Watchlist) => Verdict: ESCALATE
+Depth 3: MOSSACK FONSECA & CO. (SAMOA) LIMITED. (Entity)
+         -[SAME_AS]-> MOSSACK FONSECA & CO. (SAMOA) LIMITED (Entity)
+         -[OFFICER_OF]-> MOSSFON SUBSCRIBERS LTD. (Officer)
+         -[OFFICER_OF]-> TIANSHENG INDUSTRY AND TRADING CO., LTD. (Watchlist Entity)
+         => Verdict: ESCALATE (WATCHLIST_PATH triggered: weighted cost 6.0 <= 8.0)
 ```
 
-![Depth Contrast: Blue Star Maritime Holdings at Depth 1 vs Depth 3](docs/screens/desktop_comparison.png)
+![Depth Contrast: Mossack Fonseca at Depth 1 vs Depth 3](docs/screens/desktop_comparison.png)
 
 At depth 1, the entity appears completely benign. At depth 3, multi-hop weighted traversal across nominee directors and intermediaries uncovers direct exposure to an entity on the sanctions watchlist.
+
+### Empirical Graph Exposure Statistics
+To quantify graph connectivity across the Panama Papers dataset, reverse BFS evaluated 250 seeded sample entities (`seed=42`) against the demo watchlist ([docs/exposure_stats.md](docs/exposure_stats.md)):
+- **Depth 1 Exposure**: **0.0%** (zero shallow connections to watchlist)
+- **Depth 2 Exposure**: **30.0%**
+- **Depth 3 Exposure**: **30.0%**
+- **Depth 4 Exposure**: **64.4%** (network expands significantly beyond depth 3)
+- **Completely Unconnected**: **35.6%**
 
 ---
 
@@ -47,7 +66,7 @@ graph TD
     User([User / Browser]) <--> UI[Web UI: Cytoscape.js + SSE Trace]
     UI <--> API[FastAPI Backend: api/main.py]
     API <--> Loop[Agent Loop: agent/loop.py]
-    Loop <--> LLM[NVIDIA Hosted LLM: meta/llama-3.2-11b-vision-instruct]
+    Loop <--> LLM[NVIDIA Hosted LLM: nvidia/nemotron-3-super-120b-a12b]
     Loop <--> Tools[Typed Tools: core/tools.py / MCP Server]
     Tools <--> DB[(FalkorDB Graph: core/db.py)]
     Loop --> Rules[Rules Engine: core/rules.py]
@@ -120,24 +139,31 @@ graph LR
 | Rule ID | Trigger Condition | Severity | Verdict Mapping | Threshold Calibration |
 |---|---|---|---|---|
 | `WATCHLIST_PATH` | Path to watchlist entity found within `max_depth` with weighted cost <= 8.0 | High | **ESCALATE** | Weighted edge costs (officers=1.0, addresses=3.0, intermediaries=2.0) |
-| `NOMINEE_OFFICER_HUB` | Officer links >= 5 distinct offshore entities | Medium | **REVIEW** | Calibrated to ~p95 of officer degree distribution |
-| `ADDRESS_HUB` | Address is shared by >= 5 distinct offshore entities | Medium | **REVIEW** | Calibrated to ~p95 of address degree distribution |
-| `INTERMEDIARY_CONCENTRATION` | Intermediary manages >= 10 offshore entities | Low | **REVIEW** | Calibrated to ~p95 of intermediary degree distribution |
-| `MIN_LINKS` | Total graph connections < 1 or entity unresolved | N/A | **INSUFFICIENT_EVIDENCE** | Prevents false clearances on unmodeled entities |
-| `CLEAR` | Entity resolved, links >= 1, zero findings triggered | N/A | **CLEAR** | Confirmed isolated, non-hub network |
+| `PATH_REDUNDANCY` | $\ge 2$ node-disjoint paths to watchlist entity | High | **ESCALATE** | Detects independent exposure channels ("independent paths") |
+| `PATH_DEPENDENCY` | Single path with one intermediate node to watchlist entity | Medium | **REVIEW** | Detects bottleneck exposure ("exposure depends on <node>") |
+| `COMMUNITY_WATCHLIST`| Same graph community as watchlist entity via `algo.labelPropagation` without direct path | Medium | **REVIEW** | Community cluster co-membership indicator |
+| `HUB_CENTRALITY` | Node betweenness centrality $B \ge 50.0$ in scratch neighborhood | Medium | **REVIEW** | Calibrated to 99.5th percentile of betweenness distribution |
+| `NOMINEE_OFFICER_HUB` | Officer links >= 5 distinct offshore entities | Medium | **REVIEW** | Calibrated to ~95th percentile of officer degree distribution |
+| `ADDRESS_HUB` | Address is shared by >= 5 distinct offshore entities | Medium | **REVIEW** | Calibrated to ~95th percentile of address degree distribution |
+| `INTERMEDIARY_CONCENTRATION` | Intermediary manages >= 10 offshore entities | Low | **REVIEW** | Calibrated to ~95th percentile of intermediary degree distribution |
+| `MIN_LINKS` | Total graph connections < 2 or entity unresolved | N/A | **INSUFFICIENT_EVIDENCE** | Prevents false clearances on unmodeled or sparse entities |
+| `CLEAR` | Entity resolved, connections >= 2, zero findings triggered | N/A | **CLEAR** | Displays as: `"No indicators found within depth N"` |
 
 ---
 
 ## 7. Why FalkorDB is Essential
 
 If you replace FalkorDB with a relational SQL database:
-- **Depth 1**: Searching `Blue Star Maritime Holdings Ltd` returns a single director and address. Both appear unremarkable. The relational query reports `CLEAR`.
-- **Depth 3**: Querying 3 hops across arbitrary intermediary, officer, and entity relationship types in SQL requires expensive multiple self-joins with massive join tables. In FalkorDB, `algo.SPpaths` evaluates the weighted graph path in milliseconds, revealing the connection to `Ironclad Sanctions Entity Inc` and flipping the verdict to **ESCALATE**.
+- **Depth 1**: Searching `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` returns a single intermediary and registered address. Both appear unremarkable. The relational query reports `CLEAR`.
+- **Depth 3**: Querying 3 hops across arbitrary intermediary, officer, and entity relationship types in SQL requires expensive multiple self-joins with massive join tables. In FalkorDB, `algo.SPpaths` evaluates the weighted graph path in milliseconds, revealing the connection to `TIANSHENG INDUSTRY AND TRADING CO., LTD.` and flipping the verdict to **ESCALATE**.
 - **Without the graph, there is no verdict**: The application rejects inquiries without database verification.
 
 ---
 
-## 8. Evaluation & Regression Matrix
+## 8. Evaluation & Regression Matrix: Consistency, Not Accuracy
+
+> [!NOTE]
+> **Labelled "Consistency, Not Accuracy"**: ICIJ Offshore Leaks data documents historical offshore incorporation structures; it does not assert legal guilt, fraud, or regulatory violations. This test suite verifies architectural determinism: repeated runs on fixed graph inputs produce identical, explainable verdicts across code updates.
 
 Tested across 10 distinct entities using the deterministic evaluation path to verify consistency across depth variations:
 
@@ -237,4 +263,4 @@ python scripts/check_invariants.py
 
 ## 13. AI Assistance Disclosure
 
-Developed with the assistance of **Google Antigravity** using Gemini 3.8 Flash and Claude 3.7 Sonnet. All architecture, database interactions, invariant checks, and tests were verified against official documentation and live FalkorDB endpoints. The human team member reviewed and can defend all code. See [`docs/EXPLAIN.md`](docs/EXPLAIN.md) for full architectural explanations.
+Developed with the assistance of **Google Antigravity** paired with **NVIDIA-hosted LLM inference** (`nvidia/nemotron-3-super-120b-a12b`) at runtime. All architecture, Cypher queries, graph algorithms, invariant checks, and tests were verified against official FalkorDB and MCP documentation and executed against live endpoints. The human team member reviewed and can defend all code decisions. See [`docs/EXPLAIN.md`](docs/EXPLAIN.md) for full architectural explanations and rationale.

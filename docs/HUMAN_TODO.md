@@ -50,7 +50,7 @@ Please review and approve the following choices implemented and verified with te
    - Health check path: `/health`
 3. Configure Environment Variables in Render dashboard:
    - `NVIDIA_API_KEY`: your `nvapi-...` key
-   - `NVIDIA_MODEL`: `meta/llama-3.2-11b-vision-instruct`
+   - `NVIDIA_MODEL`: `nvidia/nemotron-3-super-120b-a12b`
    - `FALKORDB_HOST`: FalkorDB Cloud instance host
    - `FALKORDB_PORT`: FalkorDB Cloud port
    - `FALKORDB_PASSWORD`: FalkorDB Cloud password
@@ -75,14 +75,14 @@ Please review and approve the following choices implemented and verified with te
 
 Run these commands against your live Render endpoint:
 ```powershell
-# 1. Health check
+# 1. Health check (verifies db: up, llm_key: true)
 curl.exe -s https://<your-render-url>/health
 
 # 2. Entity search
-curl.exe -s "https://<your-render-url>/entities/search?q=Blue"
+curl.exe -s "https://<your-render-url>/entities/search?q=MOSSACK"
 
-# 3. Investigate Blue Star
-curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"Blue Star Maritime Holdings Ltd\",\"watchlist\":[\"Ironclad Sanctions Entity Inc\",\"Apex Nominees Ltd\"],\"depth\":3}'
+# 3. Investigate Mossack Fonseca Samoa (Depth 3 flip to ESCALATE)
+curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"MOSSACK FONSECA & CO. (SAMOA) LIMITED.\",\"watchlist\":[\"TIANSHENG INDUSTRY AND TRADING CO., LTD.\"],\"depth\":3}'
 ```
 
 ---
@@ -91,10 +91,10 @@ curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: appl
 
 1. **Record 2-3 Minute Demo Video**:
    - Follow [`docs/demo_runbook.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_runbook.md).
-   - Show Blue Star d=1 (CLEAR) vs d=3 (ESCALATE) depth flip live.
-   - Show Silverline nominee hub (REVIEW).
-   - Show prior cases memory recall.
-   - Upload to YouTube / Loom.
+   - Beat 1: Show `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` depth 1 (`clear`) vs depth 3 (`escalate`) depth flip live.
+   - Beat 2: Show `PORTCULLIS TRUSTNET (SAMOA) LIMITED` intermediary hub (`review`, 31 links).
+   - Beat 3: Show `TIANSHENG INDUSTRY AND TRADING CO., LTD.` prior Case recall (`(:Case)` node in graph).
+   - Upload to YouTube / Loom. Update README.md and submission form with the link.
 2. **Publish Blog Post**:
    - Copy text from [`docs/blog.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/blog.md) to Dev.to, Medium, or Hashnode.
 3. **Submit WeMakeDevs Form**:
@@ -103,3 +103,4 @@ curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: appl
    - Live URL: `https://<your-render-url>` (or local instructions documented in README)
    - Video URL
    - Blog URL
+

@@ -7,12 +7,10 @@ scripts/test_clean_clone.py — Test clean clone in a fresh temp directory:
 """
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -72,7 +70,7 @@ try:
     # 6. Run loader verification on clean clone
     print("\n[STEP 3] Testing ensure_seed on clean clone...")
     load_res = subprocess.run(
-        [python_exe, "-c", "from data.load import ensure_seed; print('ensure_seed result:', ensure_seed('ownership', 'icij'))"],
+        [python_exe, "-c", "from data.load import ensure_seed; print('ensure_seed result:', ensure_seed('ownership'))"],
         cwd=temp_dir,
         capture_output=True,
         text=True,

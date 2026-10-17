@@ -9,8 +9,8 @@ from __future__ import annotations
 import json
 import subprocess
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 
 print("=" * 70)
 print("TESTING FALKORDB SERVICE OUTAGE & SELF-HEALING RESILIENCE")
