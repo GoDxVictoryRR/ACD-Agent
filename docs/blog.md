@@ -4,7 +4,7 @@
 
 Offshore corporate structures are deliberately engineered to obscure beneficial ownership. A single entity registered in Samoa, Panama, or the British Virgin Islands typically appears entirely benign when viewed in isolation: one registered agent, one postal box, and an unfamiliar corporate director. In a standard relational database or SQL table, querying this entity produces a clean bill of health.
 
-Yet beneath that single tabular row lies an intricate graph of control. That registered agent may manage hundreds of shell companies across multiple jurisdictions. That individual director may be a nominee serving on fifty interlocking corporate boards. And three hops away—through an offshore management intermediary—that seemingly benign entity may connect directly to an entity on an international sanctions watchlist.
+Yet beneath that single tabular row lies an intricate graph of corporate structures. In our active demo, an ordinary shell company (such as GLAISDALE LIMITED) looks completely clean at depth 1 with standard corporate filings. But at depth 4, after excluding high-degree administrative hubs and service providers, graph traversal reveals that the same person can appear as a director of several companies, linking the entity through chained shared directors directly to an entity on a compliance watchlist (demo list chosen by graph criteria).
 
 To solve this problem for Track 1 of the WeMakeDevs x FalkorDB Graph Hacks hackathon, we built **Ownership Lens**—an autonomous graph agent that investigates offshore control networks using FalkorDB, MCP tool calling, deterministic compliance rules, and an anti-hallucination verification ledger.
 

@@ -82,9 +82,9 @@ Real offshore structures from the ICIJ dataset that exhibit significant graph co
 
 If running with `DATA_SOURCE=synthetic`, the following planted cases are used:
 
-| Entity Name | Depth 1 | Depth 3 | Target / Note |
+| Entity Name | Depth 1 | Depth 4 | Target / Note |
 |---|---|---|---|
-| `Blue Star Maritime Holdings Ltd` | `clear` | `escalate` | Flips at depth 3 to `Ironclad Sanctions Entity Inc` via `Marcus Sterling` -> `Apex Nominees Ltd` |
-| `Silverline Capital Management Ltd` | `review` | `review` | Nominee Officer Hub `John Alexander Vance` (50+ shells) |
-| `Orion Global Logistics Corp` | `review` | `review` | Address Hub `Suite 301, St. James Court` (60+ companies) |
-| `Solitary Enterprises Ltd` | `clear` | `clear` | Clean solitary entity with 1 address |
+| `GLAISDALE LIMITED` | `clear` | `escalate` | Flips at depth 4 to `DOM Limited` via `Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` |
+| `Millex International Limited` | `review` | `review` | Nominee Officer Hub, Intermediary Hub (Medium/Low; never escalates) |
+| `OMNIA TECHNOLOGIES S.A.` | `clear` | `clear` | Connected entity with no high-risk hubs or watchlist connections |
+| `Dewburn Enterprises Inc.` | `insufficient_evidence` | `insufficient_evidence` | Low-link entity (degree 1 < MIN_LINKS=2) |

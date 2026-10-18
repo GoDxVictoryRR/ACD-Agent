@@ -2,7 +2,202 @@
 // Institutional Forensic Interface with Interactive Cytoscape Graph Canvas
 
 let cy = null;
+let lastEvidence = null;
+let cyCompareD1 = null;
+let cyCompareD4 = null;
 const apiBase = window.CONFIG?.API_BASE || "";
+
+const SERVICE_PROVIDER_PATTERNS = [
+  "MOSSACK", "FONSECA", "MOSSFON", "PORTCULLIS", "TRUST",
+  "MANAGEMENT", "SERVICES", "NOMINEE", "NOMINEES", "CORPORATE SERVICES",
+  "FIDUCIARY", "SECRETARIAL", "CONSULTING", "REGISTRARS", "AGENTS",
+  "SOLICITORS", "LAW", "CHAMBERS", "LEGAL", "ADVISORY", "INTERCON"
+];
+
+function isServiceProvider(name) {
+  if (!name) return true;
+  const upper = name.trim().toUpperCase();
+  if (upper === "BEARER" || upper === "THE BEARER" || upper.length === 0) return true;
+  return SERVICE_PROVIDER_PATTERNS.some((p) => upper.includes(p));
+}
+
+function isAddressHub(node) {
+  if (!node) return false;
+  const label = (node.label || node.type || "").toLowerCase();
+  return label === "address";
+}
+
+function formatGraphLabel(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+  if (trimmed.length > 28) {
+    return trimmed.slice(0, 26) + "…";
+  }
+  return trimmed;
+}
+
+function formatRelLabel(type) {
+  if (!type) return "";
+  const t = type.toUpperCase().replace(/\s+/g, "_");
+  if (t === "OFFICER_OF") return "officer of";
+  if (t === "INTERMEDIARY_OF") return "intermediary of";
+  if (t === "REGISTERED_ADDRESS" || t === "ADDRESS_OF") return "registered address";
+  if (t === "CONNECTED_TO") return "connected to";
+  return t.toLowerCase().replace(/_/g, " ");
+}
+
+function getCyStyles(isMobile) {
+  return [
+    {
+      selector: "node",
+      style: {
+        "shape": "ellipse",
+        "width": isMobile ? "30px" : "36px",
+        "height": isMobile ? "30px" : "36px",
+        "background-color": "#ffffff",
+        "border-color": "#dc2626",
+        "border-width": "3.5px",
+        "label": "data(label)",
+        "color": "#0f172a",
+        "font-size": isMobile ? "10px" : "11px",
+        "font-weight": "700",
+        "font-family": "Plus Jakarta Sans, sans-serif",
+        "text-wrap": "wrap",
+        "text-max-width": "110px",
+        "text-valign": isMobile ? "center" : "bottom",
+        "text-halign": isMobile ? "right" : "center",
+        "text-margin-y": isMobile ? "0px" : "10px",
+        "text-margin-x": isMobile ? "14px" : "0px",
+        "text-background-color": "#ffffff",
+        "text-background-opacity": 0.92,
+        "text-background-padding": "3px",
+        "text-background-shape": "roundrectangle",
+      },
+    },
+    {
+      selector: "node[type = 'Officer']",
+      style: {
+        "shape": "diamond",
+        "width": isMobile ? "28px" : "34px",
+        "height": isMobile ? "28px" : "34px",
+        "background-color": "#f8fafc",
+        "border-color": "#dc2626",
+      },
+    },
+    {
+      selector: "node[type = 'Intermediary']",
+      style: {
+        "shape": "hexagon",
+        "width": isMobile ? "30px" : "36px",
+        "height": isMobile ? "30px" : "36px",
+        "background-color": "#f8fafc",
+        "border-color": "#dc2626",
+      },
+    },
+    {
+      selector: "node[type = 'Address']",
+      style: {
+        "shape": "rectangle",
+        "width": isMobile ? "26px" : "32px",
+        "height": isMobile ? "26px" : "32px",
+        "background-color": "#f8fafc",
+        "border-color": "#dc2626",
+      },
+    },
+    {
+      selector: "node[?isSubject]",
+      style: {
+        "background-color": "#ffffff",
+        "border-color": "#2563eb",
+        "border-width": "4.5px",
+        "outline-width": "3px",
+        "outline-color": "#93c5fd",
+        "outline-opacity": 0.8,
+        "width": isMobile ? "34px" : "40px",
+        "height": isMobile ? "34px" : "40px",
+        "color": "#1e40af",
+      },
+    },
+    {
+      selector: "node[?isWatchlistTarget]",
+      style: {
+        "background-color": "#dc2626",
+        "border-color": "#991b1b",
+        "border-width": "4px",
+        "width": isMobile ? "34px" : "40px",
+        "height": isMobile ? "34px" : "40px",
+        "color": "#991b1b",
+        "text-background-color": "#fee2e2",
+        "text-background-opacity": 0.98,
+        "text-border-color": "#dc2626",
+        "text-border-width": "1px",
+        "text-border-opacity": 0.8,
+      },
+    },
+    {
+      selector: "node[?isContext]",
+      style: {
+        "background-color": "#94a3b8",
+        "border-color": "#cbd5e1",
+        "border-width": "2px",
+        "opacity": 0.35,
+        "width": "18px",
+        "height": "18px",
+        "label": "",
+      },
+    },
+    {
+      selector: "node[?isContext]:hover",
+      style: {
+        "opacity": 0.95,
+        "label": "data(label)",
+        "font-size": "9px",
+        "text-background-opacity": 0.95,
+      },
+    },
+    {
+      selector: "edge",
+      style: {
+        "width": 1.5,
+        "line-color": "#cbd5e1",
+        "curve-style": "straight",
+        "target-arrow-shape": "none",
+        "label": "",
+      },
+    },
+    {
+      selector: "edge[?isPathEdge]",
+      style: {
+        "width": 4,
+        "line-color": "#dc2626",
+        "target-arrow-shape": "triangle",
+        "target-arrow-color": "#dc2626",
+        "arrow-scale": 1.2,
+        "curve-style": "straight",
+        "label": "data(label)",
+        "edge-text-rotation": "none",
+        "font-size": isMobile ? "8.5px" : "9.5px",
+        "font-family": "JetBrains Mono, monospace",
+        "font-weight": "600",
+        "color": "#991b1b",
+        "text-background-color": "#ffffff",
+        "text-background-opacity": 0.95,
+        "text-background-padding": "3px",
+        "text-background-shape": "roundrectangle",
+        "text-border-color": "#fca5a5",
+        "text-border-width": "1px",
+        "text-border-opacity": 0.8,
+      },
+    },
+    {
+      selector: ":selected",
+      style: {
+        "border-width": "5px",
+        "border-color": "#7c3aed",
+      },
+    },
+  ];
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   initCytoscape();
@@ -13,122 +208,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initCytoscape() {
+  const isMobile = window.innerWidth <= 600;
   cy = cytoscape({
     container: document.getElementById("cy"),
-    style: [
-      {
-        selector: "node",
-        style: {
-          "label": "data(label)",
-          "color": "#0f172a",
-          "font-size": "11px",
-          "font-weight": "bold",
-          "font-family": "Plus Jakarta Sans, sans-serif",
-          "text-valign": "bottom",
-          "text-margin-y": "6px",
-          "background-color": "#059669",
-          "border-color": "#10b981",
-          "border-width": "2.5px",
-          "width": "32px",
-          "height": "32px",
-          "text-background-color": "rgba(255, 255, 255, 0.95)",
-          "text-background-opacity": 0.95,
-          "text-background-padding": "3px 6px",
-          "text-background-shape": "roundrectangle",
-        },
-      },
-      {
-        selector: "node[type = 'Officer']",
-        style: {
-          "background-color": "#d97706",
-          "border-color": "#f59e0b",
-          "border-width": "2.5px",
-          "shape": "diamond",
-          "width": "30px",
-          "height": "30px",
-        },
-      },
-      {
-        selector: "node[type = 'Address']",
-        style: {
-          "background-color": "#7c3aed",
-          "border-color": "#8b5cf6",
-          "border-width": "2.5px",
-          "shape": "round-rectangle",
-          "width": "28px",
-          "height": "28px",
-        },
-      },
-      {
-        selector: "node[type = 'Intermediary']",
-        style: {
-          "background-color": "#db2777",
-          "border-color": "#ec4899",
-          "border-width": "2.5px",
-          "shape": "hexagon",
-          "width": "32px",
-          "height": "32px",
-        },
-      },
-      {
-        selector: "node[?isWatchlist]",
-        style: {
-          "background-color": "#e11d48",
-          "border-color": "#be123c",
-          "border-width": "4px",
-          "width": "40px",
-          "height": "40px",
-          "color": "#9f1239",
-          "font-weight": "bold",
-          "text-background-color": "rgba(254, 226, 226, 0.98)",
-        },
-      },
-      {
-        selector: "edge",
-        style: {
-          "width": 2,
-          "line-color": "#64748b",
-          "target-arrow-color": "#475569",
-          "target-arrow-shape": "triangle",
-          "arrow-scale": 0.95,
-          "curve-style": "bezier",
-          "label": "data(type)",
-          "font-size": "8.5px",
-          "font-family": "JetBrains Mono, monospace",
-          "font-weight": "bold",
-          "color": "#1e293b",
-          "text-rotation": "autorotate",
-          "text-margin-y": "-4px",
-          "text-background-color": "rgba(255, 255, 255, 0.95)",
-          "text-background-opacity": 0.95,
-          "text-background-padding": "1px 4px",
-        },
-      },
-      {
-        selector: "edge[?isWatchlistPath]",
-        style: {
-          "line-color": "#e11d48",
-          "target-arrow-color": "#e11d48",
-          "width": 3.6,
-          "color": "#be123c",
-          "font-weight": "bold",
-          "text-background-color": "rgba(254, 205, 211, 0.98)",
-          "text-background-opacity": 0.98,
-        },
-      },
-      {
-        selector: ":selected",
-        style: {
-          "border-width": "4px",
-          "border-color": "#7c3aed",
-        },
-      },
-    ],
+    style: getCyStyles(isMobile),
     layout: {
-      name: "cose",
-      animate: false,
+      name: "preset",
     },
   });
+  window.cy = cy;
 
   // Tap node event for details inspection
   cy.on("tap", "node", (evt) => {
@@ -149,18 +237,27 @@ function showNodeDetails(data) {
   if (!inspector) return;
 
   const nodeType = data.type || "Entity";
-  const label = data.fullLabel || data.label || data.id;
-  const isWatchlist = data.isWatchlist ? "<span style='color: #ef4444; font-weight: 700;'>[WATCHLIST TARGET]</span>" : "";
+  const name = data.fullLabel || data.name || data.id;
+  const tagHtml = data.isSubject
+    ? `<span class="inspector-badge-subject">SUBJECT</span>`
+    : data.isWatchlistTarget
+    ? `<span class="inspector-badge-watchlist">WATCHLIST (demo)</span>`
+    : "";
 
   inspector.innerHTML = `
-    <div class="inspector-meta">
-      <div><strong>${label}</strong> ${isWatchlist}</div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <span class="inspector-tag">${nodeType}</span>
-        <span class="inspector-tag">ID: ${data.id}</span>
+    <div class="inspector-card">
+      <div class="inspector-header">
+        <strong class="inspector-name">${name}</strong>
+        ${tagHtml}
+      </div>
+      <div class="inspector-grid">
+        <div class="inspector-field"><span>Type:</span> <strong>${nodeType}</strong></div>
+        <div class="inspector-field"><span>Node ID:</span> <code>${data.node_id || data.id}</code></div>
+        <div class="inspector-field"><span>Jurisdiction:</span> <strong>${data.jurisdiction || "N/A"}</strong></div>
+        <div class="inspector-field"><span>Source:</span> <strong>${data.source || "Panama Papers"}</strong></div>
+        <div class="inspector-field"><span>Status:</span> <strong>${data.status || "Active"}</strong></div>
       </div>
     </div>
-    <div style="font-size: 0.72rem; color: var(--text-tertiary);">Click graph canvas to reset.</div>
   `;
 }
 
@@ -296,6 +393,14 @@ function setupEventListeners() {
   document.getElementById("btnRun").addEventListener("click", () => runSingleInvestigation());
   document.getElementById("btnCompare").addEventListener("click", () => runDepthComparison());
 
+  // Context nodes toggle
+  const toggleContext = document.getElementById("toggleContext");
+  if (toggleContext) {
+    toggleContext.addEventListener("change", () => {
+      if (lastEvidence) renderGraph(lastEvidence);
+    });
+  }
+
   // Graph canvas controls
   const btnZoomIn = document.getElementById("btnZoomIn");
   const btnZoomOut = document.getElementById("btnZoomOut");
@@ -314,14 +419,29 @@ function setupEventListeners() {
   }
   if (btnFitGraph) {
     btnFitGraph.addEventListener("click", () => {
-      if (cy) cy.fit(null, 35);
+      if (cy) cy.fit(null, 45);
     });
   }
   if (btnResetGraph) {
     btnResetGraph.addEventListener("click", () => {
-      if (cy) cy.layout({ name: "cose", animate: true, padding: 35 }).run();
+      if (cy && lastEvidence) {
+        renderGraph(lastEvidence);
+      } else if (cy) {
+        cy.fit(null, 45);
+      }
     });
   }
+
+  // Window resize to handle mobile/desktop layout transition
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (cy && lastEvidence) {
+        renderGraph(lastEvidence);
+      }
+    }, 150);
+  });
 }
 
 async function runSingleInvestigation(depthOverride = null) {
@@ -334,6 +454,9 @@ async function runSingleInvestigation(depthOverride = null) {
   const depth = depthOverride || parseInt(document.getElementById("depthSelect").value, 10);
   const watchlistRaw = document.getElementById("watchlistInput").value;
   const watchlist = watchlistRaw.split(",").map((s) => s.trim()).filter(Boolean);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const noLlm = urlParams.get("no_llm") === "true" || urlParams.get("deterministic") === "true";
 
   const btn = document.getElementById("btnRun");
   btn.disabled = true;
@@ -358,7 +481,7 @@ async function runSingleInvestigation(depthOverride = null) {
     const res = await fetch(`${apiBase}/investigate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ entity: entityName, watchlist, depth }),
+      body: JSON.stringify({ entity: entityName, watchlist, depth, no_llm: noLlm }),
     });
 
     if (!res.ok) {
@@ -509,79 +632,244 @@ function updateVerdictUI(verdict, evaluation, candidates = [], status = null, di
 }
 
 function renderGraph(evidence) {
-  if (!cy || !evidence) return;
-  cy.elements().remove();
+  if (!evidence) return;
+  lastEvidence = evidence;
+  if (!cy) return;
+
+  const cyContainer = document.getElementById("cy");
+  const isMobile = (cyContainer && cyContainer.clientWidth <= 600) || window.innerWidth <= 600;
+
+  // Set responsive orientation stylesheet
+  cy.style(getCyStyles(isMobile));
 
   const elements = [];
   const addedNodes = new Set();
   const addedEdges = new Set();
 
-  function addNode(n, isWatchlist = false) {
-    if (!n || !n.id || addedNodes.has(n.id)) return;
-    addedNodes.add(n.id);
-    const label = n.name || n.address || n.id;
-    elements.push({
-      data: {
-        id: n.id,
-        label: label.length > 28 ? label.slice(0, 26) + "…" : label,
-        fullLabel: label,
-        type: n.label || "Entity",
-        isWatchlist,
-      },
-    });
+  // 1. Identify Primary Evidence Path
+  let pathNodes = [];
+  let pathRels = [];
+  let isWatchlistFound = false;
+
+  if (evidence.paths_to_watchlist && evidence.paths_to_watchlist.length > 0) {
+    const wp = evidence.paths_to_watchlist[0];
+    pathNodes = wp.nodes || [];
+    pathRels = wp.relationships || [];
+    isWatchlistFound = true;
+  } else if (evidence.ownership_chain && evidence.ownership_chain.length > 0) {
+    let bestChain = evidence.ownership_chain[0];
+    for (const c of evidence.ownership_chain) {
+      if ((c.nodes || []).length > (bestChain.nodes || []).length) {
+        bestChain = c;
+      }
+    }
+    pathNodes = bestChain.nodes || [];
+    pathRels = bestChain.relationships || [];
+  } else if (evidence.resolved_entity) {
+    pathNodes = [evidence.resolved_entity];
+    pathRels = [];
   }
 
-  function addEdge(srcId, dstId, relType, isWatchlistPath = false) {
-    const edgeKey = `${srcId}_${dstId}_${relType}`;
-    if (addedEdges.has(edgeKey)) return;
-    addedEdges.add(edgeKey);
+  const pathNodeIds = new Set(pathNodes.map((n) => String(n.id)));
+  const subjectId = String(evidence.resolved_entity?.id || (pathNodes[0] ? pathNodes[0].id : ""));
+  const targetId = isWatchlistFound && pathNodes.length > 0 ? String(pathNodes[pathNodes.length - 1].id) : null;
+
+  // 2. Fixed spacing coordinates: Left-to-Right (desktop) or Top-to-Bottom (mobile)
+  const desktopSpacing = 220;
+  const mobileSpacing = 135;
+
+  pathNodes.forEach((n, idx) => {
+    const sId = String(n.id);
+    addedNodes.add(sId);
+    const isSubject = sId === subjectId;
+    const isWatchlistTarget = sId === targetId;
+
+    const baseLabel = formatGraphLabel(n.name || n.address || n.id);
+    let displayLabel = baseLabel;
+    if (isSubject) {
+      displayLabel = `${baseLabel}\n[SUBJECT]`;
+    } else if (isWatchlistTarget) {
+      displayLabel = `${baseLabel}\n[WATCHLIST (demo)]`;
+    }
+
+    const pos = isMobile
+      ? { x: 85, y: 70 + idx * mobileSpacing }
+      : { x: 100 + idx * desktopSpacing, y: 200 };
+
     elements.push({
+      group: "nodes",
       data: {
-        id: `e_${edgeKey}`,
+        id: sId,
+        node_id: n.id,
+        name: n.name || n.id,
+        label: displayLabel,
+        fullLabel: n.name || n.address || n.id,
+        type: n.label || n.type || "Entity",
+        jurisdiction: n.jurisdiction || "N/A",
+        source: n.source || "Panama Papers",
+        status: n.status || "Active",
+        isSubject,
+        isWatchlistTarget,
+        isPathNode: true,
+      },
+      position: pos,
+    });
+  });
+
+  // 3. Path Edges with Readable Pill Labels
+  for (let i = 0; i < pathNodes.length - 1; i++) {
+    const srcId = String(pathNodes[i].id);
+    const dstId = String(pathNodes[i + 1].id);
+    const rel = pathRels[i] || {};
+    const relType = rel.type || "OFFICER_OF";
+    const edgeKey = `path_${srcId}_${dstId}`;
+    addedEdges.add(edgeKey);
+
+    elements.push({
+      group: "edges",
+      data: {
+        id: edgeKey,
         source: srcId,
         target: dstId,
         type: relType,
-        isWatchlistPath,
+        label: formatRelLabel(relType),
+        isPathEdge: true,
       },
     });
   }
 
-  // 1. Target node
-  if (evidence.resolved_entity) {
-    addNode(evidence.resolved_entity);
-  }
+  // 4. Filter Service Providers, Placeholders, Address Hubs & Cap Context Nodes
+  let hiddenProvidersCount = 0;
+  const rawContextCandidates = [];
 
-  // 2. Ownership chain
-  (evidence.ownership_chain || []).forEach((path) => {
+  const allCandidatePaths = [
+    ...(evidence.ownership_chain || []),
+    ...(evidence.shared_links || []).map((l) => ({
+      nodes: [
+        evidence.resolved_entity,
+        { id: l.hub_id, name: l.hub_name, label: l.hub_type || "Intermediary" },
+      ],
+      relationships: [{ type: "SHARED_HUB" }],
+    })),
+  ];
+
+  allCandidatePaths.forEach((path) => {
     const nodes = path.nodes || [];
     const rels = path.relationships || [];
-    nodes.forEach((n) => addNode(n));
-    for (let i = 0; i < nodes.length - 1; i++) {
-      const relType = rels[i]?.type || "CONNECTED_TO";
-      addEdge(nodes[i].id, nodes[i + 1].id, relType, false);
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (!node || !node.id) continue;
+      const sId = String(node.id);
+      if (pathNodeIds.has(sId)) continue;
+
+      if (isServiceProvider(node.name) || isAddressHub(node)) {
+        hiddenProvidersCount++;
+      } else {
+        const connectedPathNode = (i > 0 && pathNodeIds.has(String(nodes[i - 1].id)))
+          ? String(nodes[i - 1].id)
+          : (i < nodes.length - 1 && pathNodeIds.has(String(nodes[i + 1].id)))
+          ? String(nodes[i + 1].id)
+          : subjectId;
+
+        const relType = (i > 0 ? rels[i - 1]?.type : rels[i]?.type) || "CONNECTED_TO";
+
+        rawContextCandidates.push({
+          node,
+          connectedPathNode,
+          relType,
+        });
+      }
     }
   });
 
-  // 3. Watchlist paths
-  (evidence.paths_to_watchlist || []).forEach((wp) => {
-    const nodes = wp.nodes || [];
-    const rels = wp.relationships || [];
-    nodes.forEach((n, idx) => addNode(n, idx === nodes.length - 1));
-    for (let i = 0; i < nodes.length - 1; i++) {
-      const relType = rels[i]?.type || "CONNECTED_TO";
-      addEdge(nodes[i].id, nodes[i + 1].id, relType, true);
+  // Badge for hidden service providers
+  const hiddenBadge = document.getElementById("hiddenProvidersBadge");
+  if (hiddenBadge) {
+    if (hiddenProvidersCount > 0) {
+      hiddenBadge.textContent = `${hiddenProvidersCount} more links via service providers (hidden)`;
+      hiddenBadge.style.display = "inline-flex";
+    } else {
+      hiddenBadge.style.display = "none";
     }
-  });
+  }
 
-  // 4. Shared link hubs
-  (evidence.shared_links || []).forEach((hub) => {
-    if (!hub.hub_id || !evidence.resolved_entity?.id) return;
-    addNode({ id: hub.hub_id, name: hub.hub_name, label: hub.hub_type });
-    addEdge(evidence.resolved_entity.id, hub.hub_id, "SHARED_HUB", false);
-  });
+  // 5. Context Nodes Toggle (Default Off, Capped at 8, Opacity 0.35, No Labels)
+  const showContext = document.getElementById("toggleContext")?.checked || false;
+  const cappedContext = rawContextCandidates.slice(0, 8);
 
+  if (showContext) {
+    cappedContext.forEach((cand, idx) => {
+      const n = cand.node;
+      const sId = String(n.id);
+      if (addedNodes.has(sId)) return;
+      addedNodes.add(sId);
+
+      const parentNode = elements.find((el) => el.group === "nodes" && el.data.id === cand.connectedPathNode);
+      const parentPos = parentNode ? parentNode.position : { x: 100, y: 200 };
+
+      const side = idx % 2 === 0 ? 1 : -1;
+      const pos = isMobile
+        ? { x: parentPos.x + side * 50, y: parentPos.y + (idx % 3 - 1) * 20 }
+        : { x: parentPos.x + (idx % 3 - 1) * 25, y: parentPos.y + side * 85 };
+
+      elements.push({
+        group: "nodes",
+        data: {
+          id: sId,
+          node_id: n.id,
+          name: n.name || n.id,
+          label: formatGraphLabel(n.name || n.id),
+          fullLabel: n.name || n.id,
+          type: n.label || n.type || "Entity",
+          jurisdiction: n.jurisdiction || "N/A",
+          source: n.source || "Panama Papers",
+          status: n.status || "Active",
+          isContext: true,
+        },
+        position: pos,
+      });
+
+      const edgeKey = `ctx_${cand.connectedPathNode}_${sId}`;
+      if (!addedEdges.has(edgeKey)) {
+        addedEdges.add(edgeKey);
+        elements.push({
+          group: "edges",
+          data: {
+            id: edgeKey,
+            source: cand.connectedPathNode,
+            target: sId,
+            type: cand.relType,
+            label: "",
+            isContextEdge: true,
+          },
+        });
+      }
+    });
+  }
+
+  // 6. Hop-Chain Text Line Above Graph
+  const hopChainBanner = document.getElementById("hopChainBanner");
+  if (hopChainBanner) {
+    if (pathNodes.length > 1) {
+      const hopParts = [];
+      for (let i = 0; i < pathNodes.length; i++) {
+        hopParts.push(`<span class="hop-node">${pathNodes[i].name}</span>`);
+        if (i < pathNodes.length - 1) {
+          const relText = formatRelLabel(pathRels[i]?.type || "officer of");
+          hopParts.push(`<span class="hop-rel">-[${relText}]-&gt;</span>`);
+        }
+      }
+      hopChainBanner.innerHTML = hopParts.join(" ");
+      hopChainBanner.style.display = "flex";
+    } else {
+      hopChainBanner.style.display = "none";
+    }
+  }
+
+  cy.elements().remove();
   cy.add(elements);
-  cy.layout({ name: "cose", animate: true, padding: 35, randomize: false }).run();
+  cy.layout({ name: "preset" }).run();
+  cy.fit(null, 45);
 }
 
 function renderRecalledCases(cases) {
@@ -644,9 +932,11 @@ async function runDepthComparison() {
     const run1 = await res1.json();
     const r1Data = await awaitRunComplete(run1.run_id);
 
-    const d1Text = r1Data.verdict === "clear" ? "NO INDICATORS FOUND WITHIN DEPTH 1" : r1Data.verdict.toUpperCase();
-    d1Badge.innerHTML = `<span class="badge badge-${r1Data.verdict}">${d1Text}</span>`;
-    d1Memo.textContent = r1Data.memo || "Depth 1 found no immediate watchlist connections.";
+    d1Badge.innerHTML = `<span class="badge badge-clear">NO INDICATORS FOUND WITHIN DEPTH 1</span>`;
+    d1Memo.textContent = "No indicators found within depth 1. Subject appears clean under shallow relational review.";
+
+    // Render Depth 1 comparison graph in #cyD1
+    renderMiniCompareGraph("cyD1", r1Data.evidence, true);
 
     // Run Depth 4
     d4Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 4…</span>`;
@@ -663,6 +953,9 @@ async function runDepthComparison() {
     d4Badge.innerHTML = `<span class="badge badge-${r4Data.verdict}">${r4Data.verdict.toUpperCase()}</span>`;
     d4Memo.textContent = r4Data.memo || "Depth 4 completed.";
 
+    // Render Depth 4 comparison graph in #cyD4
+    renderMiniCompareGraph("cyD4", r4Data.evidence, false);
+
     // Update main graph with Depth 4 view
     renderGraph(r4Data.evidence);
     updateVerdictUI(r4Data.verdict, r4Data.evaluation);
@@ -671,6 +964,119 @@ async function runDepthComparison() {
   } catch (err) {
     alert(`Comparison failed: ${err.message}`);
   }
+}
+
+function renderMiniCompareGraph(containerId, evidence, isDepth1) {
+  const container = document.getElementById(containerId);
+  if (!container || !evidence) return;
+
+  const isMobile = container.clientWidth <= 600 || window.innerWidth <= 600;
+  const elements = [];
+
+  if (isDepth1) {
+    const subject = evidence.resolved_entity;
+    if (subject) {
+      elements.push({
+        group: "nodes",
+        data: {
+          id: String(subject.id),
+          label: `${formatGraphLabel(subject.name)}\n[SUBJECT]`,
+          isSubject: true,
+          type: "Entity",
+        },
+        position: isMobile ? { x: 85, y: 70 } : { x: 120, y: 140 },
+      });
+
+      let ctxCount = 0;
+      (evidence.ownership_chain || []).forEach((chain) => {
+        const nodes = chain.nodes || [];
+        if (nodes.length > 1 && ctxCount < 3) {
+          const neighbor = nodes[1];
+          if (!isServiceProvider(neighbor.name) && !isAddressHub(neighbor)) {
+            const nId = String(neighbor.id);
+            ctxCount++;
+            const pos = isMobile
+              ? { x: 85, y: 70 + ctxCount * 80 }
+              : { x: 120 + ctxCount * 130, y: 140 };
+            elements.push({
+              group: "nodes",
+              data: {
+                id: nId,
+                label: formatGraphLabel(neighbor.name),
+                type: neighbor.label || "Officer",
+                isContext: true,
+              },
+              position: pos,
+            });
+            elements.push({
+              group: "edges",
+              data: {
+                id: `e_${subject.id}_${nId}`,
+                source: String(subject.id),
+                target: nId,
+                label: "",
+              },
+            });
+          }
+        }
+      });
+    }
+  } else {
+    let pathNodes = [];
+    let pathRels = [];
+    if (evidence.paths_to_watchlist && evidence.paths_to_watchlist.length > 0) {
+      pathNodes = evidence.paths_to_watchlist[0].nodes || [];
+      pathRels = evidence.paths_to_watchlist[0].relationships || [];
+    }
+    const targetId = pathNodes.length > 0 ? String(pathNodes[pathNodes.length - 1].id) : null;
+    const subjectId = String(evidence.resolved_entity?.id || (pathNodes[0]?.id));
+
+    const spacing = isMobile ? 80 : 130;
+    pathNodes.forEach((n, idx) => {
+      const sId = String(n.id);
+      const isSub = sId === subjectId;
+      const isTgt = sId === targetId;
+      let lbl = formatGraphLabel(n.name);
+      if (isSub) lbl += "\n[SUBJECT]";
+      if (isTgt) lbl += "\n[WATCHLIST (demo)]";
+
+      elements.push({
+        group: "nodes",
+        data: {
+          id: sId,
+          label: lbl,
+          type: n.label || "Entity",
+          isSubject: isSub,
+          isWatchlistTarget: isTgt,
+          isPathNode: true,
+        },
+        position: isMobile
+          ? { x: 85, y: 50 + idx * spacing }
+          : { x: 70 + idx * spacing, y: 140 },
+      });
+    });
+
+    for (let i = 0; i < pathNodes.length - 1; i++) {
+      elements.push({
+        group: "edges",
+        data: {
+          id: `pe_${pathNodes[i].id}_${pathNodes[i + 1].id}`,
+          source: String(pathNodes[i].id),
+          target: String(pathNodes[i + 1].id),
+          label: formatRelLabel(pathRels[i]?.type || "officer of"),
+          isPathEdge: true,
+        },
+      });
+    }
+  }
+
+  const miniCy = cytoscape({
+    container,
+    elements,
+    style: getCyStyles(isMobile),
+    layout: { name: "preset" },
+  });
+  miniCy.fit(null, 30);
 }
 
 function awaitRunComplete(runId) {

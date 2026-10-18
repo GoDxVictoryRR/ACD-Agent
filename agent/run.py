@@ -2,9 +2,9 @@
 agent/run.py — CLI entrypoint for running an entity investigation.
 
 Usage:
-    python -m agent.run --entity "Blue Star Maritime Holdings Ltd" --depth 3
-    python -m agent.run --entity "Silverline Capital Management Ltd" --no-llm
-    python -m agent.run --entity "Orion Global Logistics Corp" --watchlist data/demo.json --save-replay
+    python -m agent.run --entity "GLAISDALE LIMITED" --depth 4
+    python -m agent.run --entity "Millex International Limited" --no-llm
+    python -m agent.run --entity "OMNIA TECHNOLOGIES S.A." --watchlist data/demo.json --save-replay
 """
 
 from __future__ import annotations

@@ -13,8 +13,20 @@
 5. **Observation**:
    - **Depth 1 Panel**: Verdict is **CLEAR** (`"No exposure indicators found within depth 1"`). The entity has 5 registry links (directors and addresses), but zero watchlist paths exist in 1 hop.
    - **Depth 4 Panel**: Verdict flips to **ESCALATE**!
-   - Look at the Cytoscape graph canvas: A bright red highlighted exposure path appears:
-     `GLAISDALE LIMITED (Entity 10024477) -[OFFICER_OF]-> Rachel Erickson (Officer 12116679) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity 10028037) -[OFFICER_OF]-> ANDREW MORAY STUART (Officer 12151058) -[OFFICER_OF]-> DOM Limited (Watchlist Entity 10189122)`.
+   - Look at the redesigned Network Topology Graph:
+     - A readable **hop-chain text line** above the graph displays the exact path:
+       `GLAISDALE LIMITED -[officer of]-> Rachel Erickson -[officer of]-> NEWCOMBE LIMITED -[officer of]-> ANDREW MORAY STUART -[officer of]-> DOM Limited`
+     - The path is placed strictly left-to-right (top-to-bottom on mobile) with fixed spacing, preventing label overlaps.
+     - Path edges are highlighted in vivid red (`#dc2626`, width 4) with directional arrowheads; path nodes have red borders.
+     - `GLAISDALE LIMITED` has a blue focus ring and `[SUBJECT]` tag; `DOM Limited` is filled red with a `[WATCHLIST (demo)]` tag.
+     - Direct context nodes are capped at 8 and hidden behind the "Show context" toggle by default.
+     - Mass administrative service providers are excluded, with a badge showing `"N more links via service providers (hidden)"`.
+     - Clicking any node opens the detail inspector panel displaying its name, type, jurisdiction, node ID, source, and status.
+
+   ![Primary Demo Desktop](screens/primary_demo_desktop.png)
+   ![Contrast Comparison D1 vs D4](screens/contrast_comparison_desktop.png)
+   ![Primary Demo Mobile 390px](screens/primary_demo_mobile.png)
+
    - **Takeaway**: Relational lookups and shallow 1-hop checks completely miss the risk. Only multi-hop graph traversal through FalkorDB uncovers the hidden control path. This path passes through zero intermediaries and zero mass-address hubs—it is an authentic corporate directorship chain. A degree-matched control cohort of 30 shell companies shows 0.0% connectivity to DOM Limited.
 
 ---

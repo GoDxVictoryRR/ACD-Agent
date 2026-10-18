@@ -5,7 +5,7 @@
 ---
 
 ### 1. Which verdict would a domain expert call wrong, and why? Is the language accusatory anywhere?
-- **Audit Finding**: In early iterations of graph agents, developers often classify entities as "fraudulent" or "guilty" based purely on graph distance. In financial compliance, being 3 hops from a sanctioned entity is an exposure risk requiring Enhanced Due Diligence (EDD), not proof of illegality.
+- **Audit Finding**: In early iterations of graph agents, developers often classify entities as "fraudulent" or "guilty" based purely on graph distance. In financial compliance, being 3 hops from a watchlisted entity is an exposure risk requiring Enhanced Due Diligence (EDD), not proof of illegality.
 - **Resolution**: Every user-facing string across the UI, rules, and prompts uses calibrated regulatory phrasing: *"exposure indicators requiring human review"*. The words "fraud", "criminal", and "guilty" are strictly prohibited and tested for in the unit test suite.
 
 ### 2. Where does the product still work if FalkorDB is removed?
@@ -20,8 +20,8 @@
   - Geographic A* was evaluated and discarded because corporate ownership networks are topological, not geographic.
 
 ### 4. Which claims in the README or UI are not demonstrated by a test or demo case?
-- **Audit Finding**: The claim that "Depth 1 vs Depth 3 flips the verdict" must be verified across both tests and live data.
-- **Resolution**: Verified by `tests/regression/test_regression.py` on `Blue Star Maritime Holdings Ltd` (Depth 1 = `insufficient_evidence` / `clear`; Depth 3 = `escalate`). Demonstrated interactively by the "Compare D1 vs D3" button in the UI.
+- **Audit Finding**: The claim that "Depth 1 vs Depth 4 flips the verdict" must be verified across both tests and live data.
+- **Resolution**: Verified by `tests/regression/test_regression.py` on `GLAISDALE LIMITED` (Depth 1 = `clear`; Depth 4 = `escalate`). Demonstrated interactively by the "Compare D1 vs D4" button in the UI.
 
 ### 5. What breaks under 5 judges clicking at once?
 - **Audit Finding**: A burst of simultaneous requests could exceed LLM rate limits or exhaust Render's 512MB RAM.

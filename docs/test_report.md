@@ -872,3 +872,165 @@ tests/test_injection.py::test_real_prompt_injection_immunity PASSED
 - Deployed Model: `nvidia/llama-3.3-nemotron-super-49b-v1.5`.
 - Rate-limit retries: 0 (0% retry rate).
 - Memo verification: Template fallback triggered automatically on unverified LLM entity names, completely preventing hallucinations.
+
+---
+
+## 11. Graph Redesign & Visual Verification Pass (Items G1–G5)
+
+### 11.1 G1: Network Graph Redesign Verification
+**Target Files**: `web/app.js`, `web/style.css`, `web/index.html`
+**Container**: `ownership-lens-app` (`http://localhost:8000`)
+- Layout: Switched from force-directed (cose) to deterministic preset coordinates.
+  - Desktop: Horizontal chain, spacing S=220px (>= 160px).
+  - Mobile (<= 600px): Vertical chain, spacing S=135px (>= 110px).
+- Content: Path nodes and path edges drawn by default.
+  - Direct context nodes capped at 8, styled small with opacity 0.35, no label except hover, hidden behind "Show context" toggle (default off).
+  - Service providers, placeholders, and address hubs excluded; badge rendered: `"N more links via service providers (hidden)"`.
+- Styling: Path edges red (`#dc2626`, width 4, triangle arrowhead). Path nodes have red border. SUBJECT has blue ring and `[SUBJECT]` tag; WATCHLIST target filled red with `[WATCHLIST (demo)]` tag. Neutral director styling.
+- Labels: Wrapped with text background (`#ffffff`, opacity 0.9, padding 3px), names >28 chars shortened with ellipsis (`...`). Edge labels only on path edges as pills, no autorotate, offset from nodes.
+- Hop-chain text line: `#hopChainBanner` rendered above graph.
+- Node click: detail inspector panel (`#nodeInspector`) displaying name, type, jurisdiction, node_id, source, status. Fit and Reset buttons functional.
+- Compare view: Side-by-side on desktop, stacked on mobile (`#cyD1` and `#cyD4`); depth 1 shows subject with direct context and "No indicators found within depth 1"; depth 4 shows red path.
+- Canvas height: Desktop 480px (min 420px), Mobile 420px (min 360px). Zero horizontal scroll at 390px.
+
+### 11.2 G2: Automated Visual Verification (Playwright)
+**Command**: `python scripts/verify_graph_visual.py`
+**Raw output**:
+```
+======================================================================
+AUTOMATED VISUAL VERIFICATION REPORT (G2)
+Entity: GLAISDALE LIMITED (node 10024477) | Target: DOM Limited (Depth 4)
+======================================================================
+
+--- Testing Viewport: DESKTOP (1280x800) ---
+Saved screenshot: C:\Users\hardi\Downloads\ACD-agent\docs\screens\primary_demo_desktop.png
+Graph elements rendered: 5 nodes, 4 edges
+Overlap check: 0 pairwise overlaps found.
+  PASS: Zero pairwise overlaps among rendered bounding boxes.
+Path edges count: 4
+  PASS: Every path edge has the red style (width 4, #dc2626, triangle arrowhead).
+Target nodes found: 1
+  PASS: Target node (DOM Limited) filled red with [WATCHLIST (demo)] tag.
+  PASS: No label is truncated except via documented ellipsis (>28 chars).
+  PASS: Zero console errors.
+
+--- Testing Viewport: MOBILE (390x844) ---
+Saved screenshot: C:\Users\hardi\Downloads\ACD-agent\docs\screens\primary_demo_mobile.png
+Horizontal scroll check at 390px: scrollWidth=390, clientWidth=390
+Graph elements rendered: 5 nodes, 4 edges
+Overlap check: 0 pairwise overlaps found.
+  PASS: Zero pairwise overlaps among rendered bounding boxes.
+Path edges count: 4
+  PASS: Every path edge has the red style (width 4, #dc2626, triangle arrowhead).
+Target nodes found: 1
+  PASS: Target node (DOM Limited) filled red with [WATCHLIST (demo)] tag.
+  PASS: No label is truncated except via documented ellipsis (>28 chars).
+  PASS: Zero console errors.
+
+--- Testing Compare View (D1 vs D4) ---
+Saved comparison screenshot: C:\Users\hardi\Downloads\ACD-agent\docs\screens\contrast_comparison_desktop.png
+Depth 1 Badge Text: 'NO INDICATORS FOUND WITHIN DEPTH 1'
+Depth 4 Badge Text: 'ESCALATE'
+  PASS: Compare view displays Depth 1 clear and Depth 4 escalate side-by-side.
+
+======================================================================
+FINAL RESULT: ALL ASSERTIONS PASSED (PASS)
+======================================================================
+```
+
+### 11.3 G3: Wording Verifications & Parity
+**Fixes Applied**:
+1. `agent/run.py:5`: docstring example updated to `GLAISDALE LIMITED`.
+2. `docs/blog.md:7`: opening paragraph rewritten to describe active demo (`GLAISDALE LIMITED`, depth 1 clear, depth 4 reaches compliance watchlist via chained shared directors; hubs/service providers excluded; "compliance watchlist (demo list chosen by graph criteria)", no individual called nominee, no "serves on fifty boards", talks about companies and structures).
+3. `docs/demo_cases.md:87`: replaced Blue Star row with `GLAISDALE LIMITED` and labelled section "Synthetic Fallback Demo Cases (Reference)".
+4. `docs/review.md:8`: replaced "sanctioned entity" with "watchlisted entity".
+
+**Command**: `git status --short data/seed/nodes-entities.csv`
+**Raw output**:
+```
+(empty - file unmodified)
+```
+
+**Command**: `git grep -n -i -E "sanction|Ironclad|Blue Star|Apex Nominees" -- README.md docs/EXPLAIN.md docs/blog.md docs/demo_runbook.md docs/demo_cases.md docs/review.md agent/run.py`
+**Raw output**:
+```
+(exit code 1 - 0 hits)
+```
+
+**Parity Verification**:
+- `data/demo.json`: `GLAISDALE LIMITED` (id `10024477`), target `DOM Limited` (id `10189122`), depth 4.
+- `README.md`: lines 15, 22, 37-46 match entity, target, depth 4, and path.
+- `docs/EXPLAIN.md`: lines 84-85 match entity, target, depth 4, and path.
+- `docs/demo_runbook.md`: lines 10-20 match entity, target, depth 4, and path.
+
+### 11.4 G4: Benchmark & Live Demo Runs Analysis
+- Evaluated `docs/model_bench.md` and `docs/live_demo_runs.json`.
+- Live LLM latency for one full investigation on `GLAISDALE LIMITED` (Depth 4): **62.4 seconds** (and up to 87.6s across 6 LLM turns).
+- Recommendation: Because live LLM investigation latency exceeds ~30 seconds (62.4s > 30s), **deterministic or replay mode (`?mode=replay`) is recommended for the demo video recording** to guarantee concise pacing within the 3-minute video limit.
+
+### 11.5 G5: Suite & Invariants Raw Verification Outputs
+
+**Command**: `ruff check .`
+**Raw output**:
+```
+All checks passed!
+```
+
+**Command**: `python scripts/check_invariants.py`
+**Raw output**:
+```
+======================================================================
+OWNERSHIP LENS — ARCHITECTURAL INVARIANT CHECKER
+======================================================================
+Verifying the following 6 non-negotiable invariants:
+  * 1. Forbidden library imports (no pandas, langchain, langgraph, graphiti, graphrag)
+  * 2. LLM Cypher isolation (no Cypher queries or clauses in agent/ or prompts)
+  * 3. Read routing verification (all reads via ro_query / ro(); rw() restricted to write tools)
+  * 4. Case / ABOUT / CITED exclusion from read traversals
+  * 5. Git tracked secrets and .env protection
+  * 6. data/raw/ privacy protection (gitignored, untracked raw ICIJ data)
+======================================================================
+
+[CHECK 1/6] Forbidden library imports...
+  PASSED: No forbidden packages found.
+
+[CHECK 2/6] LLM isolation from raw Cypher...
+  PASSED: Zero Cypher patterns in agent/ directory.
+
+[CHECK 3/6] Read routing via ro() / ro_query...
+  PASSED: All read tools strictly use ro().
+
+[CHECK 4/6] Case / ABOUT / CITED exclusion from read traversals...
+  PASSED: Case nodes and ABOUT/CITED edges strictly excluded.
+
+[CHECK 5/6] Git tracked secrets and .env...
+  PASSED: Zero tracked secrets or .env files.
+
+[CHECK 6/6] data/raw/ not tracked by git (ICIJ data protection)...
+  PASSED: data/raw/ is gitignored and untracked.
+======================================================================
+
+[OK] ALL 6 INVARIANTS PASSED VERIFICATION!
+```
+
+**Command**: `pytest -q -rs`
+**Raw output**:
+```
+..................................................                       [100%]
+50 passed in 106.20s (0:01:46)
+```
+
+**Command**: `docker compose up -d --build app`
+**Raw output**:
+```
+ Container falkordb-server Running 
+ Container ownership-lens-app Recreate 
+ Container ownership-lens-app Recreated 
+ Container falkordb-server Waiting 
+ Container falkordb-server Healthy 
+ Container ownership-lens-app Starting 
+ Container ownership-lens-app Started 
+```
+
+**Container Health Verification**:
+`GET http://localhost:8000/health` $\implies$ `200 {"db":"ok","graph":"ready","llm_key":true,"mode":"live","data_source":"icij","data_disclaimer":"ICIJ Offshore Leaks (ODbL/CC BY-SA). Inclusion is not evidence of wrongdoing.","rss_mb":73.9}`

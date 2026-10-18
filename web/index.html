@@ -172,6 +172,7 @@
             </h3>
             <div id="contrastD1Badge" class="contrast-badge-wrapper"></div>
             <p id="contrastD1Memo" class="contrast-memo"></p>
+            <div id="cyD1" class="contrast-cy-canvas" role="region" aria-label="Depth 1 graph view"></div>
           </div>
           <div class="contrast-panel" id="contrastD4">
             <h3>
@@ -182,6 +183,7 @@
             </h3>
             <div id="contrastD4Badge" class="contrast-badge-wrapper"></div>
             <p id="contrastD4Memo" class="contrast-memo"></p>
+            <div id="cyD4" class="contrast-cy-canvas" role="region" aria-label="Depth 4 graph view"></div>
           </div>
         </div>
       </div>
@@ -216,6 +218,10 @@
             <h2>Network Topology View</h2>
           </div>
           <div class="graph-toolbar" role="toolbar" aria-label="Graph navigation controls">
+            <label class="context-toggle-wrapper" id="contextToggleWrapper" title="Toggle secondary context nodes">
+              <input type="checkbox" id="toggleContext">
+              <span>Show context</span>
+            </label>
             <button type="button" class="graph-tool-btn" id="btnZoomIn" aria-label="Zoom in" title="Zoom in">+</button>
             <button type="button" class="graph-tool-btn" id="btnZoomOut" aria-label="Zoom out" title="Zoom out">−</button>
             <button type="button" class="graph-tool-btn" id="btnFitGraph" aria-label="Fit graph to view" title="Fit to view">Fit</button>
@@ -224,12 +230,20 @@
         </div>
         <p class="card-desc" style="margin-top: -0.5rem; margin-bottom: 0.85rem;">Interactive k-hop subnetwork rendered from FalkorDB traversal paths.</p>
 
+        <!-- Hop-chain text line -->
+        <div id="hopChainBanner" class="hop-chain-banner" style="display: none;" aria-label="Evidence hop chain"></div>
+
+        <!-- Hidden service providers badge -->
+        <div id="hiddenProvidersBadge" class="hidden-providers-badge" style="display: none;" aria-live="polite"></div>
+
         <div class="graph-legend" aria-label="Graph legend">
           <div class="legend-item"><span class="legend-marker entity" aria-hidden="true"></span><span>Entity</span></div>
           <div class="legend-item"><span class="legend-marker officer" aria-hidden="true"></span><span>Officer / Director</span></div>
-          <div class="legend-item"><span class="legend-marker intermediary" aria-hidden="true"></span><span>Intermediary Hub</span></div>
-          <div class="legend-item"><span class="legend-marker address" aria-hidden="true"></span><span>Registered Address</span></div>
-          <div class="legend-item"><span class="legend-marker watchlist" aria-hidden="true"></span><span style="color: #fda4af; font-weight: 700;">Watchlist Exposure Path</span></div>
+          <div class="legend-item"><span class="legend-marker intermediary" aria-hidden="true"></span><span>Intermediary</span></div>
+          <div class="legend-item"><span class="legend-marker address" aria-hidden="true"></span><span>Address</span></div>
+          <div class="legend-item"><span class="legend-marker subject-marker" aria-hidden="true"></span><span style="color: #2563eb; font-weight: 700;">Subject</span></div>
+          <div class="legend-item"><span class="legend-marker watchlist-node-marker" aria-hidden="true"></span><span style="color: #dc2626; font-weight: 700;">Watchlist Target</span></div>
+          <div class="legend-item"><span class="legend-marker path-edge-marker" aria-hidden="true"></span><span style="color: #dc2626; font-weight: 700;">Evidence Path</span></div>
         </div>
 
         <div id="cy" role="region" aria-label="Interactive graph canvas showing entity relationships"></div>
