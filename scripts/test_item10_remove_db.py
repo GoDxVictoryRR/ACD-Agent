@@ -27,7 +27,7 @@ try:
 
     print("\n=== 4. POST /investigate when DB is DOWN ===")
     r_inv = httpx.post(
-        f"{API}/investigate", json={"entity": "Blue Star Maritime Holdings Ltd", "watchlist": [], "depth": 3}, timeout=5
+        f"{API}/investigate", json={"entity": "GLAISDALE LIMITED", "watchlist": [], "depth": 3}, timeout=5
     )
     print("Investigate response:", r_inv.status_code, r_inv.json())
     assert r_inv.status_code == 503

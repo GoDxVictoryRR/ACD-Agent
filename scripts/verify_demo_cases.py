@@ -27,10 +27,10 @@ if DATA_SOURCE == "icij":
         ("Dewburn Enterprises Inc.", 2, "insufficient_evidence"),
     ]
 else:
-    watchlist = ["Ironclad Watchlist Entity Inc", "Apex Nominees Ltd"]
+    watchlist = ["DOM Limited", "Beta Nominees Ltd"]
     cases = [
-        ("Blue Star Maritime Holdings Ltd", 1, "clear"),
-        ("Blue Star Maritime Holdings Ltd", 3, "escalate"),
+        ("GLAISDALE LIMITED", 1, "clear"),
+        ("GLAISDALE LIMITED", 3, "escalate"),
         ("Silverline Capital Management Ltd", 2, "review"),
         ("Orion Global Logistics Corp", 2, "review"),
         ("Solitary Enterprises Ltd", 2, "clear"),

@@ -19,7 +19,7 @@ rss_initial = r.json().get("rss_mb", 0.0)
 
 print("\n=== 2. Running 10 investigations through API ===")
 entities = [
-    "Blue Star Maritime Holdings Ltd",
+    "GLAISDALE LIMITED",
     "Silverline Capital Management Ltd",
     "Orion Global Logistics Corp",
     "Solitary Enterprises Ltd",

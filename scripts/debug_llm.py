@@ -107,5 +107,5 @@ def run_investigation_debug(entity_name, watchlist=None, depth=2):
     print(f"Verdict: {rules_eval.verdict}")
 
 
-watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
-run_investigation_debug("Blue Star Maritime Holdings Ltd", watchlist=watchlist, depth=3)
+watchlist = ["DOM Limited", "Beta Nominees Ltd"]
+run_investigation_debug("GLAISDALE LIMITED", watchlist=watchlist, depth=3)

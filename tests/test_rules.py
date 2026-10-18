@@ -84,8 +84,8 @@ def test_path_to_non_watchlist_node_never_escalates():
     # Path tagging: every path carries target id and is_watchlist flag.
     # A path to a non-watchlist node (is_watchlist=False) NEVER escalates.
     evidence = {
-        "resolved_entity": {"id": "E1", "name": "Blue Star Maritime", "status": "ok"},
-        "ownership_chain": [{"nodes": [{"id": "E1", "name": "Blue Star Maritime"}, {"id": "A1", "name": "HQ"}]}],
+        "resolved_entity": {"id": "E1", "name": "Oceanic Star Maritime", "status": "ok"},
+        "ownership_chain": [{"nodes": [{"id": "E1", "name": "Oceanic Star Maritime"}, {"id": "A1", "name": "HQ"}]}],
         "shared_links": [{"hub_type": "Address", "hub_name": "HQ", "hub_id": "A1", "linked_count": 1}],
         "paths_to_watchlist": [
             {
@@ -94,7 +94,7 @@ def test_path_to_non_watchlist_node_never_escalates():
                 "is_watchlist": False,
                 "path_weight": 2.0,
                 "nodes": [
-                    {"id": "E1", "name": "Blue Star Maritime"},
+                    {"id": "E1", "name": "Oceanic Star Maritime"},
                     {"id": "O1", "name": "Director"},
                     {"id": "NON_WATCHLIST_NODE", "name": "Benign Partner Ltd"},
                 ],

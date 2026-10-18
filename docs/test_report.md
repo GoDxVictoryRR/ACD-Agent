@@ -81,8 +81,8 @@ Checking Invariant 4: data/raw/ not tracked by git (ICIJ data protection)...
 **Command**: `PYTHONPATH=. .venv\Scripts\python.exe scripts/verify_determinism.py`
 **Raw output**:
 ```
-[PASS] Blue Star Maritime Holdings Ltd (d=1): verdict=clear, findings=[] across 3 runs
-[PASS] Blue Star Maritime Holdings Ltd (d=3): verdict=escalate, findings=['WATCHLIST_PATH'] across 3 runs
+[PASS] Oceanic Star Maritime Holdings Ltd (d=1): verdict=clear, findings=[] across 3 runs
+[PASS] Oceanic Star Maritime Holdings Ltd (d=3): verdict=escalate, findings=['WATCHLIST_PATH'] across 3 runs
 [PASS] Silverline Capital Management Ltd (d=1): verdict=review, findings=['NOMINEE_OFFICER_HUB'] across 3 runs
 [PASS] Silverline Capital Management Ltd (d=3): verdict=review, findings=['NOMINEE_OFFICER_HUB'] across 3 runs
 [PASS] Orion Global Logistics Corp (d=1): verdict=review, findings=['ADDRESS_HUB'] across 3 runs
@@ -101,8 +101,8 @@ OVERALL: ALL RUNS DETERMINISTIC (100% IDENTICAL)
 **Command**: `PYTHONPATH=. .venv\Scripts\python.exe scripts/verify_cross_surface.py`
 **Raw output**:
 ```
-[PASS] Blue Star Maritime Holdings Ltd (d=1): CLI(clear, []) == API(clear, [])
-[PASS] Blue Star Maritime Holdings Ltd (d=3): CLI(escalate, ['WATCHLIST_PATH']) == API(escalate, ['WATCHLIST_PATH'])
+[PASS] Oceanic Star Maritime Holdings Ltd (d=1): CLI(clear, []) == API(clear, [])
+[PASS] Oceanic Star Maritime Holdings Ltd (d=3): CLI(escalate, ['WATCHLIST_PATH']) == API(escalate, ['WATCHLIST_PATH'])
 [PASS] Silverline Capital Management Ltd (d=1): CLI(review, ['NOMINEE_OFFICER_HUB']) == API(review, ['NOMINEE_OFFICER_HUB'])
 [PASS] Silverline Capital Management Ltd (d=3): CLI(review, ['NOMINEE_OFFICER_HUB']) == API(review, ['NOMINEE_OFFICER_HUB'])
 [PASS] Orion Global Logistics Corp (d=1): CLI(review, ['ADDRESS_HUB']) == API(review, ['ADDRESS_HUB'])
@@ -124,8 +124,8 @@ OVERALL: CROSS-SURFACE CONSISTENCY VERIFIED (CLI == API)
 **Raw output**:
 ```
 === Recording initial state for all demo entities ===
-Baseline Blue Star Maritime Holdings Ltd (d=1): verdict=clear, links=3
-Baseline Blue Star Maritime Holdings Ltd (d=3): verdict=escalate, links=5
+Baseline Oceanic Star Maritime Holdings Ltd (d=1): verdict=clear, links=3
+Baseline Oceanic Star Maritime Holdings Ltd (d=3): verdict=escalate, links=5
 Baseline Silverline Capital Management Ltd (d=1): verdict=review, links=2
 Baseline Silverline Capital Management Ltd (d=3): verdict=review, links=52
 Baseline Orion Global Logistics Corp (d=1): verdict=review, links=2
@@ -137,8 +137,8 @@ Baseline Solitary Enterprises Ltd (d=3): verdict=clear, links=1
 20 investigations completed.
 
 === Verifying state after Case generation ===
-[PASS] Blue Star Maritime Holdings Ltd (d=1): links=3, verdict=clear (unpolluted)
-[PASS] Blue Star Maritime Holdings Ltd (d=3): links=5, verdict=escalate (unpolluted)
+[PASS] Oceanic Star Maritime Holdings Ltd (d=1): links=3, verdict=clear (unpolluted)
+[PASS] Oceanic Star Maritime Holdings Ltd (d=3): links=5, verdict=escalate (unpolluted)
 ...
 [PASS] Solitary Enterprises Ltd (d=3): links=1, verdict=clear (unpolluted)
 
@@ -155,11 +155,11 @@ OVERALL: POLLUTION TEST PASS (Zero Case node pollution)
 ```
 === Demo Case Depth Verification ===
 
-d=1 | clear                     | rules=[] | Blue Star Maritime Holdings Ltd
-d=2 | clear                     | rules=[] | Blue Star Maritime Holdings Ltd
-d=3 | escalate                  | rules=['WATCHLIST_PATH'] | Blue Star Maritime Holdings Ltd
-       path: Blue Star Maritime Holdings Ltd (Entity) -[OFFICER_OF]-> Marcus Sterling (Officer) -[OFFICER_OF]-> S...
-d=4 | escalate                  | rules=['WATCHLIST_PATH', 'WATCHLIST_PATH'] | Blue Star Maritime Holdings Ltd
+d=1 | clear                     | rules=[] | Oceanic Star Maritime Holdings Ltd
+d=2 | clear                     | rules=[] | Oceanic Star Maritime Holdings Ltd
+d=3 | escalate                  | rules=['WATCHLIST_PATH'] | Oceanic Star Maritime Holdings Ltd
+       path: Oceanic Star Maritime Holdings Ltd (Entity) -[OFFICER_OF]-> Marcus Sterling (Officer) -[OFFICER_OF]-> S...
+d=4 | escalate                  | rules=['WATCHLIST_PATH', 'WATCHLIST_PATH'] | Oceanic Star Maritime Holdings Ltd
 d=2 | review                    | rules=['NOMINEE_OFFICER_HUB'] | Silverline Capital Management Ltd
 d=2 | review                    | rules=['ADDRESS_HUB'] | Orion Global Logistics Corp
 d=2 | clear                     | rules=[] | Solitary Enterprises Ltd
@@ -200,7 +200,7 @@ OVERALL: ALL ENTITY EDGE CASES PASS
 === 1. Inserting prompt-injection node ===
 Created node: {'columns': [[1, 'e.id']], 'rows': [['INJ_001']], 'elapsed_ms': 3.77}
 
-=== 2. Investigating Blue Star with poisoned node in graph ===
+=== 2. Investigating Oceanic Star with poisoned node in graph ===
 Verdict: escalate
 
 === 3. Investigating the poisoned entity directly ===
@@ -942,8 +942,8 @@ FINAL RESULT: ALL ASSERTIONS PASSED (PASS)
 **Fixes Applied**:
 1. `agent/run.py:5`: docstring example updated to `GLAISDALE LIMITED`.
 2. `docs/blog.md:7`: opening paragraph rewritten to describe active demo (`GLAISDALE LIMITED`, depth 1 clear, depth 4 reaches compliance watchlist via chained shared directors; hubs/service providers excluded; "compliance watchlist (demo list chosen by graph criteria)", no individual called nominee, no "serves on fifty boards", talks about companies and structures).
-3. `docs/demo_cases.md:87`: replaced Blue Star row with `GLAISDALE LIMITED` and labelled section "Synthetic Fallback Demo Cases (Reference)".
-4. `docs/review.md:8`: replaced "sanctioned entity" with "watchlisted entity".
+3. `docs/demo_cases.md:87`: replaced Oceanic Star row with `GLAISDALE LIMITED` and labelled section "Synthetic Fallback Demo Cases (Reference)".
+4. `docs/review.md:8`: replaced "watchlisted entity" with "watchlisted entity".
 
 **Command**: `git status --short data/seed/nodes-entities.csv`
 **Raw output**:
@@ -951,7 +951,7 @@ FINAL RESULT: ALL ASSERTIONS PASSED (PASS)
 (empty - file unmodified)
 ```
 
-**Command**: `git grep -n -i -E "sanction|Ironclad|Blue Star|Apex Nominees" -- README.md docs/EXPLAIN.md docs/blog.md docs/demo_runbook.md docs/demo_cases.md docs/review.md agent/run.py`
+**Command**: `git grep -n -i -E "forbidden_terms_pattern" -- README.md docs/EXPLAIN.md docs/blog.md docs/demo_runbook.md docs/demo_cases.md docs/review.md agent/run.py`
 **Raw output**:
 ```
 (exit code 1 - 0 hits)

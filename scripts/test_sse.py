@@ -11,8 +11,8 @@ print("=== POST /investigate ===")
 resp = httpx.post(
     f"{API}/investigate",
     json={
-        "entity": "Blue Star Maritime Holdings Ltd",
-        "watchlist": ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"],
+        "entity": "GLAISDALE LIMITED",
+        "watchlist": ["DOM Limited", "Beta Nominees Ltd"],
         "depth": 3,
         "no_llm": True,
     },

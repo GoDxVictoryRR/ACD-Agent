@@ -7,7 +7,7 @@ sys.path.insert(0, r"C:\Users\hardi\Downloads\ACD-agent")
 
 from agent.fallback import run_deterministic_investigation
 
-watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
+watchlist = ["DOM Limited", "Beta Nominees Ltd"]
 
 with open(r"C:\Users\hardi\Downloads\ACD-agent\tests\regression\expected.json") as f:
     expected = json.load(f)

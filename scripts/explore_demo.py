@@ -67,10 +67,10 @@ def generate_demo_files() -> None:
             "demo_entities": [
                 {
                     "id": "ENT_BLUESTAR_01",
-                    "name": "Blue Star Maritime Holdings Ltd",
+                    "name": "GLAISDALE LIMITED",
                     "expected_depth_1": "clear",
                     "expected_depth_3": "escalate",
-                    "description": "Appears minimal at depth 1. At depth 3, links through nominee director to Ironclad Sanctions Entity Inc.",
+                    "description": "Appears minimal at depth 1. At depth 3, links through nominee director to DOM Limited.",
                 },
                 {
                     "id": "ENT_SILVERLINE_01",
@@ -91,12 +91,12 @@ def generate_demo_files() -> None:
                     "name": "Solitary Enterprises Ltd",
                     "expected_depth_1": "clear",
                     "expected_depth_3": "clear",
-                    "description": "Clean entity with a single solitary address, zero hub overlap, zero sanctions connection.",
+                    "description": "Clean entity with a single solitary address, zero hub overlap, zero watchlist connection.",
                 },
             ],
             "watchlist": [
-                "Ironclad Sanctions Entity Inc",
-                "Apex Nominees Ltd",
+                "DOM Limited",
+                "Beta Nominees Ltd",
             ],
         }
 

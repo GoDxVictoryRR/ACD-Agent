@@ -27,7 +27,7 @@ assert "traceback" not in r_ctrl.text.lower()
 print("[PASS] Control chars sanitized without stack trace")
 
 print("\n=== 3. Testing depth 9 (le=4) ===")
-r_depth = httpx.post(f"{API}/investigate", json={"entity": "Blue Star Maritime Holdings Ltd", "depth": 9}, timeout=5)
+r_depth = httpx.post(f"{API}/investigate", json={"entity": "GLAISDALE LIMITED", "depth": 9}, timeout=5)
 print(f"Depth 9 status: {r_depth.status_code}")
 assert r_depth.status_code == 422, f"Expected 422, got {r_depth.status_code}"
 assert "traceback" not in r_depth.text.lower()
@@ -36,7 +36,7 @@ print("[PASS] Depth 9 rejected with 422")
 print("\n=== 4. Testing watchlist of 50 (max_length=10) ===")
 r_watch = httpx.post(
     f"{API}/investigate",
-    json={"entity": "Blue Star Maritime Holdings Ltd", "watchlist": [f"Target_{i}" for i in range(50)], "depth": 3},
+    json={"entity": "GLAISDALE LIMITED", "watchlist": [f"Target_{i}" for i in range(50)], "depth": 3},
     timeout=5,
 )
 print(f"Watchlist of 50 status: {r_watch.status_code}")

@@ -212,6 +212,8 @@ function initCytoscape() {
   cy = cytoscape({
     container: document.getElementById("cy"),
     style: getCyStyles(isMobile),
+    minZoom: 0.25,
+    maxZoom: 2.0,
     layout: {
       name: "preset",
     },
@@ -456,16 +458,37 @@ async function runSingleInvestigation(depthOverride = null) {
   const watchlist = watchlistRaw.split(",").map((s) => s.trim()).filter(Boolean);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const noLlm = urlParams.get("no_llm") === "true" || urlParams.get("deterministic") === "true";
+  const toggleAi = document.getElementById("toggleAiMode");
+  // Default to deterministic mode (~1s) per H1. Only use LLM if toggle checked or ?mode=ai
+  let useAi = toggleAi ? toggleAi.checked : false;
+  if (urlParams.get("mode") === "ai") {
+    useAi = true;
+    if (toggleAi) toggleAi.checked = true;
+  }
+  if (urlParams.get("no_llm") === "true" || urlParams.get("deterministic") === "true") {
+    useAi = false;
+    if (toggleAi) toggleAi.checked = false;
+  }
+  const noLlm = !useAi;
+
+  const aiNotice = document.getElementById("aiModeNotice");
+  const aiTimer = document.getElementById("aiElapsedTimer");
+  if (useAi && aiNotice && aiTimer) {
+    aiNotice.style.display = "block";
+    aiTimer.textContent = "0.0s";
+  } else if (aiNotice) {
+    aiNotice.style.display = "none";
+  }
 
   const btn = document.getElementById("btnRun");
   btn.disabled = true;
+  const btnLabel = useAi ? "AI Investigating (~1m)…" : "Investigating…";
   btn.innerHTML = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M12 2a10 10 0 0 1 10 10"></path>
     </svg>
-    <span>Investigating…</span>
+    <span>${btnLabel}</span>
   `;
 
   const traceList = document.getElementById("traceList");
@@ -476,6 +499,13 @@ async function runSingleInvestigation(depthOverride = null) {
   document.getElementById("memoText").textContent = "Traversing beneficial ownership and control paths in FalkorDB…";
 
   const t0 = performance.now();
+  let timerInterval = null;
+  if (useAi && aiTimer) {
+    timerInterval = setInterval(() => {
+      const sec = ((performance.now() - t0) / 1000).toFixed(1);
+      aiTimer.textContent = `${sec}s`;
+    }, 200);
+  }
 
   try {
     const res = await fetch(`${apiBase}/investigate`, {
@@ -490,8 +520,10 @@ async function runSingleInvestigation(depthOverride = null) {
     }
 
     const { run_id } = await res.json();
-    listenToStream(run_id, t0);
+    listenToStream(run_id, t0, timerInterval);
   } catch (err) {
+    if (timerInterval) clearInterval(timerInterval);
+    if (aiNotice) aiNotice.style.display = "none";
     alert(`Error: ${err.message}`);
     btn.disabled = false;
     btn.innerHTML = `
@@ -503,7 +535,7 @@ async function runSingleInvestigation(depthOverride = null) {
   }
 }
 
-function listenToStream(runId, startTime) {
+function listenToStream(runId, startTime, timerInterval = null) {
   const eventSource = new EventSource(`${apiBase}/stream/${runId}`);
   const traceList = document.getElementById("traceList");
 
@@ -538,9 +570,13 @@ function listenToStream(runId, startTime) {
   eventSource.addEventListener("done", (e) => {
     const finalResult = JSON.parse(e.data);
     eventSource.close();
+    if (timerInterval) clearInterval(timerInterval);
 
     const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
     document.getElementById("investigationTime").textContent = `Elapsed: ${elapsed}s`;
+
+    const aiTimer = document.getElementById("aiElapsedTimer");
+    if (aiTimer) aiTimer.textContent = `${elapsed}s`;
 
     const btn = document.getElementById("btnRun");
     btn.disabled = false;
@@ -557,6 +593,7 @@ function listenToStream(runId, startTime) {
 
   eventSource.addEventListener("error", () => {
     eventSource.close();
+    if (timerInterval) clearInterval(timerInterval);
     const btn = document.getElementById("btnRun");
     btn.disabled = false;
     btn.innerHTML = `
@@ -566,6 +603,7 @@ function listenToStream(runId, startTime) {
       <span>Investigate</span>
     `;
   });
+
 }
 
 function updateVerdictUI(verdict, evaluation, candidates = [], status = null, displayVerdict = null) {
@@ -868,9 +906,13 @@ function renderGraph(evidence) {
 
   cy.elements().remove();
   cy.add(elements);
+  cy.resize();
   cy.layout({ name: "preset" }).run();
   cy.fit(null, 45);
+  if (cy.zoom() > 1.25) cy.zoom(1.25);
+  cy.center();
 }
+
 
 function renderRecalledCases(cases) {
   const card = document.getElementById("recalledCard");

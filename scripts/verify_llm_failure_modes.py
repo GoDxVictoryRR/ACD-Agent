@@ -11,8 +11,8 @@ import unittest.mock as mock
 
 from agent.loop import run_investigation
 
-ENTITY = "Blue Star Maritime Holdings Ltd"
-WATCHLIST = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
+ENTITY = "GLAISDALE LIMITED"
+WATCHLIST = ["DOM Limited", "Beta Nominees Ltd"]
 
 print("=== 1. Testing Invalid API Key ===")
 with mock.patch("agent.llm.NVIDIA_API_KEY", "dummy-invalid-key"):

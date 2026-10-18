@@ -185,7 +185,7 @@ class InvestigateRequest(BaseModel):
     entity: str = Field(..., max_length=200)
     watchlist: list[str] = Field(default_factory=list, max_length=10)
     depth: int = Field(default=4, ge=1, le=4)  # default=4 matches demo depth per Z2
-    no_llm: bool = False
+    no_llm: bool = True  # Default to deterministic mode (~1s) per H1
 
 
 @app.get("/health")

@@ -103,6 +103,22 @@
           </select>
         </div>
 
+        <!-- AI Agent Mode Toggle (Default OFF = Deterministic ~1s, ON = LLM Tool Selection ~1m) -->
+        <div class="form-group" style="margin-top: -0.25rem; margin-bottom: 1.15rem;">
+          <label for="toggleAiMode" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-transform: none; margin-bottom: 0;">
+            <span style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.4rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-indigo)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              AI agent mode (LLM tool selection, ~1 min)
+            </span>
+            <input type="checkbox" id="toggleAiMode" style="width: 1.15rem; height: 1.15rem; cursor: pointer; accent-color: var(--accent-indigo);">
+          </label>
+          <div id="aiModeNotice" style="display: none; font-size: 0.74rem; color: #4338ca; background: rgba(99, 102, 241, 0.08); padding: 0.45rem 0.75rem; border-radius: 6px; margin-top: 0.4rem; border-left: 3px solid #6366f1;">
+            AI Agent active: NVIDIA LLM autonomously selecting tools. Elapsed: <strong id="aiElapsedTimer">0.0s</strong>
+          </div>
+        </div>
+
         <div class="btn-group">
           <button id="btnRun" class="btn-primary" type="button" aria-label="Execute graph investigation">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -322,6 +338,6 @@
   </footer>
 
   <script src="config.js"></script>
-  <script src="app.js?v=white_liquid_glass_v1"></script>
+  <script src="app.js?v=20261018_final"></script>
 </body>
 </html>

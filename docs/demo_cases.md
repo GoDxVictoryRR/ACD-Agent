@@ -1,73 +1,68 @@
-# Demo Cases & Negative Controls: Real ICIJ Offshore Leaks & Synthetic
+# Demo Cases & Negative Controls: Real ICIJ Offshore Leaks
 
-This document specifies the primary demo case, isolated entity, case recall entity, and negative controls tested and verified on the live **ICIJ Offshore Leaks (Panama Papers Samoa/Seychelles subset)** and the **Synthetic** fallback dataset.
+This document specifies the primary demo case, isolated entity, case recall entity, and negative controls tested and verified on the live **ICIJ Offshore Leaks (Panama Papers Samoa/Seychelles subset)** from `data/demo.json`.
 
 ---
 
-## 1. Primary Depth Contrast Case (PROVISIONAL)
+## 1. Primary Depth Contrast Case (Active Demo)
 
-Demonstrates the critical value of multi-hop graph traversal. At depth 1 and depth 2, the entity has no risk escalation. At depth 3, the ownership path reaches a watchlisted entity and flips the verdict to `escalate`.
+Demonstrates the critical value of multi-hop graph traversal. At depth 1, the entity appears standard and unconnected to flagged targets (clear). At depth 4, multi-hop traversal across corporate directorship links uncovers an authentic ownership path to a watchlisted entity and flips the verdict to `escalate`.
 
-- **Source Entity**: `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` (`node_id: 10001171`)
+- **Source Entity**: `GLAISDALE LIMITED` (`node_id: 10024477`)
   - Jurisdiction: Samoa (`SAM`)
   - Source: Panama Papers
   - Status: Active
-  - Name uniqueness: Exactly 1 entity with this name in the dataset
-- **Watchlist Entity**: `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (`node_id: 10000001`)
-  - Label: `Entity` (Entity nodes only; never Officer persons)
+  - Degree: 5 links (1 officer, 1 address, 3 intermediaries)
+- **Watchlist Entity**: `DOM Limited` (`node_id: 10189122`)
+  - Label: `Entity`
   - Jurisdiction: Samoa (`SAM`)
   - Source: Panama Papers
   - Status: Defaulted
-  - Name uniqueness: Exactly 1 entity with this name in the dataset
-- **Traversed Path (Depth 3)**:
-  `MOSSACK FONSECA & CO. (SAMOA) LIMITED. (Entity)`
-  `-[SAME_AS]-> MOSSACK FONSECA & CO. (SAMOA) LIMITED (Entity)`
-  `-[OFFICER_OF]-> MOSSFON SUBSCRIBERS LTD. (Officer)`
-  `-[OFFICER_OF]-> TIANSHENG INDUSTRY AND TRADING CO., LTD. (Entity)`
-- **Weighted Path Cost**: `6.0` (weight threshold <= 8.0)
-  - `SAME_AS`: 4.0
-  - `OFFICER_OF`: 1.0
-  - `OFFICER_OF`: 1.0
-  - Total = 6.0
+  - Degree: 5 links
+- **Traversed Path (Depth 4)**:
+  `GLAISDALE LIMITED (Entity 10024477)`
+  `-[OFFICER_OF]-> Rachel Erickson (Officer 12116679)`
+  `-[OFFICER_OF]-> NEWCOMBE LIMITED (Entity 10028037)`
+  `-[OFFICER_OF]-> ANDREW MORAY STUART (Officer 12151058)`
+  `-[OFFICER_OF]-> DOM Limited (Watchlist Entity 10189122)`
+- **Weighted Path Cost**: `4.0` (weight threshold <= 8.0)
+  - 4 x `OFFICER_OF` @ 1.0 = 4.0
 - **Shortest Path Verification**:
-  - `algo.SPpaths` confirmed: `hops = 3`, `path_weight = 6.0`.
-  - Bounded BFS confirmed: Zero paths exist at depth 1 or depth 2.
+  - `algo.SPpaths` confirmed: `hops = 4`, `path_weight = 4.0`.
+  - Zero watchlist paths exist within depth 1, 2, or 3.
 - **Verdicts by Depth**:
-  - **Depth 1**: `clear` (No watchlist entity in range; low intermediary concentration indicator only)
-  - **Depth 2**: `clear` (No watchlist entity in range)
-  - **Depth 3**: `escalate` (Rule `WATCHLIST_PATH` triggered: cost 6.0 <= 8.0)
+  - **Depth 1**: `clear` ("No exposure indicators found within depth 1")
+  - **Depth 4**: `escalate` (Rule `WATCHLIST_PATH` triggered: cost 4.0 <= 8.0)
 
 ---
 
-## 2. Isolated / Low-Link Entity (PROVISIONAL)
+## 2. Isolated / Low-Link Entity
 
-Entities with minimal or no graph connections, demonstrating that sparse structures do not trigger spurious risk findings.
+Entities with minimal or no graph connections, demonstrating that sparse structures honestly abstain rather than guessing.
 
 - **Entity**: `Dewburn Enterprises Inc.` (`node_id: 10000290`)
   - Jurisdiction: Samoa (`SAM`)
   - Degree: 1 link (connected to single officer `David G. Baker`)
-  - Verdicts: Depth 1 `clear`, Depth 2 `clear`, Depth 3 `clear`
-- **Alternative (0-link)**:
-  - If an entity is queried with 0 connections, `evaluate()` returns `insufficient_evidence` per `MIN_LINKS = 1`.
+  - Verdicts: Depth 1 `insufficient_evidence`, Depth 4 `insufficient_evidence` (degree < MIN_LINKS=2)
 
 ---
 
-## 3. Related Entity for Case Memory Recall (PROVISIONAL)
+## 3. Related Entity for Case Memory Recall
 
 Demonstrates the read/write graph feedback loop: writing an investigation verdict as a `Case` node allows subsequent investigations on connected entities to recall prior decisions.
 
-- **Primary Investigation**: Investigate `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` -> verdict `escalate`, recorded with `record_decision`.
-- **Related Query Entity**: `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (`node_id: 10000001`)
-  - Shares the investigation path and connection nodes.
-  - Calling `recall_cases("10000001")` immediately recalls the primary case node (`case_id: case_...`, verdict `escalate`, depth `3`).
+- **Primary Investigation**: Investigate `GLAISDALE LIMITED` -> verdict `escalate`, recorded with `record_decision`.
+- **Related Query Entity**: `NEWCOMBE LIMITED` (`node_id: 10028037`)
+  - Shares corporate directorship links (`Rachel Erickson`).
+  - Calling `recall_cases("10028037")` immediately recalls the prior case node (`verdict: escalate`).
 
 ---
 
-## 4. Negative Controls (PROVISIONAL - 6 Real Structures)
+## 4. Negative Controls (6 Real Structures)
 
 Real offshore structures from the ICIJ dataset that exhibit significant graph connectivity (multiple officers, intermediaries, or addresses) but **must not escalate** because they have no watchlist connection.
 
-| # | Entity Name | Node ID | Degree | Verdict (D1) | Verdict (D3) | Active Indicators |
+| # | Entity Name | Node ID | Degree | Verdict (D1) | Verdict (D4) | Active Indicators |
 |---|---|---|---|---|---|---|
 | 1 | `Skytrack Investments Limited` | `10017419` | 3 | `clear` | `clear` | None (0 findings) |
 | 2 | `OMNIA TECHNOLOGIES S.A.` | `10000280` | 5 | `clear` | `clear` | None (0 findings) |
@@ -78,9 +73,7 @@ Real offshore structures from the ICIJ dataset that exhibit significant graph co
 
 ---
 
-## 5. Synthetic Fallback Demo Cases (Reference)
-
-If running with `DATA_SOURCE=synthetic`, the following planted cases are used:
+## 5. Active Benchmark Dossier Summary (`data/demo.json`)
 
 | Entity Name | Depth 1 | Depth 4 | Target / Note |
 |---|---|---|---|

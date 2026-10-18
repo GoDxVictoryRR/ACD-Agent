@@ -57,6 +57,20 @@ def extract_ground_truth_names(evidence: dict[str, Any]) -> set[str]:
     return names
 
 
+def normalize_name(s: str) -> str:
+    """Normalize company name variants, suffixes, and punctuation for fair comparison."""
+    norm = re.sub(r"[^\w\s]", " ", s.lower())
+    words = norm.split()
+    suffix_map = {
+        "ltd": "limited",
+        "corp": "corporation",
+        "inc": "incorporated",
+        "co": "company",
+        "sa": "sa",
+    }
+    return " ".join(suffix_map.get(w, w) for w in words)
+
+
 def verify_memo(
     memo: str,
     evidence: dict[str, Any],
@@ -69,8 +83,9 @@ def verify_memo(
         return False, ["Empty memo"]
 
     ground_truth = extract_ground_truth_names(evidence)
+    norm_gt = {normalize_name(gt) for gt in ground_truth}
 
-    # Standard legal/financial stopwords to ignore when analyzing capitalized words
+    # Standard legal/financial stopwords and report headers to ignore
     stopwords = {
         "the",
         "a",
@@ -79,6 +94,58 @@ def verify_memo(
         "that",
         "these",
         "those",
+        "no",
+        "not",
+        "none",
+        "target",
+        "compliance",
+        "memorandum",
+        "memo",
+        "word",
+        "words",
+        "count",
+        "based",
+        "findings",
+        "finding",
+        "total",
+        "links",
+        "path",
+        "weight",
+        "rule",
+        "rules",
+        "status",
+        "result",
+        "results",
+        "determination",
+        "report",
+        "review",
+        "clear",
+        "escalate",
+        "insufficient_evidence",
+        "falkordb",
+        "cypher",
+        "solely",
+        "examination",
+        "warrant",
+        "further",
+        "assessment",
+        "conclusion",
+        "note",
+        "notes",
+        "identified",
+        "provided",
+        "indicated",
+        "indicates",
+        "suggesting",
+        "exhibits",
+        "yielded",
+        "returned",
+        "associated",
+        "implied",
+        "active",
+        "defaulted",
+        "samoa",
+        "seychelles",
         "entity",
         "officer",
         "address",
@@ -87,9 +154,6 @@ def verify_memo(
         "shareholder",
         "intermediary",
         "verdict",
-        "review",
-        "clear",
-        "escalate",
         "evidence",
         "ledger",
         "exposure",
@@ -103,8 +167,11 @@ def verify_memo(
         "holding",
         "holdings",
         "corp",
+        "corporation",
         "ltd",
+        "limited",
         "inc",
+        "incorporated",
         "llc",
         "sa",
         "company",
@@ -114,7 +181,6 @@ def verify_memo(
         "degree",
         "centrality",
         "community",
-        "path",
         "cost",
         "risk",
         "level",
@@ -122,8 +188,8 @@ def verify_memo(
         "case",
     }
 
-    # Extract capitalized phrases / named entities (e.g., 'Alpha Corp', 'John Vance')
-    candidate_tokens = re.findall(r"\b[A-Z][a-zA-Z0-9\.\-']*(?:\s+[A-Z][a-zA-Z0-9\.\-']*)*\b", memo)
+    # Extract capitalized phrases on single lines (no matching across newlines)
+    candidate_tokens = re.findall(r"\b[A-Z][a-zA-Z0-9\.\-']*(?:[ \t]+[A-Z][a-zA-Z0-9\.\-']*)*\b", memo)
 
     unverified: list[str] = []
     for token in candidate_tokens:
@@ -137,9 +203,12 @@ def verify_memo(
         if all(w in stopwords for w in words):
             continue
 
-        # Check if the candidate appears as a substring in any ground-truth name
-        # or any ground-truth name appears in the candidate
-        matches = any(lower in gt or gt in lower for gt in ground_truth)
+        # Check raw substring matches or normalized suffix matches
+        norm_candidate = normalize_name(clean)
+        matches = (
+            any(lower in gt or gt in lower for gt in ground_truth)
+            or any(norm_candidate in ngt or ngt in norm_candidate for ngt in norm_gt)
+        )
         if not matches:
             unverified.append(clean)
 

@@ -26,8 +26,8 @@ def regression_config():
         primary_entity = "GLAISDALE LIMITED"
     else:
         expected_file = REGRESSION_DIR / "expected.json"
-        watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
-        primary_entity = "Blue Star Maritime Holdings Ltd"
+        watchlist = ["Alpha Watchlist Entity Inc", "Beta Nominees Ltd"]
+        primary_entity = "Oceanic Star Maritime Holdings Ltd"
 
     with open(expected_file, encoding="utf-8") as f:
         expected = json.load(f)

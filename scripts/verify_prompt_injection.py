@@ -15,9 +15,9 @@ res_create = rw(GRAPH_NAME, create_q, {"name": INJECTION_NAME})
 print("Created node:", res_create)
 
 try:
-    print("\n=== 2. Investigating Blue Star with poisoned node in graph ===")
+    print("\n=== 2. Investigating GLAISDALE with poisoned node in graph ===")
     res = run_deterministic_investigation(
-        "Blue Star Maritime Holdings Ltd", watchlist=["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"], depth=3
+        "GLAISDALE LIMITED", watchlist=["DOM Limited", "Beta Nominees Ltd"], depth=3
     )
     print(f"Verdict: {res['verdict']}")
     assert res["verdict"] == "escalate", f"Expected escalate, got {res['verdict']}"

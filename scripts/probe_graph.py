@@ -49,7 +49,7 @@ r3 = ro(
     "ownership",
     """
 MATCH path = (e:Entity {node_id: $eid})-[*1..4]-(t:Entity)
-WHERE t.node_id = 'ENT_IRONCLAD_SANCTIONS'
+WHERE t.node_id = 'ENT_DOM_WATCHLIST'
 RETURN [n in nodes(path) | {name: coalesce(n.name, n.address, '?'), label: labels(n)[0]}] AS pn,
        [rel in relationships(path) | type(rel)] AS rels,
        length(path) AS hops
@@ -58,7 +58,7 @@ LIMIT 5
 """,
     {"eid": "ENT_BLUESTAR_01"},
 )
-print("Paths from Blue Star to Ironclad:")
+print("Paths from GLAISDALE to DOM:")
 for row in r3.get("rows", []):
     path_str = " -> ".join(f"{n['name']}({n['label']})" for n in row[0])
     print(f"  [{row[2]} hops] {path_str}")

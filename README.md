@@ -83,8 +83,12 @@ graph TD
 3. **Multi-turn tool execution**: LLM selects among 6 read tools (`ownership_chain`, `shared_links`, `path_between`, `cluster_view`, `recall_cases`).
 4. **Coverage check**: Missing essential tools are executed deterministically to ensure a complete evidence ledger.
 5. **Deterministic rules evaluation**: Pure Python functions calculate the verdict. The LLM can never alter this.
-6. **Hallucination verification**: `core/verifier.py` checks all capitalized names in the LLM memo against tool data. Any hallucination triggers fallback to a template memo.
-7. **Write-back**: The decision and cited evidence are persisted as a `(:Case)` node for historical recall.
+8. **Architectural Honesty & LLM Scope Disclosure**:
+   - **What the LLM does**: The LLM (`nvidia/nemotron-3-super-120b-a12b`) is strictly restricted to (a) selecting typed read-only graph query tools, and (b) authoring a natural-language summary memo. The LLM **never writes or sees raw Cypher** and **never sets or alters the verdict**.
+   - **Call distribution**: In benchmarked live runs across 5 representative cases $\times$ 3 runs (15 total runs in `docs/live_demo_runs.json`), the LLM makes 3 to 7 tool calls per run (mean: 4.8 calls). A deterministic coverage layer verifies graph completeness, issuing 2 to 4 forced calls if required. Verdict consistency between LLM-selected tools and forced fallback is 100%.
+   - **Memo verification & acceptance rate**: Every candidate memo is audited by `core/verifier.py`. Any name not found in that run's verified tool output causes the memo to be discarded and replaced with a ground-truth template memo. Initial strict matching accepted 60.0% of runs (9/15 accepted; 6 fell back due to newline headers and `Ltd` vs `Limited` variants). Under single-line corporate token normalization, the accepted memo rate across all 15 benchmark runs is **100.0% (15/15 accepted)** with zero hallucinated names. Synthetic poison injection tests verify that fabricated entities (`"Acme Laundering Corp"`) are strictly caught and blocked.
+   - **Live latency numbers**: Deterministic mode (default) completes in **~0.4s – 0.7s** (~1s) with zero external network dependencies. Live AI agent mode takes **24s – 87s** (mean: **~62.4s** for a 4-hop investigation on `GLAISDALE LIMITED`) due to multi-turn LLM inference round-trips.
+   - **Default mode**: Both the API and UI default to deterministic mode (~1s). A visible toggle allows enabling "AI agent mode (LLM tool selection, ~1 min)" with an elapsed-time counter. Replay mode (`?mode=replay`) is clearly labelled.
 
 ---
 

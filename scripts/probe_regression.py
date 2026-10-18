@@ -2,17 +2,17 @@
 
 from agent.fallback import run_deterministic_investigation
 
-watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
+watchlist = ["DOM Limited", "Beta Nominees Ltd"]
 tests = [
-    ("Blue Star Maritime Holdings Ltd", 1),
-    ("Blue Star Maritime Holdings Ltd", 3),
+    ("GLAISDALE LIMITED", 1),
+    ("GLAISDALE LIMITED", 3),
     ("Silverline Capital Management Ltd", 2),
     ("Orion Global Logistics Corp", 2),
     ("Solitary Enterprises Ltd", 2),
     ("Vance Shell Entity 001 Ltd", 2),
     ("St James Resident 001 Corp", 2),
-    ("Apex Nominees Ltd", 2),
-    ("Ironclad Sanctions Entity Inc", 2),
+    ("Beta Nominees Ltd", 2),
+    ("DOM Limited", 2),
     ("Unknown Entity Alpha", 2),
     ("Unknown Entity Beta", 2),
 ]

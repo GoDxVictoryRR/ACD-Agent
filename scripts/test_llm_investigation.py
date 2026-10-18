@@ -11,14 +11,14 @@ os.environ["NO_LLM"] = "0"
 
 from agent.loop import run_investigation
 
-print("=== Full LLM Investigation: Blue Star Maritime Holdings Ltd ===")
+print("=== Full LLM Investigation: GLAISDALE LIMITED ===")
 print()
 
-watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
+watchlist = ["DOM Limited", "Beta Nominees Ltd"]
 
 try:
     result = run_investigation(
-        entity_name="Blue Star Maritime Holdings Ltd",
+        entity_name="GLAISDALE LIMITED",
         watchlist=watchlist,
         depth=3,
         force_fallback=False,

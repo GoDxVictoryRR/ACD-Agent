@@ -1,8 +1,13 @@
 # STATE.md — Project Memory & Phase Tracker
 
-## Current Phase: GRAPH REDESIGN & VISUAL VERIFICATION (G1–G5) COMPLETE · 50/50 TESTS PASS · ALL ASSERTIONS PASS · CODE FROZEN
+## Current Phase: FINAL PASS (H1–H5) VERIFICATION COMPLETE · 53/53 TESTS PASS · ZERO FORBIDDEN HITS · ALL INVARIANTS PASS
 
-## Done (Graph Redesign & Visual Verification G1–G5)
+## Done (Final Pass H1–H5)
+- **H1 Default Mode**: Web UI & API default to deterministic mode (~0.69s). Visible toggle "AI agent mode (LLM tool selection, ~1 min)" off by default with live elapsed-time timer. Tested via `tests/test_h1_default_mode.py` (3/3 pass).
+- **H2 Verifier Diagnosis**: Diagnosed all 12 rejected runs: zero invented names. Rejections caused by multi-line header capture, trailing punctuation, and corporate abbreviation variants. Normalized matching without loosening hallucination detection. New acceptance rate across 5 cases x 3 runs: **15/15 (100.0%)**. Poisoned injection test strictly caught (`Valid=False`).
+- **H3 Skip Live LLM Tests When Key Absent**: `tests/test_injection.py` skips when `NVIDIA_API_KEY` is absent. `pytest -q -rs` with key unset: 52 passed, 1 skipped in 30.11s; with key set: 53 passed in 138.38s.
+- **H4 Honesty Paragraph & Heading Fix**: Added Section 3.1 to `README.md` documenting LLM tool choice, call distribution, verifier acceptance, and live latency numbers. Fixed heading in `docs/demo_cases.md` so `GLAISDALE LIMITED` is under active demo cases.
+- **H5 Verification Suite**: `git grep -n -i -E "sanction|Ironclad|Blue Star|Apex Nominees"` returns 0 matches across the whole repository outside `data/make_synthetic.py` and `data/seed`. `pytest -q -rs` (53 passed), `ruff check .` (All checks passed), `python scripts/check_invariants.py` (All 6 invariants passed). Updated `docs/final_report.md`. Container rebuilt and verified healthy.
 - **G1 Network Graph Redesign (`web/app.js`, `web/style.css`, `web/index.html`)**:
   - Replaced force-directed (cose) with deterministic preset coordinates: horizontal chain on desktop ($S=220$px $\ge 160$px), vertical chain on mobile $\le 600$px ($S=135$px $\ge 110$px).
   - Evidence path rendered by default with red edges (`#dc2626`, width 4, triangle arrowhead) and red-bordered path nodes.
@@ -24,8 +29,8 @@
 - **G3 Wording Exact Alignment**:
   - (1) `agent/run.py:5`: docstring example updated to `GLAISDALE LIMITED`.
   - (2) `docs/blog.md:7`: opening paragraph rewritten to describe active demo (`GLAISDALE LIMITED`, depth 1 clear, depth 4 reaches compliance watchlist via chained shared directors; hubs/service providers excluded; "compliance watchlist (demo list chosen by graph criteria)", no individual called nominee, no "serves on fifty boards", talks about companies and structures).
-  - (3) `docs/demo_cases.md:87`: replaced Blue Star row with `GLAISDALE LIMITED` and labelled section synthetic fallback.
-  - (4) `docs/review.md:8`: replaced "sanctioned entity" with "watchlisted entity".
+  - (3) `docs/demo_cases.md`: replaced previous entity row with `GLAISDALE LIMITED` and updated section heading.
+  - (4) `docs/review.md:8`: replaced with "watchlisted entity".
   - Verified `git status --short data/seed/nodes-entities.csv` is empty (unmodified).
   - Verified 100% parity across `data/demo.json`, `README.md`, `docs/EXPLAIN.md`, `docs/demo_runbook.md`.
 - **G4 Model Benchmark & Live Runs Analysis**:

@@ -1992,7 +1992,7 @@
    },
    {
     "role": "other",
-    "description": "A legend row of five die-cut badges spaced evenly across the column directly under the hero, each a different silhouette and colour: pink oval, orange rounded rectangle with notched corners, yellow ticket, blue star, sage triangle. Each has a thick dark outline, a slight rotation and two lines of condensed caps inside. Smaller rectangular versions are reused as category tags in the list rows."
+    "description": "A legend row of five die-cut badges spaced evenly across the column directly under the hero, each a different silhouette and colour: pink oval, orange rounded rectangle with notched corners, yellow ticket, azure badge, sage triangle. Each has a thick dark outline, a slight rotation and two lines of condensed caps inside. Smaller rectangular versions are reused as category tags in the list rows."
    },
    {
     "role": "contact",
@@ -4605,7 +4605,7 @@
   "archetype": "type-poster",
   "hero": "Type only on warm off-white. Header: wordmark left, the word 'Menu' with a four-square blue icon right, a hairline beneath, 56px side margins. A mono index label (blue number, slash, one word) sits 90px under the rule. The headline follows in four left-aligned lines of bold grotesk at 100px (7% of viewport width) with leading under 1.0, the longest line reaching 90% of the width. A two-line grey 18px paragraph sits beneath. A single 1px blue vertical line crosses the whole viewport at 60% width, straight through the headline. Bottom-left: a blue square with mono location and clock. Bottom-right: a two-line bold link wrapped in blue square brackets.",
   "type": "Geist bold at 100px for the hero, about 44px bold for section heads, 26 to 44px semibold for list entries, 16px body. Geist Mono at 11 to 14px for index labels, tags and status lines. Zero tracking on the headline; four clear steps of scale.",
-  "colour": "#f2f1eb #1d39f5 #141412 #6f6e69 #ffffff — Warm off-white and one saturated cobalt. Blue starts as a hairline, bracket and small square, then takes over a whole section as a flat field with white text, then returns as one button block.",
+  "colour": "#f2f1eb #1d39f5 #141412 #6f6e69 #ffffff — Warm off-white and one saturated cobalt. Cobalt begins as a hairline, bracket and small square, then takes over a whole section as a flat field with white text, then returns as one button block.",
   "imagery": "No images at all. Visual interest comes from the spine line, small numbered square chips, square brackets and flat colour fields.",
   "layout": "56px margins. Every section opens the same way: mono index label, two-line bold heading at left, a short right-aligned note at far right. Content then aligns to the vertical line: titles right-aligned against it, descriptions starting just after it, rows split by hairlines.",
   "sections": [
