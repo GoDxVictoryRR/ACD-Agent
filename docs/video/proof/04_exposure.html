@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Empirical Baseline: Degree-Matched Exposure Stats | Ownership Lens Proof</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #090d16;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding: 2.5rem 3rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      border-bottom: 2px solid #1e293b;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .title-group h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #38bdf8;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+    .meta-tag {
+      text-align: right;
+      font-size: 0.8rem;
+      color: #64748b;
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+    }
+    .meta-tag .tag-status {
+      color: #10b981;
+      font-weight: 700;
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .content-box {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+      flex: 1;
+      overflow-x: auto;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    pre {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: #f1f5f9;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .highlight-pass {
+      color: #34d399;
+      font-weight: bold;
+    }
+    .highlight-stat {
+      color: #fbbf24;
+      font-weight: bold;
+    }
+    .footer {
+      margin-top: 1.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <h1>Empirical Baseline: Degree-Matched Exposure Stats</h1>
+      <p class="subtitle">0 of 30 degree-matched control entities reach watchlist target DOM Limited</p>
+    </div>
+    <div class="meta-tag">
+      <span class="tag-status">EVIDENTIARY AUDIT PROOF</span>
+      <span>Source: exposure_stats.json</span><br>
+      <span>Captured: 2026-10-18 16:30:51Z</span>
+    </div>
+  </div>
+
+  <div class="content-box">
+    <pre>{
+  &quot;source&quot;: {
+    &quot;id&quot;: &quot;10024477&quot;,
+    &quot;name&quot;: &quot;GLAISDALE LIMITED&quot;
+  },
+  &quot;real_target&quot;: {
+    &quot;id&quot;: &quot;10189122&quot;,
+    &quot;name&quot;: &quot;DOM Limited&quot;,
+    &quot;reachable&quot;: true,
+    &quot;cost&quot;: 4.0,
+    &quot;hops&quot;: 4,
+    &quot;latency_ms&quot;: 31.87
+  },
+  &quot;baseline_30&quot;: {
+    &quot;sample_size&quot;: 30,
+    &quot;degree_band&quot;: &quot;4-6&quot;,
+    &quot;seed&quot;: 42,
+    &quot;reachable_count&quot;: 0,
+    &quot;reachability_pct&quot;: 0.0,
+    &quot;results&quot;: [
+      {
+        &quot;id&quot;: &quot;10027526&quot;,
+        &quot;name&quot;: &quot;SIGP SYSTEMS CORP.&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 53.12
+      },
+      {
+        &quot;id&quot;: &quot;10002072&quot;,
+        &quot;name&quot;: &quot;WELL WAY DEVELOPMENT LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 54.98
+      },
+      {
+        &quot;id&quot;: &quot;10000503&quot;,
+        &quot;name&quot;: &quot;STANSON TECHNOLOGY CORP.&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 52.81
+      },
+      {
+        &quot;id&quot;: &quot;10187126&quot;,
+        &quot;name&quot;: &quot;LPR CAPITAL LTD.&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.8
+      },
+      {
+        &quot;id&quot;: &quot;10013874&quot;,
+        &quot;name&quot;: &quot;PLAZA LTD.&quot;,
+        &quot;degree&quot;: 6,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 49.74
+      },
+      {
+        &quot;id&quot;: &quot;10006356&quot;,
+        &quot;name&quot;: &quot;MELODY POWER SERVICES LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.11
+      },
+      {
+        &quot;id&quot;: &quot;10004955&quot;,
+        &quot;name&quot;: &quot;cartier investment co.,ltd&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.46
+      },
+      {
+        &quot;id&quot;: &quot;10002562&quot;,
+        &quot;name&quot;: &quot;Starvista International Ltd.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 54.42
+      },
+      {
+        &quot;id&quot;: &quot;10185797&quot;,
+        &quot;name&quot;: &quot;ZHONGLIAN INTERNATIONAL PETROLEUM LIMITED&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 52.56
+      },
+      {
+        &quot;id&quot;: &quot;10001871&quot;,
+        &quot;name&quot;: &quot;NANOUAUGUSTIN S.A.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 49.83
+      },
+      {
+        &quot;id&quot;: &quot;10029137&quot;,
+        &quot;name&quot;: &quot;SOPRAMANTO LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.42
+      },
+      {
+        &quot;id&quot;: &quot;10186262&quot;,
+        &quot;name&quot;: &quot;Bonne Sante Limited&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 54.5
+      },
+      {
+        &quot;id&quot;: &quot;10024475&quot;,
+        &quot;name&quot;: &quot;GARDENEA MARKETING INC.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.66
+      },
+      {
+        &quot;id&quot;: &quot;10001610&quot;,
+        &quot;name&quot;: &quot;Whitesun Healthcare Ventures Ltd&quot;,
+        &quot;degree&quot;: 6,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 49.79
+      },
+      {
+        &quot;id&quot;: &quot;10025915&quot;,
+        &quot;name&quot;: &quot;SUCCESS INTERNATIONAL LIMITED&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.24
+      },
+      {
+        &quot;id&quot;: &quot;10020773&quot;,
+        &quot;name&quot;: &quot;CALLAS LTD.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 49.57
+      },
+      {
+        &quot;id&quot;: &quot;10000636&quot;,
+        &quot;name&quot;: &quot;GOLD FINANCE LIMITED&quot;,
+        &quot;degree&quot;: 6,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.83
+      },
+      {
+        &quot;id&quot;: &quot;10000614&quot;,
+        &quot;name&quot;: &quot;STARTEX INTERNATIONAL LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.4
+      },
+      {
+        &quot;id&quot;: &quot;10001693&quot;,
+        &quot;name&quot;: &quot;CASTEL LTD.&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.79
+      },
+      {
+        &quot;id&quot;: &quot;10004676&quot;,
+        &quot;name&quot;: &quot;DPS STAR LTD.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.1
+      },
+      {
+        &quot;id&quot;: &quot;10005354&quot;,
+        &quot;name&quot;: &quot;The NExt Investment Group Ltd.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.03
+      },
+      {
+        &quot;id&quot;: &quot;10023060&quot;,
+        &quot;name&quot;: &quot;STARLIGHT INC.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.15
+      },
+      {
+        &quot;id&quot;: &quot;10026295&quot;,
+        &quot;name&quot;: &quot;COMPETENT LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.82
+      },
+      {
+        &quot;id&quot;: &quot;10000524&quot;,
+        &quot;name&quot;: &quot;AMERICAN PACIFIC INTERNATIONAL S.A.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.43
+      },
+      {
+        &quot;id&quot;: &quot;10024975&quot;,
+        &quot;name&quot;: &quot;ShenXi Investment Company Limited&quot;,
+        &quot;degree&quot;: 6,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 49.49
+      },
+      {
+        &quot;id&quot;: &quot;10004069&quot;,
+        &quot;name&quot;: &quot;JC HORIZON LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 52.19
+      },
+      {
+        &quot;id&quot;: &quot;10032154&quot;,
+        &quot;name&quot;: &quot;DOAMELIZ LIMITED&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 56.69
+      },
+      {
+        &quot;id&quot;: &quot;10027872&quot;,
+        &quot;name&quot;: &quot;5markets ltd&quot;,
+        &quot;degree&quot;: 5,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 50.61
+      },
+      {
+        &quot;id&quot;: &quot;10030730&quot;,
+        &quot;name&quot;: &quot;NITA OVERSEAS S.A.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.69
+      },
+      {
+        &quot;id&quot;: &quot;10024473&quot;,
+        &quot;name&quot;: &quot;VIGNO CAPITAL INC.&quot;,
+        &quot;degree&quot;: 4,
+        &quot;reachable&quot;: false,
+        &quot;cost&quot;: null,
+        &quot;hops&quot;: null,
+        &quot;latency_ms&quot;: 51.53
+      }
+    ]
+  }
+}</pre>
+  </div>
+
+  <div class="footer">
+    <span>Ownership Lens | FalkorDB Graph Hacks (Track 01)</span>
+    <span>Deterministic Evidence Ledger &bull; Raw Unedited System Telemetry</span>
+  </div>
+</body>
+</html>

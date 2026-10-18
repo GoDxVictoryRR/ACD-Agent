@@ -10,3 +10,6 @@ dist/
 .pytest_cache/
 scratch_prompt.txt
 test_clean_clone/
+docs/video/clips/
+docs/video/raw/
+docs/video/temp_clips/

@@ -1,0 +1,672 @@
+{
+  "entity_name": "GLAISDALE LIMITED",
+  "resolved_id": "10024477",
+  "verdict": "escalate",
+  "evaluation": {
+    "verdict": "escalate",
+    "display_verdict": "escalate",
+    "findings": [
+      {
+        "rule_id": "WATCHLIST_PATH",
+        "severity": "high",
+        "text": "Exposure indicator: Direct or indirect path to watchlist entity 'DOM Limited' at cost 4.0 (within depth 4): GLAISDALE LIMITED -> Rachel Erickson -> NEWCOMBE LIMITED -> ANDREW MORAY STUART -> DOM Limited",
+        "evidence_ids": [
+          "10024477",
+          "12116679",
+          "10028037",
+          "12151058",
+          "10189122"
+        ],
+        "metadata": {
+          "path_weight": 4.0,
+          "target_id": "10189122",
+          "depth": 4
+        }
+      }
+    ],
+    "total_links": 11,
+    "resolved": true,
+    "notes": "Evaluated 1 findings. Verdict: escalate"
+  },
+  "memo": "INVESTIGATION MEMORANDUM (Template Generated)\nTarget Entity: GLAISDALE LIMITED\nInvestigation Depth: 4\nVerdict: ESCALATE (Exposure indicators requiring human review)\n\nSummary:\nAutomated graph analysis revealed 1 key exposure indicator(s) warranting human review at depth 4:\n1. [HIGH] Exposure indicator: Direct or indirect path to watchlist entity 'DOM Limited' at cost 4.0 (within depth 4): GLAISDALE LIMITED -> Rachel Erickson -> NEWCOMBE LIMITED -> ANDREW MORAY STUART -> DOM Limited\n\nDisclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All findings are exposure indicators requiring human review.",
+  "memo_source": "template",
+  "trace": [
+    {
+      "tool": "resolve_entity",
+      "params": {
+        "name": "GLAISDALE LIMITED"
+      },
+      "status": "ok",
+      "elapsed_ms": 40.04,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "ownership_chain",
+      "params": {
+        "entity_id": "10024477",
+        "max_depth": 4
+      },
+      "status": "ok",
+      "elapsed_ms": 4.74,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "shared_links",
+      "params": {
+        "entity_id": "10024477"
+      },
+      "status": "ok",
+      "elapsed_ms": 3.51,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "path_between",
+      "params": {
+        "a_id": "10024477",
+        "b_id": "10189122",
+        "max_depth": 4
+      },
+      "status": "ok",
+      "elapsed_ms": 15.26,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "cluster_view",
+      "params": {
+        "entity_id": "10024477",
+        "max_depth": 2
+      },
+      "status": "ok",
+      "elapsed_ms": 14.4,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "recall_cases",
+      "params": {
+        "entity_id": "10024477"
+      },
+      "status": "ok",
+      "elapsed_ms": 2.66,
+      "source": "deterministic",
+      "via": "mcp"
+    }
+  ],
+  "evidence": {
+    "resolved_entity": {
+      "id": "10024477",
+      "node_id": "10024477",
+      "name": "GLAISDALE LIMITED",
+      "label": "Entity",
+      "jurisdiction": "SEY",
+      "source": "Panama Papers",
+      "status": "Active"
+    },
+    "ownership_chain": [
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "11006815",
+            "name": "MANNY",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[INTERMEDIARY_OF]-> MANNY (Intermediary)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Andrew Morey Suart (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Christina Cornelia Van Den Berg (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "11006815",
+            "name": "MANNY",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity) -[INTERMEDIARY_OF]-> MANNY (Intermediary)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151058",
+            "name": "ANDREW MORAY STUART",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity) -[OFFICER_OF]-> ANDREW MORAY STUART (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151058",
+            "name": "ANDREW MORAY STUART",
+            "label": "Officer"
+          },
+          {
+            "id": "10189122",
+            "name": "DOM Limited",
+            "label": "Entity"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity) -[OFFICER_OF]-> ANDREW MORAY STUART (Officer) -[OFFICER_OF]-> DOM Limited (Entity)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12113310",
+            "name": "Frederick Van Zyl",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity) -[OFFICER_OF]-> Frederick Van Zyl (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12111564",
+            "name": "Francois Calldo",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Francois Calldo (Officer)"
+      }
+    ],
+    "shared_links": [
+      {
+        "hub_type": "Officer",
+        "hub_name": "Rachel Erickson",
+        "hub_id": "12116679",
+        "linked_count": 1
+      }
+    ],
+    "paths_to_watchlist": [
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151058",
+            "name": "ANDREW MORAY STUART",
+            "label": "Officer"
+          },
+          {
+            "id": "10189122",
+            "name": "DOM Limited",
+            "label": "Entity"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          }
+        ],
+        "path_weight": 4.0,
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity) -[OFFICER_OF]-> ANDREW MORAY STUART (Officer) -[OFFICER_OF]-> DOM Limited (Entity)",
+        "target_id": "10189122",
+        "target_name": "DOM Limited",
+        "is_watchlist": true,
+        "disjoint_paths_count": 1,
+        "independent_paths": false,
+        "exposure_depends_on": "Rachel Erickson, NEWCOMBE LIMITED, ANDREW MORAY STUART"
+      }
+    ],
+    "cluster_view": [
+      {
+        "nodes_count": 6,
+        "edges_count": 10,
+        "top_pagerank": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "score": 0.3774
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "score": 0.1979
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "score": 0.1091
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "score": 0.1052
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "score": 0.1052
+          }
+        ],
+        "top_betweenness": [
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "score": 15.0
+          },
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "score": 13.0
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "score": 0.0
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "score": 0.0
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "score": 0.0
+          }
+        ],
+        "communities": [
+          {
+            "community_id": 0,
+            "size": 6
+          }
+        ],
+        "shared_watchlist_communities": [],
+        "high_centrality_nodes": [],
+        "viz_nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "label": "Officer"
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "label": "Officer"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12111564",
+            "name": "Francois Calldo",
+            "label": "Officer"
+          }
+        ],
+        "viz_edges": [
+          {
+            "src": "10028037",
+            "dst": "12116679",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12116679",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12151276",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12119992",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12111564",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12119992",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12116679",
+            "dst": "10028037",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12111564",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12151276",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12116679",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          }
+        ]
+      }
+    ],
+    "recalled_cases": [
+      {
+        "case_id": "case_eb29ee34ea1116a4",
+        "verdict": "escalate",
+        "created_at": "2026-10-18T17:07:47.841004+00:00",
+        "depth": 4,
+        "related_entity": "GLAISDALE LIMITED",
+        "shared_nodes": []
+      }
+    ]
+  },
+  "candidates": [],
+  "status": "ok",
+  "mode": "replay"
+}
