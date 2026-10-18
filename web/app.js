@@ -307,9 +307,20 @@ async function loadDemoConfig() {
       card.tabIndex = 0;
       card.role = "button";
 
-      const flipPill = (item.expected_depth_1 && (item.expected_depth_4 || item.expected_depth_3))
-        ? `<span class="demo-dossier-pill">${item.expected_depth_1.toUpperCase()} → ${(item.expected_depth_4 || item.expected_depth_3).toUpperCase()}</span>`
+      const d1 = item.expected_depth_1 ? item.expected_depth_1.toUpperCase() : "";
+      const d4 = (item.expected_depth_4 || item.expected_depth_3)
+        ? (item.expected_depth_4 || item.expected_depth_3).toUpperCase()
         : "";
+      let flipPill = "";
+      if (d1 && d4) {
+        if (d1 === d4) {
+          flipPill = `<span class="demo-dossier-pill">${d1}</span>`;
+        } else {
+          flipPill = `<span class="demo-dossier-pill">${d1} → ${d4}</span>`;
+        }
+      } else if (d1) {
+        flipPill = `<span class="demo-dossier-pill">${d1}</span>`;
+      }
 
       card.innerHTML = `
         <div class="demo-dossier-top">
@@ -421,7 +432,11 @@ function setupEventListeners() {
   }
   if (btnFitGraph) {
     btnFitGraph.addEventListener("click", () => {
-      if (cy) cy.fit(null, 45);
+      if (cy) {
+        cy.resize();
+        cy.fit(cy.elements(), 80);
+        cy.center();
+      }
     });
   }
   if (btnResetGraph) {
@@ -429,10 +444,24 @@ function setupEventListeners() {
       if (cy && lastEvidence) {
         renderGraph(lastEvidence);
       } else if (cy) {
-        cy.fit(null, 45);
+        cy.resize();
+        cy.fit(cy.elements(), 80);
+        cy.center();
       }
     });
   }
+
+  // Auto-refit graph on browser resize
+  let resizeDebounceTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = setTimeout(() => {
+      if (cy && lastEvidence) {
+        cy.resize();
+        renderGraph(lastEvidence);
+      }
+    }, 150);
+  });
 
   // Window resize to handle mobile/desktop layout transition
   let resizeTimer;
@@ -908,8 +937,8 @@ function renderGraph(evidence) {
   cy.add(elements);
   cy.resize();
   cy.layout({ name: "preset" }).run();
-  cy.fit(null, 45);
-  if (cy.zoom() > 1.25) cy.zoom(1.25);
+  cy.fit(cy.elements(), 80);
+  if (cy.zoom() > 1.15) cy.zoom(1.15);
   cy.center();
 }
 
@@ -1118,7 +1147,7 @@ function renderMiniCompareGraph(containerId, evidence, isDepth1) {
     style: getCyStyles(isMobile),
     layout: { name: "preset" },
   });
-  miniCy.fit(null, 30);
+  miniCy.fit(miniCy.elements(), 45);
 }
 
 function awaitRunComplete(runId) {

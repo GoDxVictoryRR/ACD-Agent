@@ -351,8 +351,8 @@ header::before {
    ========================================================================== */
 .layout-grid {
   display: grid;
-  grid-template-columns: 420px 1fr;
-  gap: 2rem;
+  grid-template-columns: minmax(320px, 390px) 1fr;
+  gap: 1.75rem;
   align-items: start;
 }
 
@@ -714,29 +714,30 @@ button:disabled {
 .demo-dossier-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .demo-dossier-name {
   font-size: 0.88rem;
   font-weight: 800;
   color: #0f172a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 250px;
+  flex: 1 1 auto;
+  min-width: 140px;
+  word-break: break-word;
 }
 
 .demo-dossier-pill {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 0.2rem 0.6rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 6px;
   background: rgba(16, 185, 129, 0.16);
   color: #047857;
   border: 1px solid #059669;
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
