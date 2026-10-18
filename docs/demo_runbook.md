@@ -4,18 +4,18 @@
 
 ---
 
-## Beat 1: Proving the Graph Matters (Depth 1 vs Depth 3 Contrast)
+## Beat 1: Proving the Graph Matters (Depth 1 vs Depth 4 Contrast)
 
 1. Open the UI at `http://localhost:8000` (or the live URL).
-2. Enter Target Entity Name: **`MOSSACK FONSECA & CO. (SAMOA) LIMITED.`** (or enter node ID `10001171`).
-3. Set Watchlist Entities: **`TIANSHENG INDUSTRY AND TRADING CO., LTD.`** (node ID `10000001`).
-4. Click **"Compare D1 vs D3"** (or run at Depth 1, then at Depth 3).
+2. Enter Target Entity Name: **`GLAISDALE LIMITED`** (or enter node ID `10024477`).
+3. Set Watchlist Entities: **`DOM Limited`** (node ID `10189122`).
+4. Click **"Compare D1 vs D4"** (or run at Depth 1, then at Depth 4).
 5. **Observation**:
-   - **Depth 1 Panel**: Verdict is **CLEAR** (`"No indicators found within depth 1"`). The entity has a registered address and intermediary, but zero watchlist paths exist in 1 hop.
-   - **Depth 3 Panel**: Verdict flips to **ESCALATE**!
+   - **Depth 1 Panel**: Verdict is **CLEAR** (`"No exposure indicators found within depth 1"`). The entity has 5 registry links (directors and addresses), but zero watchlist paths exist in 1 hop.
+   - **Depth 4 Panel**: Verdict flips to **ESCALATE**!
    - Look at the Cytoscape graph canvas: A bright red highlighted exposure path appears:
-     `MOSSACK FONSECA & CO. (SAMOA) LIMITED. (Entity) -[SAME_AS]-> MOSSACK FONSECA & CO. (SAMOA) LIMITED (Entity) -[OFFICER_OF]-> MOSSFON SUBSCRIBERS LTD. (Officer) -[OFFICER_OF]-> TIANSHENG INDUSTRY AND TRADING CO., LTD. (Watchlist Entity)`.
-   - **Takeaway**: Relational lookups and shallow 1-hop checks completely miss the risk. Only multi-hop graph traversal through FalkorDB uncovers the hidden control path.
+     `GLAISDALE LIMITED (Entity 10024477) -[OFFICER_OF]-> Rachel Erickson (Officer 12116679) -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity 10028037) -[OFFICER_OF]-> ANDREW MORAY STUART (Officer 12151058) -[OFFICER_OF]-> DOM Limited (Watchlist Entity 10189122)`.
+   - **Takeaway**: Relational lookups and shallow 1-hop checks completely miss the risk. Only multi-hop graph traversal through FalkorDB uncovers the hidden control path. This path passes through zero intermediaries and zero mass-address hubs—it is an authentic corporate directorship chain. A degree-matched control cohort of 30 shell companies shows 0.0% connectivity to DOM Limited.
 
 ---
 
@@ -28,19 +28,20 @@
    - Notice the trace markers: `via: mcp` and `source: llm`.
    - Verdict: **REVIEW**.
    - Evidence ledger flags `HUB_CENTRALITY`: Computed by FalkorDB `algo.betweenness` in the scratch graph with score $B = 79.0$ (calibrated $\ge 50.0$, 99.5th percentile).
-   - Now test an entity not in the graph: enter **`Ghostly Offshore Unknown Corp XYZ`**.
-   - Click **Investigate**.
-   - Verdict: **INSUFFICIENT_EVIDENCE**. The system abstains honestly and lists candidate resolutions rather than hallucinating an answer.
+4. Now test negative controls:
+   - Enter **`OMNIA TECHNOLOGIES S.A.`** (node ID `10014876`): Verdict is **CLEAR** (multi-link entity with 0 exposure indicators).
+   - Enter **`Dewburn Enterprises Inc.`** (node ID `10000280`): Verdict is **INSUFFICIENT_EVIDENCE** (honestly abstains on degree 1 entity < MIN_LINKS=2).
+   - Enter an entity not in the graph: **`Ghostly Offshore Unknown Corp XYZ`**: Verdict is **INSUFFICIENT_EVIDENCE** (lists candidate resolutions rather than hallucinating).
 
 ---
 
 ## Beat 3: Graph Memory and Prior Case Recall
 
-1. Now enter related entity: **`TIANSHENG INDUSTRY AND TRADING CO., LTD.`** (`node_id: 10000001`).
+1. Now enter related entity: **`NEWCOMBE LIMITED`** (`node_id: 10028037`).
 2. Select **Depth 2** and click **Investigate**.
 3. **Observation**:
    - Observe the **"Prior Cases Recalled"** card on the results panel.
-   - The earlier decision recorded on Mossack Fonseca is recalled automatically via 2-hop graph traversal from `(:Case)-[:ABOUT]->(shared)`.
+   - The earlier decision recorded on `GLAISDALE LIMITED` is recalled automatically via 2-hop graph traversal from `(:Case)-[:ABOUT]->(shared)`.
    - Every verdict is written back into FalkorDB as a `(:Case)` node connected with `[:ABOUT]` and `[:CITED]` edges, making compliance intelligence compound over time.
 
 ---
@@ -49,9 +50,9 @@
 
 > "Welcome to Ownership Lens, an autonomous graph agent built on FalkorDB for Track 1: Agents That Act on Connected Data.
 >
-> Offshore networks deliberately conceal beneficial ownership behind layers of shell companies and nominee directors. When we examine 'Mossack Fonseca Samoa' at depth 1, it appears clear: an ordinary address and registration.
+> Offshore networks deliberately conceal beneficial ownership behind layers of shell companies and corporate directors. When we examine 'GLAISDALE LIMITED' at depth 1, it appears clear: ordinary filings and zero watchlist exposure.
 >
-> But when our agent traverses FalkorDB to depth 3, the verdict flips to ESCALATE. The graph uncovers a 3-hop control path through an officer hub directly into a defaulted entity on the watchlist.
+> But when our agent traverses FalkorDB to depth 4, the verdict flips to ESCALATE. The graph uncovers a 4-hop corporate directorship chain through Rachel Erickson and Andrew Stuart directly into defaulted watchlist entity DOM Limited.
 >
 > The LLM never writes raw Cypher and never invents verdicts. All decisions are computed deterministically by graph algorithms—PageRank, Betweenness, and Shortest Paths—and every memorandum is verified against tool data to eliminate hallucinations.
 >

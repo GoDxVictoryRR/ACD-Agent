@@ -407,3 +407,61 @@ Total relationship rows: 3,339,267
 | `DELINQUENT` | 21 |
 | `ACTIVE LEGAL` | 14 |
 | `SUSPENDED LEGAL` | 3 |
+
+## 6. Excluded Placeholder and Service Provider Nodes (Rule A1)
+
+### Documented Exclusion Rule
+Offshore incorporation registries routinely contain placeholder tokens, bearer instrument labels, and service provider administrative entities rather than bona fide corporate controllers:
+1. **Name Pattern Rule**: Any node whose `name` is null, empty string, whitespace-only, or case-insensitively contains `bearer`, `the bearer`, `to the bearer`, `bearer share`, `depositary`, or `bearer holder` is excluded from all graph traversals, paths, rules, and subgraph views.
+2. **Degree Percentile Rule**: Across all 10,000 officers in the seed dataset (and >770,000 in full ICIJ OLDB):
+   - $p_{50}$ (median degree) = 1
+   - $p_{90}$ = 1
+   - $p_{95}$ = 2
+   - $p_{99}$ = 4
+   - $p_{99.9}$ = 14
+   - Maximum degree = 3,882 (and "THE BEARER" at 12,520 links in the full dataset, $>99.999\text{th}$ percentile).
+   A degree $> 14$ places an officer node in the top 0.1% of all nodes. "THE BEARER" represents bearer share certificates issued to unspecified holders, not a human officer or director. Treating bearer certificates as a shared director would falsely link tens of thousands of completely unrelated companies.
+
+### Excluded Placeholder Nodes & Degrees
+| Node Label | Name / Pattern | Links in Seed | Links in Full OLDB | Rationale |
+|---|---|---|---|---|
+| `Officer` | `THE BEARER` / `The Bearer` | 124 | 12,520 | Bearer share instrument token (>99.999th percentile) |
+| `Officer` | `BEARER` | 62 | 62 | Bearer share instrument token |
+| `Officer` | `Bearer` | 19 | 19 | Bearer share instrument token |
+| `Officer` | `The bearer` | 11 | 11 | Bearer share instrument token |
+| `Officer` | `the bearer` | 5 | 5 | Bearer share instrument token |
+| `Officer` | `to the bearer` | 3 | 3 | Bearer share instrument token |
+| `Officer` | `THE BEARERE` | 2 | 2 | Typos of bearer share instrument token |
+| `Officer` | `TEH BEARER` | 1 | 1 | Typos of bearer share instrument token |
+| `Officer` | `The BEARER` | 1 | 1 | Case variation |
+| `Officer` | `BEARER 4` | 1 | 1 | Numbered bearer token |
+| `Officer` | `BEARER 3` | 1 | 1 | Numbered bearer token |
+| `Officer` | `TO THE BEARER` | 1 | 1 | Bearer token |
+| `Officer` | `THE  BEARER` | 1 | 1 | Spaced bearer token |
+| `Officer` | `The BEarer` | 1 | 1 | Case variation |
+| `Officer` | `THE BEARER 1` | 1 | 1 | Numbered bearer token |
+| `Officer` | `BEARER1` | 1 | 1 | Numbered bearer token |
+| `Officer` | `Bearer Share` | 1 | 1 | Explicit bearer share label |
+| `Officer` | `the Bearer` | 1 | 1 | Case variation |
+| `Officer` | `TH BEARER` | 1 | 1 | Typos of bearer share |
+| `Officer` | `BEARER 2` | 1 | 1 | Numbered bearer token |
+| `Officer` | `BEARER 1` | 1 | 1 | Numbered bearer token |
+| `Officer` | `BEARER2` | 1 | 1 | Numbered bearer token |
+| `Officer` | `BEARER Holder as depositary : Société Générale Bank & Trust` | 1 | 1 | Depositary placeholder |
+| `Address` | *(null or empty name)* | 353 links (245 nodes) | >100,000 links | Missing identifier / unreferenced placeholder |
+
+## 7. Hub-Free Multi-Hop Path Analysis (Rule A6)
+
+### Provider Hub vs. Genuine Control Paths
+In the Samoa/Seychelles subset, the registered intermediary `MOSSACK FONSECA & CO. (SAMOA) LIMITED` connects to over 5,000 entities. Presenting paths traversing through registered agents or shared mailbox addresses as "exposure" creates rampant false positives.
+Under ACD-Agent's pruning rules:
+- Intermediate hops through `Intermediary` and `Address` nodes are strictly forbidden in `ownership_chain` and `path_between`.
+- Genuine multi-hop paths must traverse corporate control relationships: `Entity` $\rightarrow$ `Officer` $\rightarrow$ `Entity`.
+
+### Verified Hub-Free $\ge 3$ Hop Paths in Dataset
+1. **Resource Recovery to Partners Investment (4 Hops)**:
+   - Path: `RESOURCE RECOVERY INTERNATIONAL LIMITED` (Entity 10001501) $\xrightarrow{\text{OFFICER\_OF}}$ `EUROSTOCK AG` (Officer, deg 6) $\xleftarrow{\text{OFFICER\_OF}}$ `COMTRADE S.A.` (Entity 10001502) $\xrightarrow{\text{OFFICER\_OF}}$ `IPCO S.A.` (Officer, deg 10) $\xleftarrow{\text{OFFICER\_OF}}$ `PARTNERS INVESTMENT AND LEISURE GROUP LTD.` (Entity 10001345)
+   - Metrics: 4 hops, 0 intermediaries, 0 bearer nodes, 0 shared service addresses. Maximum officer degree on path is 10 (well below provider hub thresholds).
+2. **Saffron Investments to Mayer & Collins (4 Hops)**:
+   - Path: `SAFFRON INVESTMENTS LIMITED` (Entity 10000221) $\xrightarrow{\text{OFFICER\_OF}}$ `MFM FOUNDATION` (Officer, deg 18) $\xleftarrow{\text{OFFICER\_OF}}$ `Cosicosi Company` $\xrightarrow{\text{OFFICER\_OF}}$ `FIDELITY HOLDINGS LTD.` (Officer, deg 2) $\xleftarrow{\text{OFFICER\_OF}}$ `MAYER & COLLINS TRADING COMPANY LTD.` (Entity 10191463)
+   - Metrics: 4 hops, 0 intermediaries, 0 bearer nodes. Pure corporate ownership and common directorship structure.

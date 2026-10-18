@@ -11,7 +11,7 @@ Ownership Lens investigates offshore corporate networks to detect hidden control
 The system is deliberately split into four strict layers:
 1. **Primary Database (FalkorDB)**: Holds the property graph of Entities, Officers, Intermediaries, and Addresses. All multi-hop queries and graph algorithms execute here.
 2. **Deterministic Rules Engine (`core/rules.py`)**: Computes the final verdict (`clear`, `review`, `escalate`, `insufficient_evidence`). The LLM **never** decides or alters the verdict.
-3. **Agent Loop (`agent/loop.py`)**: An NVIDIA-hosted text model (`nvidia/nemotron-3-super-120b-a12b`) that chooses which read tools to invoke and writes a concise investigation memorandum.
+3. **Agent Loop (`agent/loop.py`)**: An NVIDIA-hosted text model (`nvidia/llama-3.3-nemotron-super-49b-v1.5`) that chooses which read tools to invoke and writes a concise investigation memorandum.
 4. **Memo Verifier (`core/verifier.py`)**: Verifies that every named entity in the LLM's memorandum exists in the graph tool outputs. If the LLM hallucinates an unverified name, the memo is instantly discarded and replaced with a deterministic template memo.
 
 ---
@@ -21,7 +21,7 @@ The system is deliberately split into four strict layers:
 | Tool | Graph Operation | Why the Decision Needs It |
 |---|---|---|
 | `resolve_entity` | Full-text / exact lookup on `:Entity(name)` | Anchors the investigation. Unknown or ambiguous entity immediately terminates with `insufficient_evidence`. |
-| `ownership_chain` | Variable-length traversal `(e)-[*1..depth]-(target)` | Traces direct and indirect shareholding, directorship, and control up to 3 hops. |
+| `ownership_chain` | Variable-length traversal `(e)-[*1..depth]-(target)` | Traces direct and indirect shareholding, directorship, and control up to 4 hops. |
 | `shared_links` | Two-hop aggregation through hubs `(e)-[r1]-(hub)-[r2]-(other)` | Detects nominee officers and mass-registration addresses shared across dozens of shell entities. |
 | `path_between` | `CALL algo.SPpaths` with `weightProp:'weight'` | Finds the shortest weighted evidence path between the target and any watchlisted entity within max depth. |
 | `cluster_view` | Subgraph extraction + `algo.pageRank`, `algo.betweenness`, `algo.wcc`, `algo.labelPropagation` | Measures network centrality and community clustering in the entity's 2-hop neighborhood. Scratch graph is always deleted. |
@@ -33,7 +33,7 @@ The system is deliberately split into four strict layers:
 ## 3. The Rules Engine and Thresholds (`core/rules.py`)
 
 The verdict is determined by pure Python functions with zero LLM influence:
-- **`WATCHLIST_PATH` (High Severity)**: Fires if `path_between` finds a watchlist entity within depth 3 at weighted cost <= 8.0. Triggers **`escalate`**.
+- **`WATCHLIST_PATH` (High Severity)**: Fires if `path_between` finds a watchlist entity within depth 4 at weighted cost <= 8.0. Triggers **`escalate`**.
 - **`PATH_REDUNDANCY` (High Severity)**: Fires if $\ge 2$ node-disjoint paths exist to a watchlist entity ("independent paths"). Triggers **`escalate`**.
 - **`PATH_DEPENDENCY` (Medium Severity)**: Fires if exposure passes through a single intermediate bottleneck node ("exposure depends on <node>"). Triggers **`review`**.
 - **`COMMUNITY_WATCHLIST` (Medium Severity)**: Fires if the entity shares a graph community (via `algo.labelPropagation`) with a watchlist entity without a direct path in range. Triggers **`review`**.
@@ -80,8 +80,8 @@ If the LLM makes unnecessary queries, runs out of its 8-call budget, or fails to
 4. **How do you prevent hallucinations in the written memo?**
    `core/verifier.py` parses all capitalized entities in the LLM memo and matches them against the tool output data. Any unverified name causes the memo to be discarded and replaced with a deterministic template memo.
 
-5. **Why is depth 3 needed if depth 1 is already checked?**
-   Offshore corporate networks deliberately use multi-layered nominee directorships and shell companies. At depth 1, an entity appears clean with an individual director; at depth 3, that director connects through an intermediary to a sanctioned target.
+5. **Why is depth 4 needed if depth 1 is already checked?**
+   Offshore corporate networks deliberately use multi-layered nominee directorships and shell companies. At depth 1, `GLAISDALE LIMITED` appears completely clean with standard filings (0 indicators); at depth 4, a 4-hop corporate directorship chain connects through `Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` into defaulted watchlist entity `DOM Limited`.
 
 6. **Are you accusing entities in ICIJ data of wrongdoing?**
    No. All findings are strictly phrased as "exposure indicators requiring human review". Inclusion in ICIJ offshore leaks data does not imply illegality or wrongdoing.

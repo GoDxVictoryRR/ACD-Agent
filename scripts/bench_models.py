@@ -116,13 +116,13 @@ TOOL_DEFINITIONS = [
 TEST_PROMPTS = [
     {
         "id": 1,
-        "prompt": "Investigate entity Mossack Fonseca & Co. (Samoa) Limited.",
+        "prompt": "Investigate entity GLAISDALE LIMITED.",
         "expected_tool": "resolve_entity",
         "expected_arg": "name",
     },
     {
         "id": 2,
-        "prompt": "Find the node identifier for Tiansheng Industry and Trading Co.",
+        "prompt": "Find the node identifier for DOM Limited.",
         "expected_tool": "resolve_entity",
         "expected_arg": "name",
     },

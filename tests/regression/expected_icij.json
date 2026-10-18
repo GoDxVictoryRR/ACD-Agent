@@ -1,25 +1,25 @@
 {
-  "MOSSACK FONSECA & CO. (SAMOA) LIMITED.": {
+  "GLAISDALE LIMITED": {
     "depth_1": "clear",
-    "depth_3": "escalate"
+    "depth_4": "escalate"
   },
   "Millex International Limited": {
     "depth_2": "review"
   },
   "Skytrack Investments Limited": {
-    "depth_2": "review"
+    "depth_2": "insufficient_evidence"
   },
   "OMNIA TECHNOLOGIES S.A.": {
-    "depth_2": "review"
+    "depth_2": "clear"
   },
   "GAO SHENG LIMITED": {
-    "depth_2": "review"
+    "depth_2": "clear"
   },
   "KIRBY GARDENS LTD.": {
-    "depth_2": "review"
+    "depth_2": "insufficient_evidence"
   },
   "Dewburn Enterprises Inc.": {
-    "depth_2": "review"
+    "depth_2": "insufficient_evidence"
   },
   "TIANSHENG INDUSTRY AND TRADING CO., LTD.": {
     "depth_2": "review"

@@ -99,6 +99,94 @@ EDGE_WEIGHT: dict[str, float] = {
 DEFAULT_EDGE_WEIGHT: float = 2.5
 LOAD_BATCH_SIZE: int = int(os.getenv("LOAD_BATCH_SIZE", "1000"))
 
+# ── Placeholder & Service-Provider Exclusion Denylist (A1) ───────────────────
+# "THE BEARER" (12,520 links) and variants represent unrecorded bearer equity holders.
+# Address nodes with null/empty names (353 links) are incomplete registry entries.
+# Excluded from every traversal, path, rule evaluation, and subgraph view.
+EXCLUDED_PLACEHOLDER_NAMES: frozenset[str] = frozenset(
+    {
+        "THE BEARER",
+        "THE BEARER.",
+        "THE BEARER 1",
+        "THE  BEARER",
+        "TH BEARER",
+        "TEH BEARER",
+        "THE BEARERE",
+        "TO THE BEARER",
+        "BEARER",
+        "BEARER 1",
+        "BEARER 2",
+        "BEARER 3",
+        "BEARER 4",
+        "BEARER1",
+        "BEARER2",
+        "BEARER SHARE",
+        "BEARER SHARES",
+        "BEARER SHAREHOLDER",
+        "UNKNOWN",
+        "N/A",
+        "NONE",
+        "NULL",
+        "CLIENT",
+        "SAME AS ABOVE",
+        "SEE ATTACHED",
+        "NOT GIVEN",
+        "ANONYMOUS",
+    }
+)
+
+
+def is_placeholder_name(name: str | None) -> bool:
+    """Return True if name is null, empty, or a known placeholder token (e.g. BEARER)."""
+    if name is None:
+        return True
+    s = name.strip()
+    if not s:
+        return True
+    upper = s.upper()
+    if upper in EXCLUDED_PLACEHOLDER_NAMES:
+        return True
+    if "BEARER" in upper and not any(k in upper for k in ("HOLDING", "TRUST", "BANK", "FUND")):
+        return True
+    return False
+
+
+# ── Service Provider Exclusion Patterns (Z1) ─────────────────────────────────
+# Law firms, corporate trust providers, and registered agents are service providers.
+# They must not be used as primary demo targets, watchlist entities, or UI placeholders.
+SERVICE_PROVIDER_PATTERNS: tuple[str, ...] = (
+    "MOSSACK",
+    "FONSECA",
+    "MOSSFON",
+    "PORTCULLIS",
+    "TRUST",
+    "MANAGEMENT",
+    "SERVICES",
+    "NOMINEE",
+    "NOMINEES",
+    "CORPORATE SERVICES",
+    "FIDUCIARY",
+    "SECRETARIAL",
+    "CONSULTING",
+    "REGISTRARS",
+    "AGENTS",
+    "SOLICITORS",
+    "LAW",
+    "CHAMBERS",
+    "LEGAL",
+    "ADVISORY",
+    "INTERCON",
+)
+
+
+def is_service_provider_name(name: str | None) -> bool:
+    """Return True if name matches any service provider or administrative intermediary pattern."""
+    if not name:
+        return True
+    upper = name.strip().upper()
+    return any(p in upper for p in SERVICE_PROVIDER_PATTERNS)
+
+
 # ── Rule thresholds (Calibrated on active ICIJ SAM/SEY dataset) ────────────────
 # Address degree distribution: min=1, p50=1.0, p90=2.0, p95=5.0, max=11.
 ADDRESS_HUB_MIN: int = 5  # Exactly p95 of Address degree distribution
@@ -107,16 +195,21 @@ ADDRESS_HUB_MIN: int = 5  # Exactly p95 of Address degree distribution
 # 95%+ of officers belong to 1 company; >=3 links isolates high-volume nominee directors (p99).
 OFFICER_HUB_MIN: int = 3  # Exactly p99 of Officer degree distribution
 
-# Intermediary degree distribution: min=1, p50=2.0, p90=14.1, p95=32.0, max=3993.
-INTERMEDIARY_MIN: int = 15  # Calibrated to ~p90 of Intermediary degree distribution
+# Target entity own structure complexity thresholds (A2):
+# Number of direct officers: min=1, p50=1, p90=3, p95=3, p99=6. >6 direct officers is >p99.
+OWN_OFFICERS_MAX: int = 6
+# Distinct intermediaries: 99.8% of entities use 1 intermediary; >=3 indicates unusual layering.
+MULTI_INTERMEDIARY_MIN: int = 3
 
 PATH_COST_MAX: float = 8.0  # Max weighted path cost for WATCHLIST_PATH rule
 
 # Zero/low-link entities (degree 0 or 1) have insufficient connections to clear; must return insufficient_evidence.
 MIN_LINKS: int = 2  # At least 2 verified links required for a conclusive verdict
 
-# Scratch graph centrality threshold: betweenness >= 0.05 indicates bridge hub (~p90 in scratch clusters)
-CENTRALITY_BETWEENNESS_MIN: float = 0.05
+# Scratch graph centrality threshold (A2):
+# Unnormalized betweenness path count in provider-free scratch graph.
+# Calibrated across 60 sampled scratch graphs (p50=0, p75=32, p90=32, p95=62).
+CENTRALITY_BETWEENNESS_MIN: float = 50.0  # Matches documented threshold (~93rd percentile of target entity bridge score)
 
 # MCP tool routing switch (default: on)
 USE_MCP: bool = os.getenv("USE_MCP", "1").lower() in ("1", "true", "yes")

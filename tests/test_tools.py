@@ -24,7 +24,7 @@ def fixture_graph():
     setup_q = """
     CREATE (e1:Entity {node_id: 'E_ALPHA', name: 'Alpha Holding Corp', jurisdiction: 'BVI'})
     CREATE (e2:Entity {node_id: 'E_BETA', name: 'Beta Trading Ltd', jurisdiction: 'Panama'})
-    CREATE (e3:Entity {node_id: 'E_TARGET', name: 'Sanctioned Watchlist Corp', jurisdiction: 'Seychelles'})
+    CREATE (e3:Entity {node_id: 'E_TARGET', name: 'Designated Watchlist Corp', jurisdiction: 'Seychelles'})
     CREATE (o1:Officer {node_id: 'O_DIRECTOR', name: 'John Director', country: 'UK'})
     CREATE (a1:Address {node_id: 'A_SUITE', address: 'Suite 100 Portcullis', country: 'BVI'})
 

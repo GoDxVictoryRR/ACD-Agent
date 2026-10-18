@@ -19,6 +19,8 @@ def test_health_endpoint():
     assert "graph" in data
     assert "mode" in data
     assert "rss_mb" in data
+    assert isinstance(data["rss_mb"], (int, float))
+    assert data["rss_mb"] > 0.0
 
 
 def test_demo_endpoint():

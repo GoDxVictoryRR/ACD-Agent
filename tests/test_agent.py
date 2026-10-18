@@ -49,7 +49,7 @@ def test_fallback_completes_when_no_llm():
 def test_invalid_key_fallback():
     """Invalid LLM key triggers fallback cleanly without crashing."""
     bad_llm = LLMClient(api_key="mock-invalid-key")
-    res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=bad_llm)
+    res = run_investigation("GLAISDALE LIMITED", depth=1, llm=bad_llm)
     assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
     assert res["memo_source"] == "template"
 
@@ -70,7 +70,7 @@ def test_simulated_429_fallback():
             body={"error": "Too Many Requests"},
         ),
     ):
-        res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=mock_llm)
+        res = run_investigation("GLAISDALE LIMITED", depth=1, llm=mock_llm)
         assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
 
 
@@ -84,7 +84,7 @@ def test_timeout_fallback():
     with patch.object(
         mock_llm.client.chat.completions, "create", side_effect=openai.APITimeoutError(request=MagicMock())
     ):
-        res = run_investigation("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", depth=1, llm=mock_llm)
+        res = run_investigation("GLAISDALE LIMITED", depth=1, llm=mock_llm)
         assert res["verdict"] in {"clear", "review", "escalate", "insufficient_evidence"}
 
 

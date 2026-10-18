@@ -22,8 +22,8 @@ REGRESSION_DIR = Path(__file__).resolve().parent
 def regression_config():
     if DATA_SOURCE == "icij":
         expected_file = REGRESSION_DIR / "expected_icij.json"
-        watchlist = ["TIANSHENG INDUSTRY AND TRADING CO., LTD."]
-        primary_entity = "MOSSACK FONSECA & CO. (SAMOA) LIMITED."
+        watchlist = ["DOM Limited"]
+        primary_entity = "GLAISDALE LIMITED"
     else:
         expected_file = REGRESSION_DIR / "expected.json"
         watchlist = ["Ironclad Sanctions Entity Inc", "Apex Nominees Ltd"]
@@ -47,14 +47,16 @@ def test_regression_verdicts(regression_config):
     watchlist = regression_config["watchlist"]
     primary = regression_config["primary_entity"]
 
-    # 1. Test Depth 1 vs Depth 3 flip on primary entity
+    # 1. Test Depth 1 vs Depth 4 (or 3) flip on primary entity
+    flip_depth = 4 if DATA_SOURCE == "icij" else 3
+    flip_key = f"depth_{flip_depth}"
     r_d1 = run_deterministic_investigation(primary, watchlist=watchlist, depth=1)
-    r_d3 = run_deterministic_investigation(primary, watchlist=watchlist, depth=3)
+    r_deep = run_deterministic_investigation(primary, watchlist=watchlist, depth=flip_depth)
 
     assert r_d1["verdict"] == expected_verdicts[primary]["depth_1"]
-    assert r_d3["verdict"] == expected_verdicts[primary]["depth_3"]
-    # Invariant: depth 1 vs depth 3 must flip verdict to prove graph value!
-    assert r_d1["verdict"] != r_d3["verdict"]
+    assert r_deep["verdict"] == expected_verdicts[primary][flip_key]
+    # Invariant: depth 1 vs deep must flip verdict to prove graph value!
+    assert r_d1["verdict"] != r_deep["verdict"]
 
     # 2. Test remaining 9 entities
     for entity_name, exp in expected_verdicts.items():

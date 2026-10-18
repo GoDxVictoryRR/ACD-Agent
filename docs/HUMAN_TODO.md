@@ -4,19 +4,19 @@ This document lists all tasks, decisions, and deployment steps that only the hum
 
 ---
 
-## 1. Approve PROVISIONAL Choices
+## 1. Approve Verified Choices
 
 Please review and approve the following choices implemented and verified with test evidence:
 
 | Item | Choice | Status | Evidence / Verification File |
 |---|---|---|---|
-| **Demo Entity 1 (Primary Depth Flip)** | `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` (d=1: `clear`, d=3: `escalate` to `TIANSHENG INDUSTRY AND TRADING CO., LTD.`) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md), [`scripts/find_remaining_demo_cases.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/find_remaining_demo_cases.py) |
-| **Demo Watchlist Target** | `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (Entity node only, 10000001) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
-| **Demo Isolated Entity** | `Dewburn Enterprises Inc.` (degree 1, d=1..3 `clear`) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
-| **Demo Related Recall Entity** | `TIANSHENG INDUSTRY AND TRADING CO., LTD.` (recalls Case recorded on 10001171) | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
-| **Demo Negative Controls (>=4)** | `Skytrack Investments Limited`, `OMNIA TECHNOLOGIES S.A.`, `GAO SHENG LIMITED`, `KIRBY GARDENS LTD.`, `Millex International Limited`, `SINOWAY HOLDINGS LTD.` | PROVISIONAL | [`docs/demo_cases.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_cases.md) |
-| **Synthetic Fallback Demo Case** | `Blue Star Maritime Holdings Ltd` (d=1: `clear`, d=3: `escalate`) | PROVISIONAL | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
-| **Primary Dataset** | ICIJ Panama Papers Samoa/Seychelles subset (51,940 nodes, 58,891 edges, 40.91MB RAM) | PROVISIONAL | [`docs/data_notes.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/data_notes.md), [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
+| **Demo Entity 1 (Primary Depth Flip)** | `GLAISDALE LIMITED` (d=1: `clear`, d=4: `escalate` to `DOM Limited`) | VERIFIED | [`docs/exposure_stats.json`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/exposure_stats.json), [`scripts/measure_exposure_baseline.py`](file:///c:/Users/hardi/Downloads/ACD-agent/scripts/measure_exposure_baseline.py) |
+| **Demo Watchlist Target** | `DOM Limited` (Entity node only, 10189122) | VERIFIED | [`data/demo.json`](file:///c:/Users/hardi/Downloads/ACD-agent/data/demo.json) |
+| **Demo Low-Link Negative Control** | `Dewburn Enterprises Inc.` (degree 1, d=1..4 `insufficient_evidence`) | VERIFIED | [`docs/degree_distribution.json`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/degree_distribution.json) |
+| **Demo Related Recall Entity** | `NEWCOMBE LIMITED` (recalls Case recorded on 10024477) | VERIFIED | [`docs/demo_runbook.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_runbook.md) |
+| **Demo Clean Negative Controls** | `OMNIA TECHNOLOGIES S.A.`, `GAO SHENG LIMITED` (d=1..4 `clear`) | VERIFIED | [`tests/regression/expected_icij.json`](file:///c:/Users/hardi/Downloads/ACD-agent/tests/regression/expected_icij.json) |
+| **LLM Model** | `nvidia/llama-3.3-nemotron-super-49b-v1.5` (15/15 live runs pass) | VERIFIED | [`docs/live_demo_runs.json`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/live_demo_runs.json), [`docs/model_bench.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/model_bench.md) |
+| **Primary Dataset** | ICIJ Panama Papers Samoa/Seychelles subset (51,940 nodes, 58,875 edges, 40.91MB RAM) | VERIFIED | [`docs/data_notes.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/data_notes.md), [`docs/test_report.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/test_report.md) |
 
 ---
 
@@ -50,7 +50,7 @@ Please review and approve the following choices implemented and verified with te
    - Health check path: `/health`
 3. Configure Environment Variables in Render dashboard:
    - `NVIDIA_API_KEY`: your `nvapi-...` key
-   - `NVIDIA_MODEL`: `nvidia/nemotron-3-super-120b-a12b`
+   - `NVIDIA_MODEL`: `nvidia/llama-3.3-nemotron-super-49b-v1.5`
    - `FALKORDB_HOST`: FalkorDB Cloud instance host
    - `FALKORDB_PORT`: FalkorDB Cloud port
    - `FALKORDB_PASSWORD`: FalkorDB Cloud password
@@ -79,10 +79,10 @@ Run these commands against your live Render endpoint:
 curl.exe -s https://<your-render-url>/health
 
 # 2. Entity search
-curl.exe -s "https://<your-render-url>/entities/search?q=MOSSACK"
+curl.exe -s "https://<your-render-url>/entities/search?q=GLAISDALE"
 
-# 3. Investigate Mossack Fonseca Samoa (Depth 3 flip to ESCALATE)
-curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"MOSSACK FONSECA & CO. (SAMOA) LIMITED.\",\"watchlist\":[\"TIANSHENG INDUSTRY AND TRADING CO., LTD.\"],\"depth\":3}'
+# 3. Investigate Glaisdale Limited (Depth 4 flip to ESCALATE)
+curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"GLAISDALE LIMITED\",\"watchlist\":[\"DOM Limited\"],\"depth\":4}'
 ```
 
 ---
@@ -91,9 +91,9 @@ curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: appl
 
 1. **Record 2-3 Minute Demo Video**:
    - Follow [`docs/demo_runbook.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/demo_runbook.md).
-   - Beat 1: Show `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` depth 1 (`clear`) vs depth 3 (`escalate`) depth flip live.
-   - Beat 2: Show `PORTCULLIS TRUSTNET (SAMOA) LIMITED` intermediary hub (`review`, 31 links).
-   - Beat 3: Show `TIANSHENG INDUSTRY AND TRADING CO., LTD.` prior Case recall (`(:Case)` node in graph).
+   - Beat 1: Show `GLAISDALE LIMITED` depth 1 (`clear`) vs depth 4 (`escalate`) depth flip live.
+   - Beat 2: Show `CRYSTAL RISE HOLDINGS LIMITED` centrality hub (`review`) and negative controls (`OMNIA TECHNOLOGIES S.A.` clear, `Dewburn Enterprises Inc.` insufficient_evidence).
+   - Beat 3: Show `NEWCOMBE LIMITED` prior Case recall (`(:Case)` node in graph).
    - Upload to YouTube / Loom. Update README.md and submission form with the link.
 2. **Publish Blog Post**:
    - Copy text from [`docs/blog.md`](file:///c:/Users/hardi/Downloads/ACD-agent/docs/blog.md) to Dev.to, Medium, or Hashnode.

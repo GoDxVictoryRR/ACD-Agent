@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>Ownership Lens | Autonomous Offshore Network Investigator</title>
-  <meta name="description" content="Autonomous Graph Agent for Offshore Control and Beneficial Ownership Networks powered by FalkorDB and Model Context Protocol.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%237c3aed%22/><circle cx=%2250%22 cy=%2250%22 r=%2220%22 fill=%22white%22/></svg>">
   <link rel="stylesheet" href="style.css?v=white_liquid_glass_v1">
   <!-- Pinned Cytoscape.js from cdnjs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
@@ -77,7 +77,7 @@
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </div>
-            <input type="text" id="entityInput" placeholder="e.g. MOSSACK FONSECA & CO. (SAMOA) LIMITED." autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="suggestions">
+            <input type="text" id="entityInput" placeholder="e.g. GLAISDALE LIMITED" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="suggestions">
             <div id="suggestions" role="listbox" aria-label="Entity suggestions"></div>
           </div>
         </div>
@@ -87,7 +87,7 @@
             <span>High-Risk Watchlist Targets</span>
             <span class="label-hint">Comma-separated</span>
           </label>
-          <textarea id="watchlistInput" rows="2" placeholder="e.g. TIANSHENG INDUSTRY AND TRADING CO., LTD."></textarea>
+          <textarea id="watchlistInput" rows="2" placeholder="e.g. DOM Limited"></textarea>
         </div>
 
         <div class="form-group">
@@ -98,7 +98,8 @@
           <select id="depthSelect">
             <option value="1">Depth 1 — Immediate connections only (Shallow relational)</option>
             <option value="2">Depth 2 — Two hops (Intermediary nominee hubs)</option>
-            <option value="3" selected>Depth 3 — Three hops (Concealed multi-hop chains)</option>
+            <option value="3">Depth 3 — Three hops (Multi-layered directorships)</option>
+            <option value="4" selected>Depth 4 — Four hops (Corporate network traversal)</option>
           </select>
         </div>
 
@@ -109,12 +110,12 @@
             </svg>
             <span>Investigate Target</span>
           </button>
-          <button id="btnCompare" class="btn-secondary" type="button" aria-label="Compare Depth 1 versus Depth 3 findings side-by-side" title="Runs Depth 1 vs Depth 3 to demonstrate concealed multi-hop exposure">
+          <button id="btnCompare" class="btn-secondary" type="button" aria-label="Compare Depth 1 versus Depth 4 findings side-by-side" title="Runs Depth 1 vs Depth 4 to demonstrate concealed multi-hop exposure">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="12" y1="3" x2="12" y2="21"></line>
             </svg>
-            <span>Compare D1 vs D3</span>
+            <span>Compare D1 vs D4</span>
           </button>
         </div>
 
@@ -157,7 +158,7 @@
           <span class="coord-tag" style="color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">GRAPH VALUE PROOF</span>
         </div>
         <p class="card-desc">
-          Compare shallow relational visibility (Depth 1) against deep topological graph traversal (Depth 3). Uncovers concealed nominee directors and multi-hop sanctions exposure.
+          Compare shallow relational visibility (Depth 1) against deep topological graph traversal (Depth 4). Uncovers concealed nominee directors and multi-hop watchlist exposure.
         </p>
         <div class="contrast-container">
           <div class="contrast-panel" id="contrastD1">
@@ -172,15 +173,15 @@
             <div id="contrastD1Badge" class="contrast-badge-wrapper"></div>
             <p id="contrastD1Memo" class="contrast-memo"></p>
           </div>
-          <div class="contrast-panel" id="contrastD3">
+          <div class="contrast-panel" id="contrastD4">
             <h3>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
-              <span>Depth 3 Evaluation (Multi-Hop Graph Agent)</span>
+              <span>Depth 4 Evaluation (Multi-Hop Graph Agent)</span>
             </h3>
-            <div id="contrastD3Badge" class="contrast-badge-wrapper"></div>
-            <p id="contrastD3Memo" class="contrast-memo"></p>
+            <div id="contrastD4Badge" class="contrast-badge-wrapper"></div>
+            <p id="contrastD4Memo" class="contrast-memo"></p>
           </div>
         </div>
       </div>

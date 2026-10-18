@@ -1,35 +1,35 @@
 {
   "demo_entities": [
     {
-      "id": "10001171",
-      "name": "MOSSACK FONSECA & CO. (SAMOA) LIMITED.",
+      "id": "10024477",
+      "name": "GLAISDALE LIMITED",
       "expected_depth_1": "clear",
-      "expected_depth_3": "escalate",
-      "description": "At depth 1, appears clear. At depth 3, links through nominee officer MOSSFON SUBSCRIBERS LTD. to watchlist entity TIANSHENG INDUSTRY AND TRADING CO., LTD. \u2014 verdict flips to escalate."
+      "expected_depth_4": "escalate",
+      "description": "At depth 1, appears clear with no indicators. At depth 4, links through clean corporate directorship chain (Rachel Erickson -> NEWCOMBE LIMITED -> ANDREW MORAY STUART) to watchlist entity DOM Limited — verdict flips to escalate."
     },
     {
       "id": "10014876",
       "name": "Millex International Limited",
       "expected_depth_1": "review",
-      "expected_depth_3": "review",
+      "expected_depth_4": "review",
       "description": "Connected to nominee officer hub and intermediary concentration; review verdict without escalating to watchlist."
     },
     {
-      "id": "10017419",
-      "name": "Skytrack Investments Limited",
+      "id": "10000280",
+      "name": "OMNIA TECHNOLOGIES S.A.",
       "expected_depth_1": "clear",
-      "expected_depth_3": "clear",
-      "description": "Connected entity with no high-risk hubs or watchlist connections; remains clear at depth 1 and depth 3."
+      "expected_depth_4": "clear",
+      "description": "Connected entity with no high-risk hubs or watchlist connections; remains clear at depth 1 and depth 4."
     },
     {
       "id": "10000290",
       "name": "Dewburn Enterprises Inc.",
-      "expected_depth_1": "clear",
-      "expected_depth_3": "clear",
-      "description": "Low-link entity (degree 1) with clean structure and zero watchlist exposure."
+      "expected_depth_1": "insufficient_evidence",
+      "expected_depth_4": "insufficient_evidence",
+      "description": "Low-link entity (degree 1 < MIN_LINKS=2) with insufficient evidence for compliance determination."
     }
   ],
   "watchlist": [
-    "TIANSHENG INDUSTRY AND TRADING CO., LTD."
+    "DOM Limited"
   ]
 }

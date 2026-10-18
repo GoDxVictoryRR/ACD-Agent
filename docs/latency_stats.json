@@ -1,0 +1,46 @@
+{
+  "depth_1": {
+    "depth": 1,
+    "runs": 50,
+    "min_ms": 64.95,
+    "p50_ms": 72.79,
+    "p95_ms": 80.83,
+    "p99_ms": 122.9,
+    "max_ms": 122.9,
+    "mean_ms": 74.01,
+    "p95_under_2s": true
+  },
+  "depth_2": {
+    "depth": 2,
+    "runs": 50,
+    "min_ms": 105.4,
+    "p50_ms": 115.63,
+    "p95_ms": 133.73,
+    "p99_ms": 146.51,
+    "max_ms": 146.51,
+    "mean_ms": 117.57,
+    "p95_under_2s": true
+  },
+  "depth_3": {
+    "depth": 3,
+    "runs": 50,
+    "min_ms": 120.91,
+    "p50_ms": 146.26,
+    "p95_ms": 179.7,
+    "p99_ms": 196.46,
+    "max_ms": 196.46,
+    "mean_ms": 147.76,
+    "p95_under_2s": true
+  },
+  "depth_4": {
+    "depth": 4,
+    "runs": 50,
+    "min_ms": 129.99,
+    "p50_ms": 147.77,
+    "p95_ms": 227.06,
+    "p99_ms": 283.88,
+    "max_ms": 283.88,
+    "mean_ms": 159.48,
+    "p95_under_2s": true
+  }
+}

@@ -60,7 +60,7 @@ def test_generate_template_memo():
                 "nodes": [
                     {"id": "E1", "name": "Blue Star Maritime"},
                     {"id": "O1", "name": "Marcus Sterling"},
-                    {"id": "E_TARGET", "name": "Ironclad Sanctions Entity Inc"},
+                    {"id": "E_TARGET", "name": "Ironclad Watchlist Entity Inc"},
                 ],
             }
         ],

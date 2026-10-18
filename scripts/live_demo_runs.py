@@ -20,22 +20,34 @@ from core.config import NVIDIA_MODEL
 
 DEMO_CASES = [
     {
-        "name": "MOSSACK FONSECA & CO. (SAMOA) LIMITED.",
-        "depth": 3,
-        "watchlist": ["TIANSHENG INDUSTRY AND TRADING CO., LTD."],
-        "desc": "Primary Depth Flip Demo",
+        "name": "GLAISDALE LIMITED",
+        "depth": 4,
+        "watchlist": ["DOM Limited"],
+        "desc": "Primary Demo (Depth 4 Flip)",
     },
     {
-        "name": "TIANSHENG INDUSTRY AND TRADING CO., LTD.",
-        "depth": 2,
-        "watchlist": ["HOTFOCUS CO., LTD."],
-        "desc": "Redundant Paths Demo",
+        "name": "GLAISDALE LIMITED",
+        "depth": 1,
+        "watchlist": ["DOM Limited"],
+        "desc": "Primary Demo (Depth 1 Clear)",
     },
     {
-        "name": "CRYSTAL RISE HOLDINGS LIMITED",
+        "name": "Millex International Limited",
         "depth": 2,
         "watchlist": [],
-        "desc": "Hub Centrality Demo",
+        "desc": "Nominee / Intermediary Complexity",
+    },
+    {
+        "name": "OMNIA TECHNOLOGIES S.A.",
+        "depth": 2,
+        "watchlist": ["DOM Limited"],
+        "desc": "Negative Control (Clear)",
+    },
+    {
+        "name": "Dewburn Enterprises Inc.",
+        "depth": 1,
+        "watchlist": ["DOM Limited"],
+        "desc": "Negative Control (Low Degree)",
     },
 ]
 

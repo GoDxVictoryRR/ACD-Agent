@@ -1,0 +1,99 @@
+{
+  "distribution": {
+    "total_entities": 10000,
+    "counts_per_degree": {
+      "1": 1688,
+      "2": 3261,
+      "3": 3057,
+      "4": 901,
+      "5": 544,
+      "6": 245,
+      "8": 49,
+      "9": 27,
+      "11": 32,
+      "7": 95,
+      "38": 1,
+      "12": 28,
+      "27": 1,
+      "49": 2,
+      "10": 17,
+      "202": 1,
+      "13": 5,
+      "16": 1,
+      "14": 6,
+      "125": 1,
+      "19": 4,
+      "51": 1,
+      "15": 1,
+      "32": 2,
+      "24": 1,
+      "23": 3,
+      "22": 3,
+      "20": 3,
+      "25": 2,
+      "21": 5,
+      "17": 3,
+      "90": 1,
+      "52": 2,
+      "103": 1,
+      "18": 2,
+      "26": 2,
+      "101": 1,
+      "43": 1
+    },
+    "insufficient_count": 1688,
+    "insufficient_share_pct": 16.88
+  },
+  "negative_controls": [
+    {
+      "name": "OMNIA TECHNOLOGIES S.A.",
+      "id": "10000280",
+      "degree": 3,
+      "verdict_d1": "clear",
+      "verdict_d4": "clear",
+      "expected": "clear",
+      "passed": true,
+      "findings_count_d4": 0
+    },
+    {
+      "name": "GAO SHENG LIMITED",
+      "id": "10000854",
+      "degree": 3,
+      "verdict_d1": "clear",
+      "verdict_d4": "clear",
+      "expected": "clear",
+      "passed": true,
+      "findings_count_d4": 0
+    },
+    {
+      "name": "Dewburn Enterprises Inc.",
+      "id": "10000290",
+      "degree": 1,
+      "verdict_d1": "insufficient_evidence",
+      "verdict_d4": "insufficient_evidence",
+      "expected": "insufficient_evidence",
+      "passed": true,
+      "findings_count_d4": 0
+    },
+    {
+      "name": "Skytrack Investments Limited",
+      "id": "10017419",
+      "degree": 1,
+      "verdict_d1": "insufficient_evidence",
+      "verdict_d4": "insufficient_evidence",
+      "expected": "insufficient_evidence",
+      "passed": true,
+      "findings_count_d4": 0
+    },
+    {
+      "name": "KIRBY GARDENS LTD.",
+      "id": "10000109",
+      "degree": 3,
+      "verdict_d1": "insufficient_evidence",
+      "verdict_d4": "insufficient_evidence",
+      "expected": "insufficient_evidence",
+      "passed": true,
+      "findings_count_d4": 0
+    }
+  ]
+}

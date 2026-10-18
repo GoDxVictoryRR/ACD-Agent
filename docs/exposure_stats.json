@@ -1,0 +1,293 @@
+{
+  "source": {
+    "id": "10024477",
+    "name": "GLAISDALE LIMITED"
+  },
+  "real_target": {
+    "id": "10189122",
+    "name": "DOM Limited",
+    "reachable": true,
+    "cost": 4.0,
+    "hops": 4,
+    "latency_ms": 31.87
+  },
+  "baseline_30": {
+    "sample_size": 30,
+    "degree_band": "4-6",
+    "seed": 42,
+    "reachable_count": 0,
+    "reachability_pct": 0.0,
+    "results": [
+      {
+        "id": "10027526",
+        "name": "SIGP SYSTEMS CORP.",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 53.12
+      },
+      {
+        "id": "10002072",
+        "name": "WELL WAY DEVELOPMENT LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 54.98
+      },
+      {
+        "id": "10000503",
+        "name": "STANSON TECHNOLOGY CORP.",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 52.81
+      },
+      {
+        "id": "10187126",
+        "name": "LPR CAPITAL LTD.",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.8
+      },
+      {
+        "id": "10013874",
+        "name": "PLAZA LTD.",
+        "degree": 6,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 49.74
+      },
+      {
+        "id": "10006356",
+        "name": "MELODY POWER SERVICES LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.11
+      },
+      {
+        "id": "10004955",
+        "name": "cartier investment co.,ltd",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.46
+      },
+      {
+        "id": "10002562",
+        "name": "Starvista International Ltd.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 54.42
+      },
+      {
+        "id": "10185797",
+        "name": "ZHONGLIAN INTERNATIONAL PETROLEUM LIMITED",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 52.56
+      },
+      {
+        "id": "10001871",
+        "name": "NANOUAUGUSTIN S.A.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 49.83
+      },
+      {
+        "id": "10029137",
+        "name": "SOPRAMANTO LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.42
+      },
+      {
+        "id": "10186262",
+        "name": "Bonne Sante Limited",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 54.5
+      },
+      {
+        "id": "10024475",
+        "name": "GARDENEA MARKETING INC.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.66
+      },
+      {
+        "id": "10001610",
+        "name": "Whitesun Healthcare Ventures Ltd",
+        "degree": 6,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 49.79
+      },
+      {
+        "id": "10025915",
+        "name": "SUCCESS INTERNATIONAL LIMITED",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.24
+      },
+      {
+        "id": "10020773",
+        "name": "CALLAS LTD.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 49.57
+      },
+      {
+        "id": "10000636",
+        "name": "GOLD FINANCE LIMITED",
+        "degree": 6,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.83
+      },
+      {
+        "id": "10000614",
+        "name": "STARTEX INTERNATIONAL LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.4
+      },
+      {
+        "id": "10001693",
+        "name": "CASTEL LTD.",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.79
+      },
+      {
+        "id": "10004676",
+        "name": "DPS STAR LTD.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.1
+      },
+      {
+        "id": "10005354",
+        "name": "The NExt Investment Group Ltd.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.03
+      },
+      {
+        "id": "10023060",
+        "name": "STARLIGHT INC.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.15
+      },
+      {
+        "id": "10026295",
+        "name": "COMPETENT LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.82
+      },
+      {
+        "id": "10000524",
+        "name": "AMERICAN PACIFIC INTERNATIONAL S.A.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.43
+      },
+      {
+        "id": "10024975",
+        "name": "ShenXi Investment Company Limited",
+        "degree": 6,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 49.49
+      },
+      {
+        "id": "10004069",
+        "name": "JC HORIZON LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 52.19
+      },
+      {
+        "id": "10032154",
+        "name": "DOAMELIZ LIMITED",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 56.69
+      },
+      {
+        "id": "10027872",
+        "name": "5markets ltd",
+        "degree": 5,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 50.61
+      },
+      {
+        "id": "10030730",
+        "name": "NITA OVERSEAS S.A.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.69
+      },
+      {
+        "id": "10024473",
+        "name": "VIGNO CAPITAL INC.",
+        "degree": 4,
+        "reachable": false,
+        "cost": null,
+        "hops": null,
+        "latency_ms": 51.53
+      }
+    ]
+  }
+}

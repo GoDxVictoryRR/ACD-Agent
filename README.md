@@ -12,14 +12,14 @@
 ## 1. Overview & Pitch
 
 ### The User Story
-Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **MOSSACK FONSECA & CO. (SAMOA) LIMITED.**. Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets. But compliance policies require uncovering whether beneficial control traces to high-risk actors.
+Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **GLAISDALE LIMITED** (Node ID `10024477`). Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets (5 links, 0 findings: `clear`). But compliance policies require uncovering whether beneficial control traces to high-risk actors.
 
-With 30 minutes to make an onboarding decision, manually cross-referencing hundreds of shell companies, intermediary law firms, and nominee directors across international registry databases is impossible.
+With 30 minutes to make an onboarding decision, manually cross-referencing hundreds of shell companies and corporate directors across international registry databases is impossible.
 
 The analyst opens **Ownership Lens** and enters the entity name. Within seconds:
 1. **Entity Resolution**: The system resolves the entity in FalkorDB without table scans.
-2. **Autonomous Graph Traversal**: The agent investigates multi-hop ownership chains, discovers nominee hubs and shared addresses, and traverses control links up to depth 3.
-3. **Deterministic Rules Evaluation**: The engine identifies a 3-hop control path (`MOSSACK FONSECA` -> `MOSSFON SUBSCRIBERS LTD.` -> `TIANSHENG INDUSTRY AND TRADING CO., LTD.`) and computes an explainable **ESCALATE** verdict backed by an immutable evidence ledger.
+2. **Autonomous Graph Traversal**: The agent investigates multi-hop ownership chains, discovers nominee hubs and corporate directorships, and traverses control links up to depth 4.
+3. **Deterministic Rules Evaluation**: The engine identifies a 4-hop corporate directorship chain (`GLAISDALE LIMITED` -> `Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` -> `DOM Limited`) and computes an explainable **ESCALATE** verdict backed by an immutable evidence ledger.
 4. **Graph Memory Recall**: The verdict is written back to FalkorDB as a `(:Case)` node, ensuring future queries on related entities immediately surface prior compliance decisions.
 
 - **Track**: Track 1 — Agents That Act on Connected Data
@@ -29,33 +29,35 @@ The analyst opens **Ownership Lens** and enters the entity name. Within seconds:
 
 ---
 
-## 2. Depth 1 vs Depth 3 Contrast: Proving Graph Value
+## 2. Depth 1 vs Depth 4 Contrast: Proving Graph Value
 
 The core architectural requirement of Ownership Lens is proving that **the graph is essential, not decorative**:
 
 ```
-Depth 1: MOSSACK FONSECA & CO. (SAMOA) LIMITED. -> 1 Intermediary, 1 Address
-         => Verdict: CLEAR ("No indicators found within depth 1")
+Depth 1: GLAISDALE LIMITED -> 1 Officer, 1 Address, 3 Intermediary/Others
+         => Verdict: CLEAR ("No exposure indicators found within depth 1")
          (Shallow checks reveal zero exposure to watchlist entities)
 
-Depth 3: MOSSACK FONSECA & CO. (SAMOA) LIMITED. (Entity)
-         -[SAME_AS]-> MOSSACK FONSECA & CO. (SAMOA) LIMITED (Entity)
-         -[OFFICER_OF]-> MOSSFON SUBSCRIBERS LTD. (Officer)
-         -[OFFICER_OF]-> TIANSHENG INDUSTRY AND TRADING CO., LTD. (Watchlist Entity)
-         => Verdict: ESCALATE (WATCHLIST_PATH triggered: weighted cost 6.0 <= 8.0)
+Depth 4: GLAISDALE LIMITED (Entity 10024477, deg 5)
+         -[OFFICER_OF]-> Rachel Erickson (Officer 12116679, deg 2)
+         -[OFFICER_OF]-> NEWCOMBE LIMITED (Entity 10028037, deg 4)
+         -[OFFICER_OF]-> ANDREW MORAY STUART (Officer 12151058, deg 2)
+         -[OFFICER_OF]-> DOM Limited (Watchlist Entity 10189122, deg 5, Defaulted)
+         => Verdict: ESCALATE (WATCHLIST_PATH triggered: weighted cost 4.0 <= 8.0)
 ```
 
-![Depth Contrast: Mossack Fonseca at Depth 1 vs Depth 3](docs/screens/desktop_comparison.png)
+![Depth Contrast: GLAISDALE LIMITED at Depth 1 vs Depth 4](docs/screens/desktop_comparison.png)
 
-At depth 1, the entity appears completely benign. At depth 3, multi-hop weighted traversal across nominee directors and intermediaries uncovers direct exposure to an entity on the sanctions watchlist.
+At depth 1, the entity appears completely benign with 0 exposure indicators. At depth 4, multi-hop traversal across corporate directorship links uncovers direct exposure to `DOM Limited`, a defaulted entity on the compliance watchlist. This chain passes through zero intermediaries and zero mass-incorporation address hubs—it is an authentic corporate directorship chain.
 
-### Empirical Graph Exposure Statistics
-To quantify graph connectivity across the Panama Papers dataset, reverse BFS evaluated 250 seeded sample entities (`seed=42`) against the demo watchlist ([docs/exposure_stats.md](docs/exposure_stats.md)):
-- **Depth 1 Exposure**: **0.0%** (zero shallow connections to watchlist)
-- **Depth 2 Exposure**: **30.0%**
-- **Depth 3 Exposure**: **30.0%**
-- **Depth 4 Exposure**: **64.4%** (network expands significantly beyond depth 3)
-- **Completely Unconnected**: **35.6%**
+### Empirical Graph Exposure Statistics & Degree-Matched Baseline
+To quantify graph connectivity across the Panama Papers dataset without hub shortcut artifacts, degree-matched sampling and exact vs. cumulative measurements were performed ([docs/exposure_stats.json](docs/exposure_stats.json)):
+- **Degree-Matched Baseline**: A 30-sample degree-matched control cohort (entities of degree 4–6, `seed=42`) showed **0 / 30 (0.0%)** reachability to `DOM Limited` within 4 hops. The connection from `GLAISDALE LIMITED` is topologically distinct and not a generic dense-graph artifact.
+- **Exact vs. Cumulative Depth Expansion** (from `GLAISDALE LIMITED`):
+  - **Depth 1**: Cumulative: 4 nodes | Exact: 4 nodes (shallow boundary)
+  - **Depth 2**: Cumulative: 5 nodes | Exact: 1 node
+  - **Depth 3**: Cumulative: 7 nodes | Exact: 2 nodes
+  - **Depth 4**: Cumulative: 8 nodes | Exact: 1 node (first exposure to `DOM Limited`)
 
 ---
 
@@ -66,7 +68,7 @@ graph TD
     User([User / Browser]) <--> UI[Web UI: Cytoscape.js + SSE Trace]
     UI <--> API[FastAPI Backend: api/main.py]
     API <--> Loop[Agent Loop: agent/loop.py]
-    Loop <--> LLM[NVIDIA Hosted LLM: nvidia/nemotron-3-super-120b-a12b]
+    Loop <--> LLM[NVIDIA Hosted LLM: nvidia/llama-3.3-nemotron-super-49b-v1.5]
     Loop <--> Tools[Typed Tools: core/tools.py / MCP Server]
     Tools <--> DB[(FalkorDB Graph: core/db.py)]
     Loop --> Rules[Rules Engine: core/rules.py]
@@ -154,8 +156,8 @@ graph LR
 ## 7. Why FalkorDB is Essential
 
 If you replace FalkorDB with a relational SQL database:
-- **Depth 1**: Searching `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` returns a single intermediary and registered address. Both appear unremarkable. The relational query reports `CLEAR`.
-- **Depth 3**: Querying 3 hops across arbitrary intermediary, officer, and entity relationship types in SQL requires expensive multiple self-joins with massive join tables. In FalkorDB, `algo.SPpaths` evaluates the weighted graph path in milliseconds, revealing the connection to `TIANSHENG INDUSTRY AND TRADING CO., LTD.` and flipping the verdict to **ESCALATE**.
+- **Depth 1**: Searching `GLAISDALE LIMITED` returns its immediate filings: a director, an address, and registration records. All appear unremarkable. The relational query reports `CLEAR`.
+- **Depth 4**: Querying 4 hops across arbitrary corporate directorship and ownership relationships in SQL requires expensive multi-table self-joins with complex path reconstruction. In FalkorDB, `algo.SPpaths` evaluates the weighted graph path in milliseconds, revealing the directorship control chain to `DOM Limited` (`Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` -> `DOM Limited`) and flipping the verdict to **ESCALATE**.
 - **Without the graph, there is no verdict**: The application rejects inquiries without database verification.
 
 ---
@@ -167,18 +169,18 @@ If you replace FalkorDB with a relational SQL database:
 
 Tested across 10 distinct entities using the deterministic evaluation path to verify consistency across depth variations:
 
-| Entity Name | Depth 1 Verdict | Depth 3 Verdict | Verdict Flips? | Primary Finding |
+| Entity Name | Depth 1 Verdict | Depth 2/4 Verdict | Verdict Flips? | Primary Finding |
 |---|---|---|---|---|
-| `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` | `clear` | `escalate` | **YES (Key Demo)** | 3-hop path to `TIANSHENG INDUSTRY AND TRADING CO., LTD.` |
-| `Millex International Limited` | `review` | `review` | No | Nominee officer hub |
-| `Skytrack Investments Limited` | `review` | `review` | No | `HUB_CENTRALITY` bridge hub |
-| `OMNIA TECHNOLOGIES S.A.` | `review` | `review` | No | Nominee officer hub |
-| `GAO SHENG LIMITED` | `review` | `review` | No | Nominee officer hub |
-| `KIRBY GARDENS LTD.` | `review` | `review` | No | Nominee officer hub |
-| `Dewburn Enterprises Inc.` | `review` | `review` | No | Nominee officer hub |
-| `TIANSHENG INDUSTRY AND TRADING CO., LTD.` | `review` | `escalate` | **YES** | Direct watchlist target & redundant paths |
-| `Unknown Entity Alpha` | `insufficient_evidence` | `insufficient_evidence` | No | Unresolved entity |
-| `Unknown Entity Beta` | `insufficient_evidence` | `insufficient_evidence` | No | Unresolved entity |
+| `GLAISDALE LIMITED` | `clear` | `escalate` (d=4) | **YES (Key Demo)** | 4-hop corporate directorship chain to `DOM Limited` |
+| `Millex International Limited` | `review` | `review` (d=2) | No | Nominee officer hub |
+| `Skytrack Investments Limited` | `insufficient_evidence` | `insufficient_evidence` (d=2) | No | Degree 1 entity (< MIN_LINKS=2) |
+| `OMNIA TECHNOLOGIES S.A.` | `clear` | `clear` (d=2) | No | Clean multi-link entity, 0 findings |
+| `GAO SHENG LIMITED` | `clear` | `clear` (d=2) | No | Clean multi-link entity, 0 findings |
+| `KIRBY GARDENS LTD.` | `insufficient_evidence` | `insufficient_evidence` (d=2) | No | Degree 1 entity (< MIN_LINKS=2) |
+| `Dewburn Enterprises Inc.` | `insufficient_evidence` | `insufficient_evidence` (d=2) | No | Degree 1 entity (< MIN_LINKS=2) |
+| `TIANSHENG INDUSTRY AND TRADING CO., LTD.` | `review` | `review` (d=2) | No | Intermediary & nominee findings |
+| `Unknown Entity Alpha` | `insufficient_evidence` | `insufficient_evidence` (d=2) | No | Unresolved entity |
+| `Unknown Entity Beta` | `insufficient_evidence` | `insufficient_evidence` (d=2) | No | Unresolved entity |
 
 ---
 
@@ -186,21 +188,20 @@ Tested across 10 distinct entities using the deterministic evaluation path to ve
 
 Systematic ablation across 5 configurations ([docs/ablation.md](file:///c:/Users/hardi/Downloads/ACD-agent/docs/ablation.md)) isolating the contribution of each architectural layer:
 
-| Entity Name | Category | Full Rules (Depth 3) | Depth 1 Only | Depth 2 Only | No Algorithm Rules | No Path Rules | Verdict Shifts? |
+| Entity Name | Category | Full Rules (Depth 4) | Depth 1 Only | Depth 2 Only | No Algorithm Rules | No Path Rules | Verdict Shifts? |
 |---|---|---|---|---|---|---|---|
-| `MOSSACK FONSECA & CO. (SAMOA) LIMITED.` | Primary Demo (Depth Flip) | **escalate** | `clear` | `review` | `escalate` | `review` | **YES** (Flippable) |
-| `TIANSHENG INDUSTRY AND TRADING CO., LTD.` | Redundant Paths Demo | **review** | `review` | `review` | `review` | `review` | No (Stable) |
-| `CRYSTAL RISE HOLDINGS LIMITED` | Hub Centrality Demo | **review` | `review` | `review` | `review` | `review` | No (Stable) |
+| `GLAISDALE LIMITED` | Primary Demo (Depth Flip) | **escalate** | `clear` | `clear` | `escalate` | `clear` | **YES** (Flippable) |
+| `CRYSTAL RISE HOLDINGS LIMITED` | Hub Centrality Demo | **review** | `review` | `review` | `clear` | `review` | **YES** (Algorithm Sensitive) |
 | `Millex International Limited` | Nominee Hub Demo | **review** | `review` | `review` | `review` | `review` | No (Stable) |
+| `OMNIA TECHNOLOGIES S.A.` | Negative Control: Clean (No indicators) | **clear** | `clear` | `clear` | `clear` | `clear` | No (Stable) |
 | `Unknown Entity Alpha` | Negative Control: Unknown Entity | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
 | `Isolated Shell Corp` | Negative Control: Isolated (0 links) | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
-| `Single Link LLC` | Negative Control: Low-Link (1 link) | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
-| `Solitary Clean Trading Ltd` | Negative Control: Clean (No indicators) | **clear** | `clear` | `clear` | `clear` | `clear` | No (Stable) |
+| `Dewburn Enterprises Inc.` | Negative Control: Low-Link (1 link) | **insufficient_evidence** | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | `insufficient_evidence` | No (Stable) |
 
 *Key Findings:*
-1. **Depth Traversal Proves Graph Value**: `MOSSACK FONSECA` flips from `clear` ("No indicators found within depth 1") at Depth 1 to `escalate` at Depth 3.
+1. **Depth Traversal Proves Graph Value**: `GLAISDALE LIMITED` flips from `clear` ("No exposure indicators found within depth 1") at Depth 1 to `escalate` at Depth 4.
 2. **Algorithm Rules (`algo.betweenness`, `algo.labelPropagation`)**: Uncover structural hubs (`CRYSTAL RISE`) and community risk that path queries alone miss.
-3. **Low-Link Invariant**: Disconnected entities strictly return `insufficient_evidence`, preventing false clearances.
+3. **Low-Link Invariant**: Entities with degree < 2 strictly return `insufficient_evidence`, preventing false clearances.
 
 ---
 
@@ -263,4 +264,4 @@ python scripts/check_invariants.py
 
 ## 13. AI Assistance Disclosure
 
-Developed with the assistance of **Google Antigravity** paired with **NVIDIA-hosted LLM inference** (`nvidia/nemotron-3-super-120b-a12b`) at runtime. All architecture, Cypher queries, graph algorithms, invariant checks, and tests were verified against official FalkorDB and MCP documentation and executed against live endpoints. The human team member reviewed and can defend all code decisions. See [`docs/EXPLAIN.md`](docs/EXPLAIN.md) for full architectural explanations and rationale.
+Developed with the assistance of **Google Antigravity** paired with **NVIDIA-hosted LLM inference** (`nvidia/llama-3.3-nemotron-super-49b-v1.5`) at runtime. All architecture, Cypher queries, graph algorithms, invariant checks, and tests were verified against official FalkorDB and MCP documentation and executed against live endpoints. The human team member reviewed and can defend all code decisions. See [`docs/EXPLAIN.md`](docs/EXPLAIN.md) for full architectural explanations and rationale.

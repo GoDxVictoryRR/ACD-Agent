@@ -22,7 +22,7 @@ function initCytoscape() {
           "label": "data(label)",
           "color": "#0f172a",
           "font-size": "11px",
-          "font-weight": "700",
+          "font-weight": "bold",
           "font-family": "Plus Jakarta Sans, sans-serif",
           "text-valign": "bottom",
           "text-margin-y": "6px",
@@ -79,7 +79,7 @@ function initCytoscape() {
           "width": "40px",
           "height": "40px",
           "color": "#9f1239",
-          "font-weight": "800",
+          "font-weight": "bold",
           "text-background-color": "rgba(254, 226, 226, 0.98)",
         },
       },
@@ -95,7 +95,7 @@ function initCytoscape() {
           "label": "data(type)",
           "font-size": "8.5px",
           "font-family": "JetBrains Mono, monospace",
-          "font-weight": "600",
+          "font-weight": "bold",
           "color": "#1e293b",
           "text-rotation": "autorotate",
           "text-margin-y": "-4px",
@@ -208,8 +208,8 @@ async function loadDemoConfig() {
       card.tabIndex = 0;
       card.role = "button";
 
-      const flipPill = (item.expected_depth_1 && item.expected_depth_3)
-        ? `<span class="demo-dossier-pill">${item.expected_depth_1.toUpperCase()} → ${item.expected_depth_3.toUpperCase()}</span>`
+      const flipPill = (item.expected_depth_1 && (item.expected_depth_4 || item.expected_depth_3))
+        ? `<span class="demo-dossier-pill">${item.expected_depth_1.toUpperCase()} → ${(item.expected_depth_4 || item.expected_depth_3).toUpperCase()}</span>`
         : "";
 
       card.innerHTML = `
@@ -614,7 +614,7 @@ function renderRecalledCases(cases) {
 async function runDepthComparison() {
   const entityName = document.getElementById("entityInput").value.trim();
   if (!entityName) {
-    alert("Please enter an entity name to compare depth 1 vs 3.");
+    alert("Please enter an entity name to compare depth 1 vs 4.");
     return;
   }
 
@@ -623,13 +623,13 @@ async function runDepthComparison() {
 
   const d1Badge = document.getElementById("contrastD1Badge");
   const d1Memo = document.getElementById("contrastD1Memo");
-  const d3Badge = document.getElementById("contrastD3Badge");
-  const d3Memo = document.getElementById("contrastD3Memo");
+  const d4Badge = document.getElementById("contrastD4Badge");
+  const d4Memo = document.getElementById("contrastD4Memo");
 
   d1Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 1…</span>`;
   d1Memo.textContent = "Executing single-hop neighborhood exploration…";
-  d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">AWAITING…</span>`;
-  d3Memo.textContent = "Awaiting depth 1 completion before starting multi-hop traversal…";
+  d4Badge.innerHTML = `<span class="badge badge-insufficient_evidence">AWAITING…</span>`;
+  d4Memo.textContent = "Awaiting depth 1 completion before starting multi-hop traversal…";
 
   const watchlistRaw = document.getElementById("watchlistInput").value;
   const watchlist = watchlistRaw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -648,25 +648,25 @@ async function runDepthComparison() {
     d1Badge.innerHTML = `<span class="badge badge-${r1Data.verdict}">${d1Text}</span>`;
     d1Memo.textContent = r1Data.memo || "Depth 1 found no immediate watchlist connections.";
 
-    // Run Depth 3
-    d3Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 3…</span>`;
-    d3Memo.textContent = "Traversing 3 hops across nominee hubs and intermediary layers in FalkorDB…";
+    // Run Depth 4
+    d4Badge.innerHTML = `<span class="badge badge-insufficient_evidence">RUNNING DEPTH 4…</span>`;
+    d4Memo.textContent = "Traversing 4 hops across corporate directorship chains in FalkorDB…";
 
-    const res3 = await fetch(`${apiBase}/investigate`, {
+    const res4 = await fetch(`${apiBase}/investigate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ entity: entityName, watchlist, depth: 3, no_llm: true }),
+      body: JSON.stringify({ entity: entityName, watchlist, depth: 4, no_llm: true }),
     });
-    const run3 = await res3.json();
-    const r3Data = await awaitRunComplete(run3.run_id);
+    const run4 = await res4.json();
+    const r4Data = await awaitRunComplete(run4.run_id);
 
-    d3Badge.innerHTML = `<span class="badge badge-${r3Data.verdict}">${r3Data.verdict.toUpperCase()}</span>`;
-    d3Memo.textContent = r3Data.memo || "Depth 3 completed.";
+    d4Badge.innerHTML = `<span class="badge badge-${r4Data.verdict}">${r4Data.verdict.toUpperCase()}</span>`;
+    d4Memo.textContent = r4Data.memo || "Depth 4 completed.";
 
-    // Update main graph with Depth 3 view
-    renderGraph(r3Data.evidence);
-    updateVerdictUI(r3Data.verdict, r3Data.evaluation);
-    document.getElementById("memoText").textContent = r3Data.memo;
+    // Update main graph with Depth 4 view
+    renderGraph(r4Data.evidence);
+    updateVerdictUI(r4Data.verdict, r4Data.evaluation);
+    document.getElementById("memoText").textContent = r4Data.memo;
     document.getElementById("memoSource").textContent = "Source: DEPTH COMPARISON ENGINE";
   } catch (err) {
     alert(`Comparison failed: ${err.message}`);

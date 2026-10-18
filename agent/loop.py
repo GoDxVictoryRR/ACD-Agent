@@ -47,12 +47,12 @@ TOOL_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "ownership_chain",
-            "description": "Traverse ownership, control, and shareholder connections from an entity up to depth 3.",
+            "description": "Traverse ownership, control, and shareholder connections from an entity up to depth 4.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "entity_id": {"type": "string", "description": "Node ID of the entity"},
-                    "max_depth": {"type": "integer", "description": "Traversal depth (1-3)", "default": 2},
+                    "max_depth": {"type": "integer", "description": "Traversal depth (1-4)", "default": 2},
                 },
                 "required": ["entity_id"],
             },
@@ -83,7 +83,7 @@ TOOL_DEFINITIONS = [
                 "properties": {
                     "a_id": {"type": "string", "description": "Source node ID"},
                     "b_id": {"type": "string", "description": "Target node ID"},
-                    "max_depth": {"type": "integer", "description": "Max hops (1-3)", "default": 3},
+                    "max_depth": {"type": "integer", "description": "Max hops (1-4)", "default": 4},
                 },
                 "required": ["a_id", "b_id"],
             },
@@ -280,9 +280,12 @@ def run_investigation(
                             entity_id,
                         )
                         args["entity_id"] = entity_id
+                    if func_name == "ownership_chain":
+                        args["max_depth"] = min(int(args.get("max_depth", depth)), depth)
                 elif func_name == "path_between":
                     if not args.get("a_id"):
                         args["a_id"] = entity_id
+                    args["max_depth"] = min(int(args.get("max_depth", depth)), depth)
 
                 # Skip if LLM re-calls resolve_entity (budget already used)
                 if func_name == "resolve_entity":

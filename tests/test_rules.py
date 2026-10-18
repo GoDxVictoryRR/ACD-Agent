@@ -315,3 +315,57 @@ def test_evaluate_nominee_officer_hub_review():
     res = evaluate(evidence, max_depth=2)
     assert res.verdict == "review"
     assert any(f.rule_id == "NOMINEE_OFFICER_HUB" and f.severity == "medium" for f in res.findings)
+
+
+def test_dewburn_degree_one_returns_insufficient_evidence():
+    """A3: Degree 1 entity connected solely to an intermediary provider must return insufficient_evidence."""
+    evidence = {
+        "resolved_entity": {"id": "10000290", "name": "Dewburn Enterprises Inc.", "status": "ok"},
+        "ownership_chain": [
+            {
+                "nodes": [
+                    {"id": "10000290", "name": "Dewburn Enterprises Inc.", "label": "Entity"},
+                    {"id": "11011863", "name": "MOSSACK FONSECA & CO.", "label": "Intermediary"},
+                ],
+                "relationships": [{"type": "INTERMEDIARY_OF"}],
+            }
+        ],
+        "shared_links": [],  # Intermediary is a service provider, not a client risk hub
+        "paths_to_watchlist": [],
+        "cluster_view": [{"high_centrality_nodes": [], "shared_watchlist_communities": []}],
+    }
+    res = evaluate(evidence, max_depth=2)
+    assert res.verdict == "insufficient_evidence"
+    assert res.total_links == 1
+    assert len(res.findings) == 0
+
+
+def test_intermediary_provider_size_never_flags_entity():
+    """A2: Intermediaries are service providers. Large intermediary client volume does not flag target entity."""
+    evidence = {
+        "resolved_entity": {"id": "E_CLIENT", "name": "Standard Client Ltd", "status": "ok"},
+        "ownership_chain": [
+            {
+                "nodes": [
+                    {"id": "E_CLIENT", "name": "Standard Client Ltd", "label": "Entity"},
+                    {"id": "I_BIG", "name": "Mega Intermediary Corp", "label": "Intermediary"},
+                ],
+                "relationships": [{"type": "INTERMEDIARY_OF"}],
+            },
+            {
+                "nodes": [
+                    {"id": "E_CLIENT", "name": "Standard Client Ltd", "label": "Entity"},
+                    {"id": "O_DIR", "name": "Sole Director Person", "label": "Officer"},
+                ],
+                "relationships": [{"type": "OFFICER_OF"}],
+            },
+        ],
+        "shared_links": [],  # Provider hubs not in shared links
+        "paths_to_watchlist": [],
+        "cluster_view": [],
+    }
+    res = evaluate(evidence, max_depth=2)
+    # 2 direct links, 0 findings -> clean entity clears without intermediary flag
+    assert res.verdict == "clear"
+    assert not any("INTERMEDIARY" in f.rule_id for f in res.findings)
+

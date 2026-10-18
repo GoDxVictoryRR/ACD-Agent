@@ -17,11 +17,13 @@ from pydantic import BaseModel, Field
 from core.config import (
     ADDRESS_HUB_MIN,
     CENTRALITY_BETWEENNESS_MIN,
-    INTERMEDIARY_MIN,
     MIN_LINKS,
+    MULTI_INTERMEDIARY_MIN,
     OFFICER_HUB_MIN,
+    OWN_OFFICERS_MAX,
     PATH_COST_MAX,
     VERDICTS,
+    is_placeholder_name,
 )
 
 
@@ -87,17 +89,6 @@ def evaluate(
     chain_paths = evidence.get("ownership_chain", [])
     hubs = evidence.get("shared_links", [])
     total_links = len(chain_paths) + len(hubs)
-
-    # Check 2: Low-link entities return insufficient_evidence, never clear
-    if total_links < MIN_LINKS:
-        return RulesEvaluation(
-            verdict="insufficient_evidence",
-            display_verdict="insufficient_evidence",
-            findings=[],
-            total_links=total_links,
-            resolved=True,
-            notes=f"Insufficient graph connections (total links {total_links} < min {MIN_LINKS}).",
-        )
 
     # Check 3: Watchlist paths, PATH_REDUNDANCY and PATH_DEPENDENCY (Requirements 3 & 5)
     watchlist_paths = evidence.get("paths_to_watchlist", [])
@@ -204,28 +195,31 @@ def evaluate(
                     )
                 )
 
-        # Rule: HUB_CENTRALITY (above a calibrated percentile -> review)
+        # Rule: HUB_CENTRALITY (A2: Target entity centrality in provider-free graph >= 50.0 -> review)
         high_centrality = cdata.get("high_centrality_nodes", [])
         for hc in high_centrality:
-            hc_name = hc.get("name", "Hub")
+            hc_name = hc.get("name", "Target Entity")
             hc_score = hc.get("score", 0.0)
             hc_id = hc.get("id", "")
             findings.append(
                 Finding(
                     rule_id="HUB_CENTRALITY",
                     severity="medium",
-                    text=f"High graph centrality indicator: Node '{hc_name}' acts as a major structural bridge in the local network (betweenness centrality: {hc_score:.3f}, threshold: {CENTRALITY_BETWEENNESS_MIN}).",
+                    text=f"High graph centrality indicator: Target entity '{hc_name}' acts as a major structural bridge in the local network (betweenness centrality: {hc_score:.1f}, threshold: {CENTRALITY_BETWEENNESS_MIN}).",
                     evidence_ids=[hc_id] if hc_id else [],
                     metadata={"betweenness": hc_score, "threshold": CENTRALITY_BETWEENNESS_MIN},
                 )
             )
 
-    # Check 5: Hub rules
+    # Check 5: Provider hubs (Address / Nominee Officer)
     for h in hubs:
         hub_type = h.get("hub_type", "")
         linked = int(h.get("linked_count", 0))
         hub_name = h.get("hub_name", "")
         hub_id = h.get("hub_id", "")
+
+        if is_placeholder_name(hub_name):
+            continue
 
         if hub_type == "Address" and linked >= ADDRESS_HUB_MIN:
             findings.append(
@@ -249,27 +243,59 @@ def evaluate(
                 )
             )
 
-        elif hub_type == "Intermediary" and linked >= INTERMEDIARY_MIN:
-            findings.append(
-                Finding(
-                    rule_id="INTERMEDIARY_CONCENTRATION",
-                    severity="low",
-                    text=f"Intermediary hub indicator: Connected intermediary '{hub_name}' facilitates {linked} offshore entities (threshold: {INTERMEDIARY_MIN}).",
-                    evidence_ids=[hub_id],
-                    metadata={"linked_count": linked, "intermediary": hub_name},
-                )
+    # Check 6: Target entity's own structural complexity (A2)
+    # A2 rule: Intermediaries/providers never flag an entity on provider size.
+    # Evaluates the TARGET entity's own direct directorship and intermediary structuring.
+    direct_officers = {
+        p["nodes"][1]["id"]: p["nodes"][1].get("name", "")
+        for p in chain_paths
+        if len(p.get("nodes", [])) >= 2
+        and p["nodes"][1].get("label") == "Officer"
+        and not is_placeholder_name(p["nodes"][1].get("name"))
+    }
+    if len(direct_officers) > OWN_OFFICERS_MAX:
+        findings.append(
+            Finding(
+                rule_id="OWN_OFFICER_CONCENTRATION",
+                severity="medium",
+                text=f"High directorship complexity: Target entity maintains {len(direct_officers)} direct officers, exceeding the 99th percentile of corporate structures (threshold: {OWN_OFFICERS_MAX}).",
+                evidence_ids=list(direct_officers.keys()),
+                metadata={"officer_count": len(direct_officers), "threshold": OWN_OFFICERS_MAX},
             )
+        )
+
+    direct_intermediaries = {
+        p["nodes"][1]["id"]: p["nodes"][1].get("name", "")
+        for p in chain_paths
+        if len(p.get("nodes", [])) >= 2 and p["nodes"][1].get("label") == "Intermediary"
+    }
+    if len(direct_intermediaries) >= MULTI_INTERMEDIARY_MIN:
+        findings.append(
+            Finding(
+                rule_id="MULTI_INTERMEDIARY_LAYERING",
+                severity="low",
+                text=f"Multi-intermediary structure: Target entity is facilitated through {len(direct_intermediaries)} distinct administrative intermediaries (threshold: {MULTI_INTERMEDIARY_MIN}).",
+                evidence_ids=list(direct_intermediaries.keys()),
+                metadata={"intermediary_count": len(direct_intermediaries), "threshold": MULTI_INTERMEDIARY_MIN},
+            )
+        )
 
     # Determine Verdict based solely on findings
     has_high = any(f.severity == "high" for f in findings)
     has_medium = any(f.severity == "medium" for f in findings)
+    has_low = any(f.severity == "low" for f in findings)
 
     if has_high:
         verdict = "escalate"
-    elif has_medium:
+    elif has_medium or has_low:
         verdict = "review"
     else:
-        verdict = "clear"
+        # Zero findings: check minimum links threshold
+        # Zero/low-link entities (degree 0 or 1) have insufficient connections to clear -> insufficient_evidence
+        if total_links < MIN_LINKS:
+            verdict = "insufficient_evidence"
+        else:
+            verdict = "clear"
 
     assert verdict in VERDICTS
 

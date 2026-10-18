@@ -78,14 +78,66 @@ def check_rate_limit(client_ip: str) -> bool:
 
 
 def get_rss_mb() -> float:
+    # 1. psutil if installed
     try:
         import psutil  # type: ignore
 
         proc = psutil.Process(os.getpid())
         return round(proc.memory_info().rss / (1024 * 1024), 1)
     except Exception:
-        # Fallback without psutil
-        return 0.0
+        pass
+
+    # 2. Linux /proc/self/status
+    try:
+        with open("/proc/self/status") as f:
+            for line in f:
+                if line.startswith("VmRSS:"):
+                    kb = float(line.split()[1])
+                    return round(kb / 1024.0, 1)
+    except Exception:
+        pass
+
+    # 3. Unix resource module
+    try:
+        import resource  # type: ignore
+
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
+        scale = 1024.0 if sys.platform.startswith("linux") else 1024.0 * 1024.0
+        return round(rusage.ru_maxrss / scale, 1)
+    except Exception:
+        pass
+
+    # 4. Windows ctypes
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+            _fields_ = [
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        counters = PROCESS_MEMORY_COUNTERS()
+        counters.cb = ctypes.sizeof(PROCESS_MEMORY_COUNTERS)
+        fn = ctypes.windll.psapi.GetProcessMemoryInfo
+        fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESS_MEMORY_COUNTERS), wintypes.DWORD]
+        fn.restype = wintypes.BOOL
+        handle = ctypes.windll.kernel32.GetCurrentProcess()
+        if fn(handle, ctypes.byref(counters), counters.cb):
+            return round(counters.WorkingSetSize / (1024 * 1024), 1)
+    except Exception:
+        pass
+
+    return 0.0
 
 
 def background_seed():
@@ -132,7 +184,7 @@ app.add_middleware(
 class InvestigateRequest(BaseModel):
     entity: str = Field(..., max_length=200)
     watchlist: list[str] = Field(default_factory=list, max_length=10)
-    depth: int = Field(default=3, ge=1, le=4)  # default=3 matches demo depth
+    depth: int = Field(default=4, ge=1, le=4)  # default=4 matches demo depth per Z2
     no_llm: bool = False
 
 
@@ -273,7 +325,7 @@ async def start_investigation(
 async def stream_investigation(run_id: str):
     async def event_generator() -> AsyncGenerator[dict[str, str], None]:
         sent_count = 0
-        timeout_seconds = 60
+        timeout_seconds = 180
         start_time = time.time()
 
         while True:

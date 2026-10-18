@@ -1,6 +1,7 @@
 # ruff.toml — Ruff configuration for ACD-Agent
 target-version = "py312"
 line-length = 120
+exclude = [".agents", ".venv", "data/raw"]
 
 [lint]
 select = ["E", "F", "I", "W", "UP"]

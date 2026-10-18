@@ -30,6 +30,8 @@ from core.config import (
     RESOLVE_LIMIT,
     SHARED_LINKS_LIMIT,
     VERDICTS,
+    is_placeholder_name,
+    is_service_provider_name,
 )
 from core.db import drop_graph, ro, rw
 
@@ -268,6 +270,12 @@ def ownership_chain(
         for r in rows:
             nodes = r[0]
             rels = r[1]
+            # Exclude paths containing placeholder nodes (A1)
+            if any(is_placeholder_name(n.get("name")) for n in nodes):
+                continue
+            # Exclude paths traversing through intermediate service providers (A1/A2/A6)
+            if any(n.get("label") in ("Intermediary", "Address") for n in nodes[1:-1]):
+                continue
             # Build human-readable path string: A -[REL_TYPE]-> B (Label) -> ...
             path_text_parts = []
             if nodes:
@@ -322,7 +330,7 @@ def shared_links(
 
     q = f"""
     MATCH (e:Entity {{node_id: $entity_id}})-[r1:{_OWNERSHIP_REL_TYPES}]-(hub)-[r2:{_OWNERSHIP_REL_TYPES}]-(other:Entity)
-    WHERE (hub:Officer OR hub:Address OR hub:Intermediary)
+    WHERE (hub:Officer OR hub:Address)
       AND other.node_id <> $entity_id
     RETURN labels(hub)[0] AS hub_type,
            coalesce(hub.name, hub.address, hub.node_id, 'unknown') AS hub_name,
@@ -336,10 +344,13 @@ def shared_links(
         rows = res.get("rows", [])
         hubs = []
         for r in rows:
+            hub_name = r[1]
+            if is_placeholder_name(hub_name):
+                continue
             hubs.append(
                 {
                     "hub_type": r[0],
-                    "hub_name": r[1],
+                    "hub_name": hub_name,
                     "hub_id": r[2],
                     "linked_count": r[3],
                 }
@@ -392,6 +403,12 @@ def _find_disjoint_bfs(
         try:
             res = ro(graph_name, q, {"curr": curr})
             for nid, weight, rtype, name, lbl in res.get("rows", []):
+                if (
+                    is_placeholder_name(name)
+                    or is_service_provider_name(name)
+                    or lbl in ("Intermediary", "Address")
+                ) and nid != b_id:
+                    continue
                 if nid == b_id:
                     return {
                         "node_ids": path_nodes + [nid],
@@ -421,6 +438,7 @@ def path_between(
     Tags results with target_id and is_watchlist flag.
     Checks for node-disjoint paths (PATH_REDUNDANCY / PATH_DEPENDENCY).
     Case nodes and meta-edges strictly excluded.
+    Placeholder and provider-hub nodes strictly excluded as intermediates (A1/A2/A6).
     """
     t0 = time.perf_counter()
     depth = max(1, min(max_depth, MAX_DEPTH))
@@ -451,25 +469,41 @@ def path_between(
            [r in relationships(path) | {{type: type(r), weight: coalesce(r.weight, 2.0)}}] AS path_rels,
            pathWeight
     """
-    sp_succeeded = False
     try:
         res = ro(graph_name, sp_q, {"a_id": str(a_id), "b_id": str(b_id)})
         rows = res.get("rows", [])
-        sp_succeeded = True
         if rows:
-            nodes, rels = rows[0][0], rows[0][1]
-            path_weight = float(rows[0][2])
+            candidate_nodes = rows[0][0]
+            # Ensure no intermediate placeholder or service provider nodes (A1/A2/A6/Z1)
+            if not any(
+                is_placeholder_name(n.get("name"))
+                or is_service_provider_name(n.get("name"))
+                or n.get("label") in ("Intermediary", "Address")
+                for n in candidate_nodes[1:-1]
+            ):
+                nodes, rels = candidate_nodes, rows[0][1]
+                path_weight = float(rows[0][2])
     except Exception as sp_exc:
         logger.debug("SPpaths raised: %s; falling back to BFS traversal", sp_exc)
 
-    # Fallback to BFS traversal only if SPpaths raised an error
-    if not sp_succeeded and nodes is None:
+    # Fallback to BFS traversal if SPpaths did not yield a valid, hub-free path
+    if nodes is None:
         bfs_res = _find_disjoint_bfs(str(a_id), str(b_id), set(), max_depth=depth, graph_name=graph_name)
         if bfs_res:
             path_weight = bfs_res["cost"]
-            # Fetch node details for found BFS path
-            nodes = [{"id": nid, "name": nid, "label": "Node"} for nid in bfs_res["node_ids"]]
-            rels = [{"type": "CONNECTED_TO", "weight": 2.0} for _ in range(len(nodes) - 1)]
+            bfs_nodes = []
+            for nid in bfs_res["node_ids"]:
+                n_info = ro(
+                    graph_name,
+                    "MATCH (n {node_id: $nid}) RETURN coalesce(n.name, n.address, n.node_id, 'unknown'), labels(n)[0]",
+                    {"nid": nid},
+                )
+                if n_info.get("rows"):
+                    bfs_nodes.append({"id": nid, "name": n_info["rows"][0][0], "label": n_info["rows"][0][1]})
+                else:
+                    bfs_nodes.append({"id": nid, "name": nid, "label": "Node"})
+            nodes = bfs_nodes
+            rels = [{"type": "OFFICER_OF", "weight": 1.0} for _ in range(len(nodes) - 1)]
 
     elapsed = (time.perf_counter() - t0) * 1000
     if nodes:
@@ -573,10 +607,13 @@ def cluster_view(
     scratch_name = f"case_{uuid.uuid4().hex[:8]}"
 
     try:
-        # Fetch neighborhood — strict exclusion of Case nodes and meta-edges
+        # Fetch neighborhood — strict exclusion of Case nodes, provider hubs (Intermediary/Address per A2), and placeholders
         fetch_q = f"""
         MATCH path = (e:Entity {{node_id: $entity_id}})-[:{_OWNERSHIP_REL_TYPES}*1..{depth}]-(neighbor)
         WHERE NOT neighbor:Case
+          AND NOT neighbor:Intermediary
+          AND NOT neighbor:Address
+          AND ALL(n in nodes(path) WHERE NOT n:Case AND NOT n:Intermediary AND NOT n:Address)
         RETURN [n in nodes(path) | {{
                    id: coalesce(n.node_id, ''),
                    name: coalesce(n.name, n.address, n.node_id, 'unknown'),
@@ -604,17 +641,20 @@ def cluster_view(
                 notes="No neighborhood found to build cluster view",
             )
 
-        # Aggregate unique nodes and edges
+        # Aggregate unique nodes and edges (excluding placeholders)
         nodes_map: dict[str, dict[str, Any]] = {}
         edges_set: set[tuple[str, str, str, float]] = set()
 
         for r in rows:
             for n in r[0]:
+                if is_placeholder_name(n.get("name")):
+                    continue
                 nodes_map[n["id"]] = n
             for rel in r[1]:
-                # Insert bidirectional edges so scratch graph algorithms compute true network centrality & community propagation
-                edges_set.add((rel["start_id"], rel["end_id"], rel["type"], float(rel["weight"])))
-                edges_set.add((rel["end_id"], rel["start_id"], rel["type"], float(rel["weight"])))
+                if rel["start_id"] in nodes_map and rel["end_id"] in nodes_map:
+                    # Insert bidirectional edges so scratch graph algorithms compute true network centrality & community propagation
+                    edges_set.add((rel["start_id"], rel["end_id"], rel["type"], float(rel["weight"])))
+                    edges_set.add((rel["end_id"], rel["start_id"], rel["type"], float(rel["weight"])))
 
         # Build scratch graph
         node_batch = list(nodes_map.values())
@@ -724,21 +764,21 @@ def cluster_view(
                             }
                         )
 
-        # Identify high centrality nodes (Requirement 4)
+        # Identify high centrality nodes (A2: test TARGET entity's own centrality only)
         from core.config import CENTRALITY_BETWEENNESS_MIN
 
         high_centrality_nodes = []
-        for nid, score in bw_map.items():
-            if score >= CENTRALITY_BETWEENNESS_MIN:
-                ninfo = nodes_map.get(nid, {})
-                high_centrality_nodes.append(
-                    {
-                        "id": nid,
-                        "name": ninfo.get("name", nid),
-                        "label": ninfo.get("label", ""),
-                        "score": score,
-                    }
-                )
+        target_score = bw_map.get(str(entity_id), 0.0)
+        if target_score >= CENTRALITY_BETWEENNESS_MIN:
+            target_info = nodes_map.get(str(entity_id), {})
+            high_centrality_nodes.append(
+                {
+                    "id": str(entity_id),
+                    "name": target_info.get("name", str(entity_id)),
+                    "label": target_info.get("label", "Entity"),
+                    "score": target_score,
+                }
+            )
 
         elapsed = (time.perf_counter() - t0) * 1000
         data = [

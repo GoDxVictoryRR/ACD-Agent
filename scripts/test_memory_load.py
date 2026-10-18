@@ -13,16 +13,16 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 ENTITIES = [
-    ("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", 3, ["TIANSHENG INDUSTRY AND TRADING CO., LTD."]),
-    ("TIANSHENG INDUSTRY AND TRADING CO., LTD.", 2, ["HOTFOCUS CO., LTD."]),
-    ("CRYSTAL RISE HOLDINGS LIMITED", 2, []),
+    ("GLAISDALE LIMITED", 4, ["DOM Limited"]),
+    ("GLAISDALE LIMITED", 1, ["DOM Limited"]),
     ("Millex International Limited", 2, []),
+    ("OMNIA TECHNOLOGIES S.A.", 2, ["DOM Limited"]),
     ("Dewburn Enterprises Inc.", 1, []),
-    ("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", 1, []),
-    ("TIANSHENG INDUSTRY AND TRADING CO., LTD.", 1, []),
-    ("Solitary Clean Trading Ltd", 2, []),
-    ("Single Link LLC", 1, []),
-    ("MOSSACK FONSECA & CO. (SAMOA) LIMITED.", 2, []),
+    ("GLAISDALE LIMITED", 2, ["DOM Limited"]),
+    ("GAO SHENG LIMITED", 2, []),
+    ("Skytrack Investments Limited", 1, []),
+    ("KIRBY GARDENS LTD.", 2, []),
+    ("GLAISDALE LIMITED", 4, ["DOM Limited"]),
 ]
 
 
