@@ -20,6 +20,7 @@
 - **GitHub Repository**: [https://github.com/GoDxVictoryRR/ACD-Agent](https://github.com/GoDxVictoryRR/ACD-Agent)
 - **Technical Article / Blog**: [docs/blog.md](docs/blog.md)
 - **Architectural Rationale & Code Defense**: [docs/EXPLAIN.md](docs/EXPLAIN.md)
+- **Demo video**: [youtube](https://youtu.be/n2sCYSJtJmE)
 
 ### The User Story
 Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **GLAISDALE LIMITED** (Node ID `10024477`). Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets (5 links, 0 findings: `clear`). But compliance policies require uncovering whether beneficial control traces to high-risk actors.
