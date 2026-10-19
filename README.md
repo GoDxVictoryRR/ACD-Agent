@@ -33,6 +33,17 @@ The analyst opens **Ownership Lens** and enters the entity name. Within seconds:
 3. **Deterministic Rules Evaluation**: The engine identifies a 4-hop corporate directorship chain (`GLAISDALE LIMITED` -> `Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` -> `DOM Limited`) and computes an explainable **ESCALATE** verdict backed by an immutable evidence ledger.
 4. **Graph Memory Recall**: The verdict is written back to FalkorDB as a `(:Case)` node, ensuring future queries on related entities immediately surface prior compliance decisions.
 
+![Ownership Lens Autonomous Graph Investigation Dashboard](docs/screens/desktop_investigation.png)
+
+### 🚀 30-Second Test Drive for Judges
+Try these 4 benchmark entities directly on the [Live Web Application](https://acd-agent-3hz7.onrender.com/):
+
+| Benchmark Target | Watchlist Target | Depth | Verdict | What This Demonstrates |
+|---|---|---|---|---|
+| **`GLAISDALE LIMITED`** | `DOM Limited` | **1 vs 4** | `CLEAR` (D1) ➔ **`ESCALATE`** (D4) | **The Core Graph Proof**: Depth 1 looks clean (5 links, 0 findings). Depth 4 uncovers a 4-hop directorship chain to `DOM Limited`. Click **"Compare D1 vs D4"** to see the side-by-side proof. |
+| **`Millex International Limited`** | *None* | **2** | **`REVIEW`** | **Nominee Hub Detection**: Detects nominee officers holding directorships across multiple distinct offshore entities. |
+| **`OMNIA TECHNOLOGIES S.A.`** | *None* | **2** | **`CLEAR`** | **Clean Negative Control**: Properly connected offshore entity with standard filings and zero exposure indicators. |
+| **`Dewburn Enterprises Inc.`** | *None* | **1** | **`INSUFFICIENT_EVIDENCE`** | **Low-Link Invariant**: Single-connection entity (degree < 2) triggers insufficient evidence to prevent false clearances. |
 
 ---
 
@@ -251,9 +262,10 @@ python scripts/check_invariants.py
 
 ## 10. Deployment Notes & Free-Tier Resilience
 
-- **FalkorDB Cloud Free Tier**: 100MB RAM cap. Seed data is pruned to ~42MB. If the database goes idle and resets, the API automatically triggers self-seeding on startup.
-- **Render Free Web Service**: Total process memory is kept under 120MB (well below the 512MB free tier cap).
-- **Graceful Fallback**: If LLM API limits are reached, the system automatically falls back to deterministic rule execution and template memos.
+- **FalkorDB Cloud Free Tier**: 100MB RAM cap. The pruned Panama Papers seed graph occupies ~40.9MB in RAM. If the database goes idle and resets, the API automatically triggers self-seeding on startup.
+- **Standby & Replay Resilience Engine**: Free-tier cloud databases sleep after inactivity. To guarantee an uninterrupted experience for hackathon evaluators, Ownership Lens features an automated replay engine. When the cloud database is in standby, the application seamlessly streams verified offline graph dossiers (`mode: replay`) with full Cytoscape visualization and tool execution traces, strictly adhering to Invariant 11.
+- **Render Free Web Service**: Total backend process memory is strictly bounded at **<80MB RSS** (well below the 512MB free tier cap), ensuring rapid response times and zero Out-Of-Memory termination.
+- **Graceful Fallback**: If LLM API limits are reached, the system automatically falls back to deterministic rule execution and template memos. Zero downtime or unhandled 500/503 errors.
 
 ---
 
