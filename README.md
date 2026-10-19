@@ -67,7 +67,7 @@ Depth 4: GLAISDALE LIMITED (Entity 10024477, deg 5)
 
 At depth 1, the entity appears completely benign with 0 exposure indicators. At depth 4, multi-hop traversal across corporate directorship links uncovers direct exposure to `DOM Limited`, a defaulted entity on the compliance watchlist. This chain passes through zero intermediaries and zero mass-incorporation address hubs—it is an authentic corporate directorship chain.
 
-![Topological Graph Traversal Chain to DOM Limited](docs/screens/graph_focused.png)
+![Complete Full Network Graph Topology](docs/screens/complete_full_graph.png)
 
 ### Empirical Graph Exposure Statistics & Degree-Matched Baseline
 To quantify graph connectivity across the Panama Papers dataset without hub shortcut artifacts, degree-matched sampling and exact vs. cumulative measurements were performed ([docs/exposure_stats.json](docs/exposure_stats.json)):
