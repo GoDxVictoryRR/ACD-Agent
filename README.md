@@ -111,7 +111,11 @@ graph TD
 
 ---
 
-## 4. Graph Data Model
+## 4. Graph Data Model & Global Dataset Topology
+
+The production dataset graph comprises **10,122 nodes** and **13,208 relationships** sourced from the ICIJ Offshore Leaks Database (Panama Papers Samoa and Seychelles jurisdictions), loaded directly into FalkorDB (40.9 MB in-memory footprint):
+
+![Global Offshore Dataset Graph Topology (Panama Papers in FalkorDB)](docs/screens/full_dataset_graph.png)
 
 The graph structure models the international offshore leaks schema:
 
