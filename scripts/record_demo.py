@@ -8,7 +8,6 @@ captions, Track 01 checklist overlay, and human-paced interaction.
 import argparse
 import json
 import logging
-import os
 import shutil
 import subprocess
 import sys
@@ -20,7 +19,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from playwright.sync_api import sync_playwright, Page, BrowserContext
+from playwright.sync_api import BrowserContext, Page, sync_playwright
+
 from scripts.clean_cases import clean_cases
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")

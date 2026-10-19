@@ -1,0 +1,136 @@
+{
+  "entity_name": "Dewburn Enterprises Inc.",
+  "resolved_id": "10000290",
+  "verdict": "insufficient_evidence",
+  "evaluation": {
+    "verdict": "insufficient_evidence",
+    "display_verdict": "INSUFFICIENT_EVIDENCE",
+    "findings": [
+      {
+        "rule_id": "MIN_LINKS",
+        "severity": "info",
+        "text": "Exposure indicator: Entity has only 1 verified graph link(s) (threshold: >=2 links required for a conclusive compliance verdict).",
+        "evidence_ids": [
+          "10000290"
+        ],
+        "metadata": {
+          "total_links": 1,
+          "threshold": 2
+        }
+      }
+    ],
+    "total_links": 1,
+    "resolved": true,
+    "notes": "Evaluated 1 findings. Verdict: insufficient_evidence"
+  },
+  "memo": "INVESTIGATION MEMORANDUM (Template Generated)\nTarget Entity: Dewburn Enterprises Inc.\nInvestigation Depth: 1\nVerdict: INSUFFICIENT EVIDENCE (Sparse graph structure)\n\nSummary:\nTarget entity has only 1 verified link in the graph network, falling below the minimum threshold of 2 links required for a conclusive compliance verdict. Abstaining from clearance.\n\nDisclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All findings are exposure indicators requiring human review.",
+  "memo_source": "template",
+  "trace": [
+    {
+      "tool": "resolve_entity",
+      "params": {
+        "name": "Dewburn Enterprises Inc."
+      },
+      "status": "ok",
+      "elapsed_ms": 18.2,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "ownership_chain",
+      "params": {
+        "entity_id": "10000290",
+        "max_depth": 1
+      },
+      "status": "ok",
+      "elapsed_ms": 2.4,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "shared_links",
+      "params": {
+        "entity_id": "10000290"
+      },
+      "status": "ok",
+      "elapsed_ms": 6.5,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "paths_to_watchlist",
+      "params": {
+        "entity_id": "10000290",
+        "watchlist_names": [
+          "DOM Limited"
+        ],
+        "max_depth": 1
+      },
+      "status": "ok",
+      "elapsed_ms": 8.9,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "cluster_view",
+      "params": {
+        "entity_id": "10000290"
+      },
+      "status": "ok",
+      "elapsed_ms": 5.7,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "recall_cases",
+      "params": {
+        "entity_id": "10000290"
+      },
+      "status": "ok",
+      "elapsed_ms": 1.6,
+      "source": "deterministic",
+      "via": "mcp"
+    }
+  ],
+  "evidence": {
+    "resolved_entity": {
+      "id": "10000290",
+      "node_id": "10000290",
+      "name": "Dewburn Enterprises Inc.",
+      "label": "Entity",
+      "jurisdiction": "SAM",
+      "source": "Panama Papers",
+      "status": "Dissolved shelf company"
+    },
+    "ownership_chain": [
+      {
+        "nodes": [
+          {
+            "id": "10000290",
+            "name": "Dewburn Enterprises Inc.",
+            "label": "Entity"
+          },
+          {
+            "id": "11011863",
+            "name": "MOSSACK FONSECA & CO.",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "Dewburn Enterprises Inc. (Entity) -[INTERMEDIARY_OF]-> MOSSACK FONSECA & CO. (Intermediary)"
+      }
+    ],
+    "shared_links": [],
+    "paths_to_watchlist": [],
+    "cluster_view": [],
+    "recalled_cases": []
+  },
+  "candidates": [],
+  "status": "ok"
+}

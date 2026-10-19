@@ -5,10 +5,8 @@ Output: docs/video/proof/NN.html (monospace, large readable font, title, and cap
 Strictly uses ONLY the raw files saved under docs/video/raw/.
 """
 
-import os
-import re
 import html
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent

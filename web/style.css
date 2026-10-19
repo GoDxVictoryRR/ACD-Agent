@@ -336,6 +336,11 @@ header::before {
   box-shadow: 0 0 12px #059669, 0 0 2px #ffffff;
 }
 
+.health-dot.standby {
+  background-color: #d97706;
+  box-shadow: 0 0 12px #d97706, 0 0 2px #ffffff;
+}
+
 .health-dot.down {
   background-color: #e11d48;
   box-shadow: 0 0 12px #e11d48, 0 0 2px #ffffff;
@@ -344,6 +349,21 @@ header::before {
 .health-dot.seeding {
   background-color: #d97706;
   box-shadow: 0 0 12px #d97706;
+}
+
+.badge-replay {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(217, 119, 6, 0.16);
+  color: #b45309;
+  border: 1px solid #d97706;
+  border-radius: 6px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-left: 0.5rem;
+  vertical-align: middle;
 }
 
 /* ==========================================================================

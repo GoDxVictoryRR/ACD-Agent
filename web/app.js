@@ -278,10 +278,15 @@ async function checkHealth() {
     const res = await fetch(`${apiBase}/health`);
     if (!res.ok) throw new Error("Health check failed");
     const data = await res.json();
-    dot.className = `health-dot ${data.db === "ok" ? "ok" : "down"}`;
-    const llmStatus = data.llm_key ? "NVIDIA LLM: Connected" : "LLM: Fallback";
+    const isLive = data.db === "ok";
+    dot.className = `health-dot ${isLive ? "ok" : "standby"}`;
+    const llmStatus = data.llm_key ? "NVIDIA LLM: Connected" : "LLM: Deterministic";
     const dataLabel = data.data_source === "icij" ? "Panama Papers (SAM/SEY)" : "Synthetic Data";
-    text.textContent = `FalkorDB: Ready • ${dataLabel} • ${llmStatus}`;
+    if (isLive) {
+      text.textContent = `FalkorDB: Ready • ${dataLabel} • ${llmStatus}`;
+    } else {
+      text.textContent = `FalkorDB: Standby (Replay Active) • ${dataLabel} • ${llmStatus}`;
+    }
     text.title = data.data_disclaimer || "";
   } catch (err) {
     dot.className = "health-dot down";
@@ -587,19 +592,25 @@ function listenToStream(runId, startTime, timerInterval = null) {
 
   eventSource.addEventListener("verdict", (e) => {
     const data = JSON.parse(e.data);
-    updateVerdictUI(data.verdict, data.evaluation, data.candidates, data.status, data.display_verdict);
+    updateVerdictUI(data.verdict, data.evaluation, data.candidates, data.status, data.display_verdict, data.mode);
   });
 
   eventSource.addEventListener("memo", (e) => {
     const data = JSON.parse(e.data);
     document.getElementById("memoText").textContent = data.memo;
-    document.getElementById("memoSource").textContent = `Source: ${data.memo_source.toUpperCase()}`;
+    const sourceLabel = data.mode === "replay" ? "VERIFIED REPLAY DOSSIER" : data.memo_source.toUpperCase();
+    document.getElementById("memoSource").textContent = `Source: ${sourceLabel}`;
   });
 
   eventSource.addEventListener("done", (e) => {
     const finalResult = JSON.parse(e.data);
     eventSource.close();
     if (timerInterval) clearInterval(timerInterval);
+
+    if (finalResult.mode === "replay") {
+      const memoSource = document.getElementById("memoSource");
+      if (memoSource) memoSource.textContent = "Source: VERIFIED REPLAY DOSSIER";
+    }
 
     const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
     document.getElementById("investigationTime").textContent = `Elapsed: ${elapsed}s`;
@@ -635,17 +646,24 @@ function listenToStream(runId, startTime, timerInterval = null) {
 
 }
 
-function updateVerdictUI(verdict, evaluation, candidates = [], status = null, displayVerdict = null) {
+function updateVerdictUI(verdict, evaluation, candidates = [], status = null, displayVerdict = null, mode = null) {
   const badge = document.getElementById("verdictBadge");
   badge.className = `badge badge-${verdict}`;
   const depth = document.getElementById("depthSelect") ? document.getElementById("depthSelect").value : "2";
 
+  let mainText = "";
   if (displayVerdict) {
-    badge.textContent = displayVerdict.toUpperCase();
+    mainText = displayVerdict.toUpperCase();
   } else if (verdict === "clear") {
-    badge.textContent = `NO INDICATORS FOUND WITHIN DEPTH ${depth}`;
+    mainText = `NO INDICATORS FOUND WITHIN DEPTH ${depth}`;
   } else {
-    badge.textContent = verdict.toUpperCase();
+    mainText = verdict.toUpperCase();
+  }
+
+  if (mode === "replay") {
+    badge.innerHTML = `<span>${mainText}</span><span class="badge-replay" title="Loaded from verified evidentiary graph record">REPLAY</span>`;
+  } else {
+    badge.textContent = mainText;
   }
 
   const tbody = document.getElementById("ledgerBody");
@@ -1000,6 +1018,10 @@ async function runDepthComparison() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ entity: entityName, watchlist, depth: 1, no_llm: true }),
     });
+    if (!res1.ok) {
+      const err = await res1.json();
+      throw new Error(err.detail || "Depth 1 query failed");
+    }
     const run1 = await res1.json();
     const r1Data = await awaitRunComplete(run1.run_id);
 
@@ -1018,6 +1040,10 @@ async function runDepthComparison() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ entity: entityName, watchlist, depth: 4, no_llm: true }),
     });
+    if (!res4.ok) {
+      const err = await res4.json();
+      throw new Error(err.detail || "Depth 4 query failed");
+    }
     const run4 = await res4.json();
     const r4Data = await awaitRunComplete(run4.run_id);
 

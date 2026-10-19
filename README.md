@@ -6,10 +6,21 @@
 [![FalkorDB](https://img.shields.io/badge/FalkorDB-1.8.0-red.svg)](https://www.falkordb.com/)
 [![MCP](https://img.shields.io/badge/MCP-Standard-orange.svg)](https://modelcontextprotocol.io/)
 [![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.13-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/Tests-53%2F53%20Passed-brightgreen.svg)](tests/)
+[![Invariants](https://img.shields.io/badge/Invariants-6%2F6%20Verified-brightgreen.svg)](scripts/check_invariants.py)
+[![Memory](https://img.shields.io/badge/Memory-%3C80MB%20%2F%20512MB-success.svg)](#10-deployment-notes--free-tier-resilience)
 
 ---
 
 ## 1. Overview & Pitch
+
+### Links & Submission Resources
+- **Track**: **Track 1 — Agents That Act on Connected Data**
+- **Live Web Application**: [https://acd-agent-3hz7.onrender.com/](https://acd-agent-3hz7.onrender.com/)
+- **GitHub Repository**: [https://github.com/GoDxVictoryRR/ACD-Agent](https://github.com/GoDxVictoryRR/ACD-Agent)
+- **Technical Article / Blog**: [docs/blog.md](docs/blog.md)
+- **Architectural Rationale & Code Defense**: [docs/EXPLAIN.md](docs/EXPLAIN.md)
+- **Demo Runbook & Video Script**: [docs/demo_runbook.md](docs/demo_runbook.md)
 
 ### The User Story
 Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **GLAISDALE LIMITED** (Node ID `10024477`). Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets (5 links, 0 findings: `clear`). But compliance policies require uncovering whether beneficial control traces to high-risk actors.
@@ -17,15 +28,11 @@ Imagine a compliance officer at a financial institution tasked with onboarding a
 With 30 minutes to make an onboarding decision, manually cross-referencing hundreds of shell companies and corporate directors across international registry databases is impossible.
 
 The analyst opens **Ownership Lens** and enters the entity name. Within seconds:
-1. **Entity Resolution**: The system resolves the entity in FalkorDB without table scans.
+1. **Entity Resolution**: The system resolves the entity in FalkorDB without table scans using indexed full-text search.
 2. **Autonomous Graph Traversal**: The agent investigates multi-hop ownership chains, discovers nominee hubs and corporate directorships, and traverses control links up to depth 4.
 3. **Deterministic Rules Evaluation**: The engine identifies a 4-hop corporate directorship chain (`GLAISDALE LIMITED` -> `Rachel Erickson` -> `NEWCOMBE LIMITED` -> `ANDREW MORAY STUART` -> `DOM Limited`) and computes an explainable **ESCALATE** verdict backed by an immutable evidence ledger.
 4. **Graph Memory Recall**: The verdict is written back to FalkorDB as a `(:Case)` node, ensuring future queries on related entities immediately surface prior compliance decisions.
 
-- **Track**: Track 1 — Agents That Act on Connected Data
-- **Demo Video**: VIDEO LINK: TBD by author
-- **Blog Post**: [Read Technical Article](docs/blog.md)
-- **Live Deployment**: Pending human cloud provisioning (see [`docs/HUMAN_TODO.md`](docs/HUMAN_TODO.md) for Render & Vercel deployment runbook; local Docker stack fully functional)
 
 ---
 
@@ -83,12 +90,12 @@ graph TD
 3. **Multi-turn tool execution**: LLM selects among 6 read tools (`ownership_chain`, `shared_links`, `path_between`, `cluster_view`, `recall_cases`).
 4. **Coverage check**: Missing essential tools are executed deterministically to ensure a complete evidence ledger.
 5. **Deterministic rules evaluation**: Pure Python functions calculate the verdict. The LLM can never alter this.
-8. **Architectural Honesty & LLM Scope Disclosure**:
-   - **What the LLM does**: The LLM (`nvidia/nemotron-3-super-120b-a12b`) is strictly restricted to (a) selecting typed read-only graph query tools, and (b) authoring a natural-language summary memo. The LLM **never writes or sees raw Cypher** and **never sets or alters the verdict**.
-   - **Call distribution**: In benchmarked live runs across 5 representative cases $\times$ 3 runs (15 total runs in `docs/live_demo_runs.json`), the LLM makes 3 to 7 tool calls per run (mean: 4.8 calls). A deterministic coverage layer verifies graph completeness, issuing 2 to 4 forced calls if required. Verdict consistency between LLM-selected tools and forced fallback is 100%.
-   - **Memo verification & acceptance rate**: Every candidate memo is audited by `core/verifier.py`. Any name not found in that run's verified tool output causes the memo to be discarded and replaced with a ground-truth template memo. Initial strict matching accepted 60.0% of runs (9/15 accepted; 6 fell back due to newline headers and `Ltd` vs `Limited` variants). Under single-line corporate token normalization, the accepted memo rate across all 15 benchmark runs is **100.0% (15/15 accepted)** with zero hallucinated names. Synthetic poison injection tests verify that fabricated entities (`"Acme Laundering Corp"`) are strictly caught and blocked.
-   - **Live latency numbers**: Deterministic mode (default) completes in **~0.4s – 0.7s** (~1s) with zero external network dependencies. Live AI agent mode takes **24s – 87s** (mean: **~62.4s** for a 4-hop investigation on `GLAISDALE LIMITED`) due to multi-turn LLM inference round-trips.
-   - **Default mode**: Both the API and UI default to deterministic mode (~1s). A visible toggle allows enabling "AI agent mode (LLM tool selection, ~1 min)" with an elapsed-time counter. Replay mode (`?mode=replay`) is clearly labelled.
+### 3.1 Architectural Honesty & LLM Scope Disclosure
+- **What the LLM does**: The LLM (`nvidia/nemotron-3-super-120b-a12b`) is strictly restricted to (a) selecting typed read-only graph query tools, and (b) authoring a natural-language summary memo. The LLM **never writes or sees raw Cypher** and **never sets or alters the verdict**.
+- **Call distribution**: In benchmarked live runs across 5 representative cases $\times$ 3 runs (15 total runs in `docs/live_demo_runs.json`), the LLM makes 3 to 7 tool calls per run (mean: 4.8 calls). A deterministic coverage layer verifies graph completeness, issuing 2 to 4 forced calls if required. Verdict consistency between LLM-selected tools and forced fallback is 100%.
+- **Memo verification & acceptance rate**: Every candidate memo is audited by `core/verifier.py`. Any name not found in that run's verified tool output causes the memo to be discarded and replaced with a ground-truth template memo. Initial strict matching accepted 60.0% of runs (9/15 accepted; 6 fell back due to newline headers and `Ltd` vs `Limited` variants). Under single-line corporate token normalization, the accepted memo rate across all 15 benchmark runs is **100.0% (15/15 accepted)** with zero hallucinated names. Synthetic poison injection tests verify that fabricated entities (`"Acme Laundering Corp"`) are strictly caught and blocked.
+- **Live latency numbers**: Deterministic mode (default) completes in **~0.23s – 0.69s** with zero external network dependencies. Live AI agent mode takes **24s – 87s** (mean: **~62.4s** for a 4-hop investigation on `GLAISDALE LIMITED`) due to multi-turn LLM inference round-trips.
+- **Default mode**: Both the API and UI default to deterministic mode (~1s). A visible toggle allows enabling "AI agent mode (LLM tool selection, ~1 min)" with an elapsed-time counter. Replay mode (`?mode=replay`) is clearly labelled.
 
 ---
 

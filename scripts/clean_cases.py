@@ -11,8 +11,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from core.db import rw, ro
 from core.config import GRAPH_NAME
+from core.db import ro, rw
+
 
 def clean_cases(graph_name: str = GRAPH_NAME) -> int:
     # 1. Read existing Case count

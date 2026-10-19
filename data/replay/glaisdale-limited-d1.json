@@ -1,0 +1,373 @@
+{
+  "entity_name": "GLAISDALE LIMITED",
+  "resolved_id": "10024477",
+  "verdict": "clear",
+  "evaluation": {
+    "verdict": "clear",
+    "display_verdict": "No indicators found within depth 1",
+    "findings": [],
+    "total_links": 5,
+    "resolved": true,
+    "notes": "Evaluated 0 findings. Verdict: clear"
+  },
+  "memo": "INVESTIGATION MEMORANDUM (Template Generated)\nTarget Entity: GLAISDALE LIMITED\nInvestigation Depth: 1\nVerdict: CLEAR (No exposure indicators found within depth 1)\n\nSummary:\nAutomated graph analysis revealed zero exposure indicators within depth 1. Immediate neighborhood shows 5 direct links with no connection to watchlist targets.\n\nDisclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All findings are exposure indicators requiring human review.",
+  "memo_source": "template",
+  "trace": [
+    {
+      "tool": "resolve_entity",
+      "params": {
+        "name": "GLAISDALE LIMITED"
+      },
+      "status": "ok",
+      "elapsed_ms": 32.1,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "ownership_chain",
+      "params": {
+        "entity_id": "10024477",
+        "max_depth": 1
+      },
+      "status": "ok",
+      "elapsed_ms": 3.8,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "shared_links",
+      "params": {
+        "entity_id": "10024477"
+      },
+      "status": "ok",
+      "elapsed_ms": 11.2,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "paths_to_watchlist",
+      "params": {
+        "entity_id": "10024477",
+        "watchlist_names": [
+          "DOM Limited"
+        ],
+        "max_depth": 1
+      },
+      "status": "ok",
+      "elapsed_ms": 14.5,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "cluster_view",
+      "params": {
+        "entity_id": "10024477"
+      },
+      "status": "ok",
+      "elapsed_ms": 12.0,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "recall_cases",
+      "params": {
+        "entity_id": "10024477"
+      },
+      "status": "ok",
+      "elapsed_ms": 2.1,
+      "source": "deterministic",
+      "via": "mcp"
+    }
+  ],
+  "evidence": {
+    "resolved_entity": {
+      "id": "10024477",
+      "node_id": "10024477",
+      "name": "GLAISDALE LIMITED",
+      "label": "Entity",
+      "jurisdiction": "SEY",
+      "source": "Panama Papers",
+      "status": "Active"
+    },
+    "ownership_chain": [
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "11006815",
+            "name": "MANNY",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[INTERMEDIARY_OF]-> MANNY (Intermediary)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Andrew Morey Suart (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Christina Cornelia Van Den Berg (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Rachel Erickson (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12111564",
+            "name": "Francois Calldo",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "GLAISDALE LIMITED (Entity) -[OFFICER_OF]-> Francois Calldo (Officer)"
+      }
+    ],
+    "shared_links": [],
+    "paths_to_watchlist": [],
+    "cluster_view": [
+      {
+        "nodes_count": 6,
+        "edges_count": 10,
+        "top_pagerank": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "score": 0.3774
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "score": 0.1979
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "score": 0.1091
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "score": 0.1052
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "score": 0.1052
+          }
+        ],
+        "top_betweenness": [
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "score": 15.0
+          },
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "score": 13.0
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "score": 0.0
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "score": 0.0
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "score": 0.0
+          }
+        ],
+        "communities": [
+          {
+            "community_id": 0,
+            "size": 6
+          }
+        ],
+        "shared_watchlist_communities": [],
+        "high_centrality_nodes": [],
+        "viz_nodes": [
+          {
+            "id": "10024477",
+            "name": "GLAISDALE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12151276",
+            "name": "Andrew Morey Suart",
+            "label": "Officer"
+          },
+          {
+            "id": "12119992",
+            "name": "Christina Cornelia Van Den Berg",
+            "label": "Officer"
+          },
+          {
+            "id": "12116679",
+            "name": "Rachel Erickson",
+            "label": "Officer"
+          },
+          {
+            "id": "10028037",
+            "name": "NEWCOMBE LIMITED",
+            "label": "Entity"
+          },
+          {
+            "id": "12111564",
+            "name": "Francois Calldo",
+            "label": "Officer"
+          }
+        ],
+        "viz_edges": [
+          {
+            "src": "10028037",
+            "dst": "12116679",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12116679",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12151276",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12119992",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12111564",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12119992",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12116679",
+            "dst": "10028037",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12111564",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12151276",
+            "dst": "10024477",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "10024477",
+            "dst": "12116679",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          }
+        ]
+      }
+    ],
+    "recalled_cases": []
+  },
+  "candidates": [],
+  "status": "ok",
+  "mode": "replay"
+}

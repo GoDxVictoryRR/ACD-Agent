@@ -1,0 +1,186 @@
+{
+  "entity_name": "OMNIA TECHNOLOGIES S.A.",
+  "resolved_id": "10000280",
+  "verdict": "clear",
+  "evaluation": {
+    "verdict": "clear",
+    "display_verdict": "No indicators found within depth 2",
+    "findings": [],
+    "total_links": 3,
+    "resolved": true,
+    "notes": "Evaluated 0 findings. Verdict: clear"
+  },
+  "memo": "INVESTIGATION MEMORANDUM (Template Generated)\nTarget Entity: OMNIA TECHNOLOGIES S.A.\nInvestigation Depth: 2\nVerdict: CLEAR (No exposure indicators found within depth 2)\n\nSummary:\nAutomated graph analysis revealed zero exposure indicators within depth 2. Subject entity has 3 verified links and no paths to watchlist targets.\n\nDisclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All findings are exposure indicators requiring human review.",
+  "memo_source": "template",
+  "trace": [
+    {
+      "tool": "resolve_entity",
+      "params": {
+        "name": "OMNIA TECHNOLOGIES S.A."
+      },
+      "status": "ok",
+      "elapsed_ms": 22.1,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "ownership_chain",
+      "params": {
+        "entity_id": "10000280",
+        "max_depth": 2
+      },
+      "status": "ok",
+      "elapsed_ms": 3.5,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "shared_links",
+      "params": {
+        "entity_id": "10000280"
+      },
+      "status": "ok",
+      "elapsed_ms": 9.8,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "paths_to_watchlist",
+      "params": {
+        "entity_id": "10000280",
+        "watchlist_names": [
+          "DOM Limited"
+        ],
+        "max_depth": 2
+      },
+      "status": "ok",
+      "elapsed_ms": 11.2,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "cluster_view",
+      "params": {
+        "entity_id": "10000280"
+      },
+      "status": "ok",
+      "elapsed_ms": 8.7,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "recall_cases",
+      "params": {
+        "entity_id": "10000280"
+      },
+      "status": "ok",
+      "elapsed_ms": 1.9,
+      "source": "deterministic",
+      "via": "mcp"
+    }
+  ],
+  "evidence": {
+    "resolved_entity": {
+      "id": "10000280",
+      "node_id": "10000280",
+      "name": "OMNIA TECHNOLOGIES S.A.",
+      "label": "Entity",
+      "jurisdiction": "SAM",
+      "source": "Panama Papers",
+      "status": "Defaulted"
+    },
+    "ownership_chain": [
+      {
+        "nodes": [
+          {
+            "id": "10000280",
+            "name": "OMNIA TECHNOLOGIES S.A.",
+            "label": "Entity"
+          },
+          {
+            "id": "11013652",
+            "name": "HBC FIDUCIAIRE SARL",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "OMNIA TECHNOLOGIES S.A. (Entity) -[INTERMEDIARY_OF]-> HBC FIDUCIAIRE SARL (Intermediary)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10000280",
+            "name": "OMNIA TECHNOLOGIES S.A.",
+            "label": "Entity"
+          },
+          {
+            "id": "12176914",
+            "name": "no share",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "OMNIA TECHNOLOGIES S.A. (Entity) -[OFFICER_OF]-> no share (Officer)"
+      }
+    ],
+    "shared_links": [],
+    "paths_to_watchlist": [],
+    "cluster_view": [
+      {
+        "nodes_count": 3,
+        "edges_count": 2,
+        "top_pagerank": [
+          {
+            "id": "10000280",
+            "name": "OMNIA TECHNOLOGIES S.A.",
+            "score": 0.5
+          }
+        ],
+        "top_betweenness": [],
+        "communities": [
+          {
+            "community_id": 0,
+            "size": 3
+          }
+        ],
+        "shared_watchlist_communities": [],
+        "high_centrality_nodes": [],
+        "viz_nodes": [
+          {
+            "id": "10000280",
+            "name": "OMNIA TECHNOLOGIES S.A.",
+            "label": "Entity"
+          },
+          {
+            "id": "12176914",
+            "name": "no share",
+            "label": "Officer"
+          }
+        ],
+        "viz_edges": [
+          {
+            "src": "12176914",
+            "dst": "10000280",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          }
+        ]
+      }
+    ],
+    "recalled_cases": []
+  },
+  "candidates": [],
+  "status": "ok"
+}

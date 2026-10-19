@@ -58,7 +58,7 @@ Please review and approve the following choices implemented and verified with te
    - `GRAPH_NAME`: `ownership`
    - `ALLOWED_ORIGINS`: `*`
    - `DAILY_LLM_CAP`: `300`
-4. Click **Deploy Web Service** and copy the live URL (e.g. `https://ownership-lens.onrender.com`).
+4. Click **Deploy Web Service** and copy the live URL: `https://acd-agent-3hz7.onrender.com/`.
 
 ---
 
@@ -67,7 +67,7 @@ Please review and approve the following choices implemented and verified with te
 *Note: The FastAPI Docker backend on Render already serves the static UI directly at `/` (bundled). If you wish to host the UI separately on Vercel/Netlify:*
 1. Connect repo on Vercel or Netlify.
 2. Root directory: `web`.
-3. In `web/config.js`, set `API_BASE`: `https://ownership-lens.onrender.com`.
+3. In `web/config.js`, set `API_BASE`: `https://acd-agent-3hz7.onrender.com`.
 
 ---
 
@@ -75,14 +75,14 @@ Please review and approve the following choices implemented and verified with te
 
 Run these commands against your live Render endpoint:
 ```powershell
-# 1. Health check (verifies db: up, llm_key: true)
-curl.exe -s https://<your-render-url>/health
+# 1. Health check (verifies db: up or standby, llm_key: true)
+curl.exe -s https://acd-agent-3hz7.onrender.com/health
 
 # 2. Entity search
-curl.exe -s "https://<your-render-url>/entities/search?q=GLAISDALE"
+curl.exe -s "https://acd-agent-3hz7.onrender.com/entities/search?q=GLAISDALE"
 
 # 3. Investigate Glaisdale Limited (Depth 4 flip to ESCALATE)
-curl.exe -s -X POST https://<your-render-url>/investigate -H "Content-Type: application/json" -d '{\"entity\":\"GLAISDALE LIMITED\",\"watchlist\":[\"DOM Limited\"],\"depth\":4}'
+curl.exe -s -X POST https://acd-agent-3hz7.onrender.com/investigate -H "Content-Type: application/json" -d '{\"entity\":\"GLAISDALE LIMITED\",\"watchlist\":[\"DOM Limited\"],\"depth\":4}'
 ```
 
 ---

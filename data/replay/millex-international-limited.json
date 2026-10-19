@@ -1,0 +1,296 @@
+{
+  "entity_name": "Millex International Limited",
+  "resolved_id": "10014876",
+  "verdict": "review",
+  "evaluation": {
+    "verdict": "review",
+    "display_verdict": "REVIEW",
+    "findings": [
+      {
+        "rule_id": "NOMINEE_OFFICER_HUB",
+        "severity": "medium",
+        "text": "Exposure indicator: Linked to officer hub 'Mr Rogazinsky Georgiy' associated with multiple offshore companies.",
+        "evidence_ids": [
+          "10014876",
+          "12121251"
+        ],
+        "metadata": {
+          "linked_count": 3
+        }
+      },
+      {
+        "rule_id": "INTERMEDIARY_CONCENTRATION",
+        "severity": "low",
+        "text": "Exposure indicator: Associated with major intermediary 'CONSULCO INTERNATIONAL LIMITED'.",
+        "evidence_ids": [
+          "10014876",
+          "11009351"
+        ],
+        "metadata": {
+          "linked_count": 8
+        }
+      }
+    ],
+    "total_links": 4,
+    "resolved": true,
+    "notes": "Evaluated 2 findings. Verdict: review"
+  },
+  "memo": "INVESTIGATION MEMORANDUM (Template Generated)\nTarget Entity: Millex International Limited\nInvestigation Depth: 2\nVerdict: REVIEW (Exposure indicators requiring human review)\n\nSummary:\nAutomated graph analysis revealed 2 exposure indicator(s) warranting human review:\n1. [MEDIUM] Linked to officer hub 'Mr Rogazinsky Georgiy' associated with multiple offshore companies.\n2. [LOW] Associated with major intermediary 'CONSULCO INTERNATIONAL LIMITED'.\n\nDisclaimer: Inclusion in ICIJ data is not evidence of wrongdoing. Demo watchlist items were chosen by graph criteria for demonstration only. They are not accusations. All findings are exposure indicators requiring human review.",
+  "memo_source": "template",
+  "trace": [
+    {
+      "tool": "resolve_entity",
+      "params": {
+        "name": "Millex International Limited"
+      },
+      "status": "ok",
+      "elapsed_ms": 28.4,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "ownership_chain",
+      "params": {
+        "entity_id": "10014876",
+        "max_depth": 2
+      },
+      "status": "ok",
+      "elapsed_ms": 5.1,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "shared_links",
+      "params": {
+        "entity_id": "10014876"
+      },
+      "status": "ok",
+      "elapsed_ms": 12.3,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "paths_to_watchlist",
+      "params": {
+        "entity_id": "10014876",
+        "watchlist_names": [
+          "DOM Limited"
+        ],
+        "max_depth": 2
+      },
+      "status": "ok",
+      "elapsed_ms": 15.6,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "cluster_view",
+      "params": {
+        "entity_id": "10014876"
+      },
+      "status": "ok",
+      "elapsed_ms": 10.9,
+      "source": "deterministic",
+      "via": "mcp"
+    },
+    {
+      "tool": "recall_cases",
+      "params": {
+        "entity_id": "10014876"
+      },
+      "status": "ok",
+      "elapsed_ms": 2.3,
+      "source": "deterministic",
+      "via": "mcp"
+    }
+  ],
+  "evidence": {
+    "resolved_entity": {
+      "id": "10014876",
+      "node_id": "10014876",
+      "name": "Millex International Limited",
+      "label": "Entity",
+      "jurisdiction": "SEY",
+      "source": "Panama Papers",
+      "status": "Changed agent"
+    },
+    "ownership_chain": [
+      {
+        "nodes": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "label": "Entity"
+          },
+          {
+            "id": "11009351",
+            "name": "CONSULCO INTERNATIONAL LIMITED",
+            "label": "Intermediary"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERMEDIARY_OF",
+            "weight": 2.0,
+            "link": "intermediary of"
+          }
+        ],
+        "path_text": "Millex International Limited (Entity) -[INTERMEDIARY_OF]-> CONSULCO INTERNATIONAL LIMITED (Intermediary)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "label": "Entity"
+          },
+          {
+            "id": "12121251",
+            "name": "Mr Rogazinsky Georgiy",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "Millex International Limited (Entity) -[OFFICER_OF]-> Mr Rogazinsky Georgiy (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "label": "Entity"
+          },
+          {
+            "id": "12152486",
+            "name": "FORMIA LIMITED",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "Millex International Limited (Entity) -[OFFICER_OF]-> FORMIA LIMITED (Officer)"
+      },
+      {
+        "nodes": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "label": "Entity"
+          },
+          {
+            "id": "12152489",
+            "name": "Messrs Saxeme Services Limited",
+            "label": "Officer"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "OFFICER_OF",
+            "weight": 1.0,
+            "link": "shareholder of"
+          }
+        ],
+        "path_text": "Millex International Limited (Entity) -[OFFICER_OF]-> Messrs Saxeme Services Limited (Officer)"
+      }
+    ],
+    "shared_links": [
+      {
+        "hub_type": "Officer",
+        "hub_name": "Mr Rogazinsky Georgiy",
+        "hub_id": "12121251",
+        "linked_count": 3
+      },
+      {
+        "hub_type": "Intermediary",
+        "hub_name": "CONSULCO INTERNATIONAL LIMITED",
+        "hub_id": "11009351",
+        "linked_count": 8
+      }
+    ],
+    "paths_to_watchlist": [],
+    "cluster_view": [
+      {
+        "nodes_count": 5,
+        "edges_count": 4,
+        "top_pagerank": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "score": 0.42
+          }
+        ],
+        "top_betweenness": [
+          {
+            "id": "12121251",
+            "name": "Mr Rogazinsky Georgiy",
+            "score": 12.0
+          }
+        ],
+        "communities": [
+          {
+            "community_id": 0,
+            "size": 5
+          }
+        ],
+        "shared_watchlist_communities": [],
+        "high_centrality_nodes": [],
+        "viz_nodes": [
+          {
+            "id": "10014876",
+            "name": "Millex International Limited",
+            "label": "Entity"
+          },
+          {
+            "id": "12121251",
+            "name": "Mr Rogazinsky Georgiy",
+            "label": "Officer"
+          },
+          {
+            "id": "12152486",
+            "name": "FORMIA LIMITED",
+            "label": "Officer"
+          },
+          {
+            "id": "12152489",
+            "name": "Messrs Saxeme Services Limited",
+            "label": "Officer"
+          }
+        ],
+        "viz_edges": [
+          {
+            "src": "12121251",
+            "dst": "10014876",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12152486",
+            "dst": "10014876",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          },
+          {
+            "src": "12152489",
+            "dst": "10014876",
+            "type": "OFFICER_OF",
+            "weight": 1.0
+          }
+        ]
+      }
+    ],
+    "recalled_cases": []
+  },
+  "candidates": [],
+  "status": "ok"
+}
