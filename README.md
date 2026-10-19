@@ -20,7 +20,6 @@
 - **GitHub Repository**: [https://github.com/GoDxVictoryRR/ACD-Agent](https://github.com/GoDxVictoryRR/ACD-Agent)
 - **Technical Article / Blog**: [docs/blog.md](docs/blog.md)
 - **Architectural Rationale & Code Defense**: [docs/EXPLAIN.md](docs/EXPLAIN.md)
-- **Demo Runbook & Video Script**: [docs/demo_runbook.md](docs/demo_runbook.md)
 
 ### The User Story
 Imagine a compliance officer at a financial institution tasked with onboarding an offshore entity: **GLAISDALE LIMITED** (Node ID `10024477`). Standard KYC procedures check the immediate registry filings (directors, shareholders, and registered office). At depth 1, the entity appears standard and unconnected to flagged targets (5 links, 0 findings: `clear`). But compliance policies require uncovering whether beneficial control traces to high-risk actors.
@@ -67,6 +66,8 @@ Depth 4: GLAISDALE LIMITED (Entity 10024477, deg 5)
 ![Depth Contrast: GLAISDALE LIMITED at Depth 1 vs Depth 4](docs/screens/desktop_comparison.png)
 
 At depth 1, the entity appears completely benign with 0 exposure indicators. At depth 4, multi-hop traversal across corporate directorship links uncovers direct exposure to `DOM Limited`, a defaulted entity on the compliance watchlist. This chain passes through zero intermediaries and zero mass-incorporation address hubs—it is an authentic corporate directorship chain.
+
+![Topological Graph Traversal Chain to DOM Limited](docs/screens/graph_focused.png)
 
 ### Empirical Graph Exposure Statistics & Degree-Matched Baseline
 To quantify graph connectivity across the Panama Papers dataset without hub shortcut artifacts, degree-matched sampling and exact vs. cumulative measurements were performed ([docs/exposure_stats.json](docs/exposure_stats.json)):
